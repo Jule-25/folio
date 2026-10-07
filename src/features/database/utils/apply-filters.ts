@@ -268,7 +268,10 @@ function matchesRule(
     };
     const a = toDay(value);
     const b = toDay(ruleValue);
-    if (a == null || b == null) return false;
+    
+    if (b == null) return true;
+    if (a == null) return false;
+    
     switch (op) {
       case "is":
         return a === b;
