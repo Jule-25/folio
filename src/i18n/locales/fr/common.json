@@ -311,6 +311,8 @@
   "account.unsyncedTitle": "Certaines modifications ne sont pas encore synchronisées.",
   "account.unsyncedBody": "Si tu te déconnectes maintenant, les modifications faites hors ligne sur cet appareil seront perdues. Reconnecte-toi et patiente un instant pour les garder.",
   "account.logOutAnyway": "Se déconnecter quand même",
+  "app.updateAvailable": "Une nouvelle version de Folio est disponible.",
+  "app.updateReload": "Recharger",
   "inbox.invite.title": "Rejoindre {{workspace}}",
   "inbox.invite.aWorkspace": "un espace de travail",
   "inbox.invite.someone": "Quelqu’un",

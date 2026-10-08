@@ -12,6 +12,7 @@ import { PageCapabilitiesProvider } from "../features/pages/context/page-capabil
 import { ToastProvider } from "../features/shell/toast";
 import { Sidebar } from "../features/shell/sidebar";
 import { OfflineCacheGuard } from "../features/shell/offline/offline-cache-guard";
+import { UpdatePrompt } from "../features/shell/offline/update-prompt";
 
 // Everything a signed-in person needs: the app's providers, the router, the
 // sidebar and the pages. Loaded lazily from App.tsx, only once someone is
@@ -30,6 +31,7 @@ export default function SignedInApp() {
                       <PageCapabilitiesProvider>
                         <NotificationProvider>
                           <ToastProvider>
+                            <UpdatePrompt />
                             <Sidebar />
                             <Outlet />
                           </ToastProvider>

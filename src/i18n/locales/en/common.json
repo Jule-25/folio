@@ -373,6 +373,8 @@
   "account.unsyncedTitle": "Some changes haven't synced yet.",
   "account.unsyncedBody": "If you log out now, edits made while offline on this device will be lost. Reconnect and wait a moment to keep them.",
   "account.logOutAnyway": "Log out anyway",
+  "app.updateAvailable": "A new version of Folio is available.",
+  "app.updateReload": "Reload",
   "inbox.invite.title": "Join {{workspace}}",
   "inbox.invite.aWorkspace": "a workspace",
   "inbox.invite.someone": "Someone",

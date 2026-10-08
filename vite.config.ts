@@ -2,13 +2,97 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { resolve } from "path";
 import { visualizer } from "rollup-plugin-visualizer";
+import { VitePWA } from "vite-plugin-pwa";
+
+const DAY = 60 * 60 * 24;
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), visualizer({ open: true, gzipSize: true })],
+  plugins: [
+    react(),
+    // Service worker: Folio opens with no connection.
+    //   • The built app (JS, CSS, fonts, icons) is precached on the first
+    //     visit, so a reload works offline.
+    //   • Any in-app URL (/page/…, /t/…) falls back to the cached index.html;
+    //     the router takes it from there.
+    //   • Public files in Supabase Storage (images, covers) and Google Fonts:
+    //     served from cache, refreshed in the background.
+    //   • Everything else (Supabase REST/Auth/Realtime, Hocuspocus, uploads)
+    //     goes straight to the network; offline data comes from IndexedDB
+    //     (query-persistence.ts, offline-doc-cache.ts), not from here.
+    // "prompt": a new deploy waits until the person reloads (UpdatePrompt),
+    // so nobody is reloaded mid-sentence. Off in dev.
+    VitePWA({
+      registerType: "prompt",
+      injectRegister: false,
+      manifest: false,
+      devOptions: { enabled: false },
+      workbox: {
+        globPatterns: [
+          "**/*.{js,mjs,css,html,svg,png,jpg,webp,ico,woff,woff2}",
+        ],
+        // ~1,600 one-icon Lucide chunks (see build.output.chunkFileNames):
+        // precaching them would mean 1,600 downloads on the first visit.
+        // They're cached when first shown instead (runtimeCaching below).
+        globIgnores: ["assets/icons/**"],
+        // The icon font (~5 MB) and the PDF worker are larger than
+        // workbox's 2 MB default; without this they'd be left out and
+        // missing offline.
+        maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
+        navigateFallback: "/index.html",
+        navigateFallbackDenylist: [/^\/api\//, /^\/threads-api\//],
+        cleanupOutdatedCaches: true,
+        runtimeCaching: [
+          {
+            urlPattern: ({ url, sameOrigin }) =>
+              sameOrigin && url.pathname.startsWith("/assets/icons/"),
+            handler: "CacheFirst",
+            options: {
+              cacheName: "folio-icons",
+              expiration: { maxEntries: 2000, maxAgeSeconds: 365 * DAY },
+              cacheableResponse: { statuses: [200] },
+            },
+          },
+          {
+            urlPattern: ({ url }) =>
+              url.hostname.endsWith(".supabase.co") &&
+              url.pathname.startsWith("/storage/v1/object/public/"),
+            handler: "StaleWhileRevalidate",
+            options: {
+              cacheName: "folio-public-files",
+              expiration: { maxEntries: 300, maxAgeSeconds: 30 * DAY },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            urlPattern: ({ url }) =>
+              url.origin === "https://fonts.googleapis.com",
+            handler: "StaleWhileRevalidate",
+            options: { cacheName: "google-fonts-css" },
+          },
+          {
+            urlPattern: ({ url }) => url.origin === "https://fonts.gstatic.com",
+            handler: "CacheFirst",
+            options: {
+              cacheName: "google-fonts",
+              expiration: { maxEntries: 30, maxAgeSeconds: 365 * DAY },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+        ],
+      },
+    }),
+    visualizer({ open: true, gzipSize: true }),
+  ],
   build: {
     rollupOptions: {
       output: {
+        // One-icon chunks from lucide-react/dynamic go in their own folder,
+        // so the service worker can leave them out of its precache.
+        chunkFileNames: (chunk) =>
+          chunk.facadeModuleId?.includes("/lucide-react/dist/esm/icons/")
+            ? "assets/icons/[name]-[hash].js"
+            : "assets/[name]-[hash].js",
         // Big libraries get their own chunks, so a page that doesn't need
         // one doesn't download it, and they stay cached across deploys.
         manualChunks(id) {
