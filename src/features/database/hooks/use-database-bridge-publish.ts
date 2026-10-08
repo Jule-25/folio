@@ -15,6 +15,7 @@ import type {
 } from "src/types";
 import { usePublishDatabaseData } from "./use-database-bridge-data";
 import type { DatabaseBridgeData } from "../utils/database-bridge";
+import type { UseDataSourceReturn } from "./use-data-source";
 import type { BoardLayout, BoardPlacement } from "./use-board-layout";
 import type { GalleryLayout, GalleryPlacement } from "./use-gallery-layout";
 import type { CalendarLayout, CalendarPlacement } from "./use-calendar-layout";
@@ -30,7 +31,9 @@ interface Params {
   sortedRecords: Page[];
   draftWidths: Record<string, number>;
   hasSource: boolean;
-  setCellValue: (recordId: string, propertyId: string, value: unknown) => void;
+  /** Pass the stable callback from `useDataSource` directly: a new function
+   *  each render would change `bridgeSetCellValue` and re-publish to every row. */
+  setCellValue: UseDataSourceReturn["setCellValue"];
   rowSlots: string[];
   /** Template page cover, fetched once by the database node view and passed in
    *  — the fallback title icon. No per-cell (or per-hook) fetch. */
