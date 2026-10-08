@@ -86,9 +86,14 @@ VITE_HOCUSPOCUS_URL=ws://localhost:1234
 
 ### 4. Database
 
-The schema lives in `supabase/migrations/`, numbered in the order they apply. Run them in order with the Supabase CLI or paste them into the SQL editor. Migration `35_uploads_bucket.sql` creates the `uploads` Storage bucket used for images, files and covers.
+In a new Supabase project, open the **SQL Editor** and run, in order:
 
-> The numbering starts at `006`: the first tables (pages, people, workspaces…) were created before migrations were kept in the repo. If you're setting up a fresh project and something is missing, open an issue.
+1. `supabase/migrations/000_baseline.sql`: the whole schema (tables, functions, policies, storage buckets) and a little seed data.
+2. Every migration numbered `043` and higher, in order.
+
+That's it: sign up in the app and the first account becomes the owner of the default workspace. Older migrations are kept in `supabase/migrations/archive/` for history; don't run them.
+
+New database changes go in a new numbered file after the highest one (see [Data and security](CONTRIBUTING.md#data-and-security)).
 
 ### 5. Edge Functions
 
