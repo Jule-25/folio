@@ -152,8 +152,7 @@ function DatabaseNodeViewBody({
     draftWidths,
     rowSlots: activeRowSlots,
     hasSource: !!source,
-    setCellValue: (recordId, propertyId, value) =>
-      setCellValue(recordId, propertyId, value as never),
+    setCellValue,
     templateCover: templatePage?.cover ?? null,
     boardLayout,
     galleryLayout,
