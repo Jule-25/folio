@@ -313,6 +313,8 @@
   "account.logOutAnyway": "Se déconnecter quand même",
   "app.updateAvailable": "Une nouvelle version de Folio est disponible.",
   "app.updateReload": "Recharger",
+  "offline.syncedPages_one": "Les modifications faites hors ligne sur {{count}} page sont synchronisées.",
+  "offline.syncedPages_other": "Les modifications faites hors ligne sur {{count}} pages sont synchronisées.",
   "inbox.invite.title": "Rejoindre {{workspace}}",
   "inbox.invite.aWorkspace": "un espace de travail",
   "inbox.invite.someone": "Quelqu’un",

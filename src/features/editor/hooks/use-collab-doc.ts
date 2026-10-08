@@ -7,6 +7,7 @@ import {
   loadDocCache,
   markDocClean,
   markDocDirty,
+  noteDocOpened,
   saveDocCache,
 } from "src/lib/offline-doc-cache";
 
@@ -50,8 +51,9 @@ interface UseCollabDocResult {
 //               and the page opens from it. Edits land in the same doc, so
 //               when the connection comes back the provider syncs them.
 //   • edits made while not connected mark the copy "dirty"; if you leave the
-//     page before reconnecting, the next open merges the copy back in (even
-//     online), so those edits reach the server instead of being lost.
+//     page before reconnecting, OfflineDocSync sends them in the background
+//     once online (sync-offline-edits.ts), and the next open merges the copy
+//     back in too (even online), so those edits reach the server.
 //
 // The local copy is only applied when needed (offline, or dirty) — never on a
 // normal online open. See the note on server restarts in the PR description.
@@ -95,6 +97,9 @@ export function useCollabDoc(page: Page | null): UseCollabDocResult {
       document: ydoc,
       token,
     });
+    // While open here, this provider delivers the page's edits; the
+    // background sync leaves it alone.
+    const closeDoc = noteDocOpened(pageId);
 
     setDoc({ ydoc, provider });
 
@@ -229,6 +234,7 @@ export function useCollabDoc(page: Page | null): UseCollabDocResult {
       }
       provider.destroy();
       ydoc.destroy();
+      closeDoc();
       setReady((prev) => (prev?.provider === provider ? null : prev));
       setUnavailableFor((prev) => (prev === provider ? null : prev));
     };

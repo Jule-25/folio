@@ -13,6 +13,7 @@ import { ToastProvider } from "../features/shell/toast";
 import { Sidebar } from "../features/shell/sidebar";
 import { OfflineCacheGuard } from "../features/shell/offline/offline-cache-guard";
 import { UpdatePrompt } from "../features/shell/offline/update-prompt";
+import { OfflineDocSync } from "../features/shell/offline/offline-doc-sync";
 
 // Everything a signed-in person needs: the app's providers, the router, the
 // sidebar and the pages. Loaded lazily from App.tsx, only once someone is
@@ -32,6 +33,7 @@ export default function SignedInApp() {
                         <NotificationProvider>
                           <ToastProvider>
                             <UpdatePrompt />
+                            <OfflineDocSync />
                             <Sidebar />
                             <Outlet />
                           </ToastProvider>

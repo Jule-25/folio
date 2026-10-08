@@ -375,6 +375,8 @@
   "account.logOutAnyway": "Log out anyway",
   "app.updateAvailable": "A new version of Folio is available.",
   "app.updateReload": "Reload",
+  "offline.syncedPages_one": "Edits made offline on {{count}} page are now synced.",
+  "offline.syncedPages_other": "Edits made offline on {{count}} pages are now synced.",
   "inbox.invite.title": "Join {{workspace}}",
   "inbox.invite.aWorkspace": "a workspace",
   "inbox.invite.someone": "Someone",

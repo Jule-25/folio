@@ -119,3 +119,43 @@ export async function hasDirtyDocs(): Promise<boolean> {
     return false;
   }
 }
+
+/** This person's pages whose local copy holds edits the server hasn't
+ *  received yet (sync-offline-edits.ts sends them). */
+export async function listDirtyPageIds(personId: string): Promise<string[]> {
+  const prefix = `dirty:${personId}:`;
+  try {
+    const keys = await request<IDBValidKey[]>("readonly", (s) =>
+      s.getAllKeys(),
+    );
+    return keys
+      .filter((k): k is string => typeof k === "string" && k.startsWith(prefix))
+      .map((k) => k.slice(prefix.length));
+  } catch {
+    return [];
+  }
+}
+
+// ── Pages open in this tab ──────────────────────────────────────────────
+// useCollabDoc registers the page it shows (a count: the same page can be
+// open in the main view and a peek at once). The background sync skips
+// those — the open page's own provider already delivers its edits.
+
+const openCounts = new Map<string, number>();
+
+/** Marks a page as open in this tab; call the returned function on close. */
+export function noteDocOpened(pageId: string): () => void {
+  openCounts.set(pageId, (openCounts.get(pageId) ?? 0) + 1);
+  let closed = false;
+  return () => {
+    if (closed) return;
+    closed = true;
+    const n = (openCounts.get(pageId) ?? 1) - 1;
+    if (n > 0) openCounts.set(pageId, n);
+    else openCounts.delete(pageId);
+  };
+}
+
+export function isDocOpen(pageId: string): boolean {
+  return openCounts.has(pageId);
+}
