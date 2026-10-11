@@ -25,6 +25,7 @@ import type {
 import { makePage } from "src/utils/make-page";
 import { patchPage as updatePage } from "src/api/pages";
 import { Card, CardBody } from "src/components/tiptap-ui-primitive/card";
+import { ScrollFog } from "src/components/tiptap-ui-primitive/scroll-frog";
 import { Spacer } from "src/components/tiptap-ui-primitive/spacer";
 import { SidebarTree } from "./sidebar-tree";
 import { LibraryPaletteTrigger } from "./library-palette-trigger";
@@ -63,6 +64,9 @@ import "./sidebar-tabs.scss";
 const EMPTY_TEAMSPACES: Teamspace[] = [];
 const EMPTY_GROUPS: Group[] = [];
 const RECENT_LIMIT = 6;
+// The body is a flex column that overflows; without this the bottom fog
+// (an empty box) would shrink to nothing.
+const FOG_NO_SHRINK = { flexShrink: 0 } as const;
 
 // Inside a teamspace: a fixed list — Pinned (Favorites), Recent, Rooms, the
 // teamspace's pages (Teamspaces), Templates.
@@ -423,10 +427,24 @@ export const SidebarBody = memo(() => {
           <>
             {!peeking && (
               <>
+                <ScrollFog
+                  height={2}
+                  edge="top"
+                  color="var(--sidebar-fog-color)"
+                />
                 <Spacer orientation="vertical" size={4} />
               </>
             )}
             {renderView()}
+            {/* The list fades out into the dock below. */}
+            {!peeking && (
+              <ScrollFog
+                edge="bottom"
+                height={36}
+                color="var(--sidebar-fog-color)"
+                style={FOG_NO_SHRINK}
+              />
+            )}
           </>
         </CardBody>
       )}

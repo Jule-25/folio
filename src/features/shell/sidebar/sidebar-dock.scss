@@ -1,0 +1,178 @@
+// ── The dock: Home · Inbox · Chats · Search · account, at the sidebar's foot ──
+// A floating card (design 33): raised surface, hairline, soft shadow; the
+// active tab gets a violet tint.
+:root {
+  --sb-dock-bg: #ffffff;
+  --sb-dock-shadow: 0 0 0 1px rgba(55, 53, 47, 0.1),
+    0 4px 12px rgba(0, 0, 0, 0.06);
+  --sb-dock-active-bg: rgba(98, 41, 255, 0.08);
+  --sb-dock-active-color: #5b21e6;
+}
+
+.dark {
+  --sb-dock-bg: #262626;
+  --sb-dock-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 6px 16px rgba(0, 0, 0, 0.35);
+  --sb-dock-active-bg: rgba(124, 92, 255, 0.18);
+  --sb-dock-active-color: #d3c7ff;
+}
+
+.sb-dock {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 12px;
+  background: var(--sb-dock-bg);
+  box-shadow: var(--sb-dock-shadow);
+
+  &__tab {
+    all: unset;
+    box-sizing: border-box;
+    position: relative;
+    flex: 1 1 0;
+    min-width: 0;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    border-radius: 9px;
+    color: var(--sb-row-color);
+    cursor: pointer;
+    transition:
+      background 0.12s ease,
+      color 0.12s ease;
+
+    svg {
+      display: block;
+    }
+
+    &:hover {
+      background: var(--sb-hover-bg);
+      color: var(--sb-active-color);
+    }
+
+    &.is-active {
+      background: var(--sb-dock-active-bg);
+      color: var(--sb-dock-active-color);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--tt-brand-color-500);
+      outline-offset: -2px;
+    }
+  }
+
+  // Unread count on the icon's top-right shoulder.
+  &__badge {
+    position: absolute;
+    top: 0;
+    left: calc(50% + 3px);
+    min-width: 15px;
+    height: 15px;
+    padding: 0 4px;
+    box-sizing: border-box;
+    border-radius: 8px;
+    background: var(--tt-color-red-base);
+    box-shadow: 0 0 0 2px var(--sb-dock-bg);
+    color: #fff;
+    font-family: var(--sb-font);
+    font-size: 9.5px;
+    font-weight: 700;
+    line-height: 15px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  // The account slot: just the avatar.
+  .sb-account--compact {
+    flex: 1 1 0;
+    min-width: 0;
+    height: 32px;
+    justify-content: center;
+    padding: 0;
+    border-radius: 9px;
+  }
+}
+
+@media (max-width: 768px) {
+  .sb-dock__tab,
+  .sb-dock .sb-account--compact {
+    height: 40px;
+  }
+}
+
+// ── Find in pages: a row under the top row while searching ─────────────────
+.sb-find {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    grid-template-rows 0.22s cubic-bezier(0.32, 0.72, 0, 1),
+    opacity 0.15s ease,
+    visibility 0s linear 0.22s;
+
+  &.is-open {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    visibility: visible;
+    transition:
+      grid-template-rows 0.22s cubic-bezier(0.32, 0.72, 0, 1),
+      opacity 0.18s ease,
+      visibility 0s linear 0s;
+  }
+
+  &__inner {
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding-top: 6px;
+  }
+
+  .sb-search {
+    flex: 1;
+    min-width: 0;
+    height: 32px;
+    min-height: 0;
+    padding: 0 2px 0 8px;
+    border-radius: 8px;
+    font-family: var(--sb-font);
+  }
+
+  .sb-search__input {
+    font-family: var(--sb-font);
+    font-size: 13px;
+  }
+
+  &__close {
+    all: unset;
+    box-sizing: border-box;
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    color: var(--sb-icon-color);
+    cursor: pointer;
+
+    &:hover {
+      background: var(--sb-hover-bg);
+      color: var(--sb-active-color);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--tt-brand-color-500);
+      outline-offset: -2px;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sb-find,
+  .sb-dock__tab {
+    transition-duration: 0s !important;
+  }
+}

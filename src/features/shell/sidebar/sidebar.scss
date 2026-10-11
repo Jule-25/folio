@@ -1,7 +1,7 @@
 :root {
   // Warm gray, a step darker than the old rgb(249, 248, 245) so it separates
   // from the white page. Keep --sidebar-fog-color in step with it.
-  --sidebar-bg-color: rgb(244, 243, 239);
+  --sidebar-bg-color: #F4F3EF;
   // --sidebar-bg-color: rgb(251, 251, 251);  //rgba(252, 249, 249, 1);
   --sidebar-shadow-color: rgba(240, 239, 237, 0.737);
   --sidebar-text-color: var(--tt-theme-text);
@@ -36,7 +36,7 @@
 }
 
 .dark {
-  --sidebar-bg-color: #1f1f1f;
+  --sidebar-bg-color: #1F1F1F;
   --sidebar-shadow-color: #0f0f0e0c;
   --sidebar-text-secondary: var(--tt-gray-dark-a-600);
 
@@ -100,7 +100,7 @@
   color: var(--sidebar-text-color);
   font-size: 14px;
   font-weight: 500;
-  background: var(--tt-bg-color);  //var(--sidebar-bg-color);
+  background: var(--sidebar-bg-color);
   border-right: 1px solid var(--sidebar-border-color);
   box-shadow: var(--sidebar-edge-shadow);
   padding: 0;

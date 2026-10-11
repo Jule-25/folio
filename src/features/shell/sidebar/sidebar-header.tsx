@@ -15,12 +15,13 @@ import {
   useEditorLayoutState,
 } from "../context/editor-layout-context";
 import { User } from "./sidebar-user";
-import { SidebarTabs } from "./sidebar-tabs";
+import { SidebarFind } from "./sidebar-dock";
 import { NewPageButton } from "./new-page-button";
 import "./sidebar-tabs.scss";
 
-// Top row: the space switcher, collapse, and New page. Below it the tabs
-// (Home · Inbox · Chats, + search). Your account sits in the footer.
+// Top row: the space switcher, collapse, and New page. The find row opens
+// under it while searching. The tabs and your account sit in the dock at the
+// bottom (sidebar-footer).
 export const SidebarHeader = memo(() => {
   const { t } = useTranslation();
   const { onCollapsedChange, collapseWithFloat } = useEditorLayoutActions();
@@ -62,8 +63,7 @@ export const SidebarHeader = memo(() => {
           <NewPageButton className="sb-top__new" />
         </div>
 
-        <Spacer orientation="vertical" size={8} />
-        <SidebarTabs />
+        <SidebarFind />
         <Spacer orientation="vertical" size={4} />
       </CardItemGroup>
     </CardHeader>

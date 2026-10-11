@@ -1,12 +1,13 @@
 import { memo } from "react";
-import { SidebarAccount } from "./sidebar-account";
+import { SidebarDock } from "./sidebar-dock";
 import "./sidebar-footer.scss";
 
-// Pinned under the page tree: your account (New page is in the top row).
+// Pinned under the page tree: the dock (Home · Inbox · Chats · Search ·
+// account).
 export const SidebarFooter = memo(() => {
   return (
     <div className="sb-footer">
-      <SidebarAccount />
+      <SidebarDock />
     </div>
   );
 });

@@ -2,7 +2,7 @@ import { DynamicIcon } from "src/features/pages/cover/dynamic-icon";
 import type { Page } from "src/types";
 import type { CSSProperties } from "react";
 import { FileText } from "src/components/tiptap-icons";
-import { TbFileText } from "src/components/tiptap-icons/tabler-icons";
+import { SbPageIcon } from "src/components/tiptap-icons/sidebar-icons";
 
 interface PageItemIconProps {
   cover: Page["cover"];
@@ -29,11 +29,10 @@ export function PageItemIcon({
         : undefined;
     return (
       <span className="page-icon" style={{ ...styles }} aria-hidden="true">
-        {/* A touch bigger than the nav icons and in the row's text colour,
-            so it holds its own next to emoji and custom icons. */}
-        <TbFileText
-          size={19}
-          strokeWidth={1.5}
+        {/* Folio's page glyph, in the row's text colour. */}
+        <SbPageIcon
+          size={16}
+          strokeWidth={1.7}
           style={{ color: tint ?? "var(--sb-row-color)" }}
         />
       </span>
@@ -44,7 +43,7 @@ export function PageItemIcon({
     return (
       <span
         className="page-icon emoji"
-        style={{ ...styles, fontSize: 16.5 }}
+        style={{ ...styles, fontSize: 15.5 }}
         aria-hidden="true"
       >
         {cover.iconName}
@@ -64,14 +63,14 @@ export function PageItemIcon({
                   : cover.color,
             }}
             name={cover.iconName!}
-            size={37}
+            size={32}
           />
         ) : (
           <FileText
             size={38}
             style={{
-              width: 38,
-              height: 38,
+              width: 32,
+              height: 32,
               color:
                 !cover.color || cover.color === "var(--tt-text-color)"
                   ? "var(--tt-text-color)"
@@ -97,7 +96,7 @@ export function PageItemIcon({
 
   return (
     <span className="page-icon" /*style={{ ...styles }}*/ aria-hidden="true">
-      <FileText size={38} style={{ width: 38, height: 38 }} />
+      <FileText size={32} style={{ width: 32, height: 32 }} />
     </span>
   );
 }

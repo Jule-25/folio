@@ -1,8 +1,9 @@
 import type { SVGProps } from "react";
 
 // Folio's own sidebar glyphs, drawn for the Dense list sidebar (design 13)
-// and its quiet top row (design 18): Home, Inbox, Chats, Search, the default
-// page icon, and the top row's chevron, collapse and plus. Plain inline SVG on a
+// its quiet top row (design 18) and bottom dock (design 27): Home, Inbox,
+// Chats, Search, the default page icon, and the top row's chevron, collapse
+// and plus. Plain inline SVG on a
 // 24×24 grid, round caps and joins, no icon library.
 // Sidebar rows use them at 16px with a 1.8 stroke, pages at 15px:
 //   <SbHomeIcon />                      → 16px, stroke 1.8
@@ -57,10 +58,13 @@ export const SbInboxIcon = icon(
   </>,
 );
 
-// A speech bubble with its tail at the bottom left.
+// A rounded-square speech bubble with two lines of text, tail bottom left.
 export const SbChatsIcon = icon(
   "SbChatsIcon",
-  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />,
+  <>
+    <path d="M4 6a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3h-6l-5 4v-4a2 2 0 0 1-2-2z" />
+    <path d="M8.5 8.5h7M8.5 12h4" />
+  </>,
 );
 
 // A magnifier: round lens, short handle to the bottom right.

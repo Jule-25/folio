@@ -1,8 +1,7 @@
-// The sidebar's footer: your account row.
+// The sidebar's footer: the floating dock, inset from the edges.
 .sb-footer {
   flex-shrink: 0;
   width: 100%;
   box-sizing: border-box;
-  padding: 3px;
-  border-top: 1px solid var(--sb-divider);
+  padding: 4px 8px 8px;
 }
