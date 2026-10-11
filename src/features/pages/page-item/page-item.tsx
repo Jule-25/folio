@@ -35,10 +35,7 @@ import { getActiveEditor } from "../../editor/context/active-editor-store";
 import { setEditorTitle } from "../../editor/utils/doc-title";
 import { CloudDownload } from "lucide-react";
 import { useAvailableOffline } from "../available-offline";
-import {
-  SbChevronRightIcon,
-  SbUsersIcon,
-} from "src/components/tiptap-icons/sidebar-icons";
+import { SbChevronRightIcon } from "src/components/tiptap-icons/sidebar-icons";
 import { colorForPersonId } from "src/lib/person-color";
 
 // A teamspace's colour: its icon's colour when it has one, otherwise a
@@ -60,8 +57,9 @@ interface PageItemProps {
   disableActive?: boolean;
   /** Optional second line under the title. */
   subtitle?: string;
-  /** A teamspace row's member count, shown on its right (design 42). */
-  memberCount?: number;
+  /** A top-level row in the sidebar tree (design 48): chevron always shown,
+   *  a 24px icon slot, a bold name. A teamspace's icon also gets a tile. */
+  topLevel?: boolean;
   /** Every row is collapsible now — this just drives the caret's rotation. */
   expanded?: boolean;
   onToggleExpand?: (id: ID) => void;
@@ -100,7 +98,7 @@ function PageItemView({
   depth = 0,
   disableActive = false,
   subtitle,
-  memberCount,
+  topLevel = false,
   expanded = false,
   onToggleExpand,
   canEditContent = false,
@@ -203,23 +201,26 @@ function PageItemView({
   // Touch screens have no hover: keep the enter arrow visible there.
   const showActions = shouldShow || (isMobile && isTeamspaceRoot);
 
+  // Design 48: top-level rows (a teamspace is always one) keep a visible
+  // chevron and a 24px icon slot; only a teamspace's icon sits on a tile.
+  const lead = topLevel || isTeamspaceRoot;
+
   return (
     <div className="page-item-tree">
       <Spacer orientation="vertical" size={1.1} />
       <CardItemGroup
         orientation="horizontal"
-        className={`page-item ${isActive ? "active" : ""} ${isTeamspaceRoot ? "is-teamspace-root" : ""}`}
+        className={`page-item ${isActive ? "active" : ""} ${isTeamspaceRoot ? "is-teamspace-root" : ""} ${lead ? "is-top-level" : ""}`}
         style={{ paddingLeft: `${6 + depth * 14}px` }}
         onClick={() => onSelect(page.id)}
         onMouseOver={() => setShouldShow(true)}
         onMouseLeave={() => setShouldShow(false)}
       >
-        {isTeamspaceRoot ? (
-          // Design 42: chevron, then a tile tinted in the teamspace's colour.
+        {lead ? (
           <>
             <button
               type="button"
-              className="page-item-ts-chevron"
+              className="page-item-lead-chevron"
               data-expanded={expanded}
               aria-expanded={expanded}
               aria-label={expanded ? "Collapse" : "Expand"}
@@ -230,20 +231,35 @@ function PageItemView({
             >
               <SbChevronRightIcon size={12} strokeWidth={2} />
             </button>
-            <span
-              className="page-item-ts-tile"
-              style={{ "--ts-tint": teamspaceTint(page) } as CSSProperties}
-              aria-hidden="true"
-            >
-              {page.cover.iconName ? (
-                <PageItemIcon
-                  cover={page.cover}
-                  styles={{ width: 16, height: 16, fontSize: 14 }}
-                />
-              ) : (
-                <span className="page-item-ts-initial">{initialOf(title)}</span>
-              )}
-            </span>
+            {isTeamspaceRoot ? (
+              <span
+                className="page-item-ts-tile"
+                style={{ "--ts-tint": teamspaceTint(page) } as CSSProperties}
+                aria-hidden="true"
+              >
+                {page.cover.iconName ? (
+                  <PageItemIcon
+                    cover={page.cover}
+                    styles={{ width: 16, height: 16, fontSize: 14 }}
+                  />
+                ) : (
+                  <span className="page-item-ts-initial">
+                    {initialOf(title)}
+                  </span>
+                )}
+              </span>
+            ) : (
+              <span className="page-item-lead-icon">
+                {withBadge ? (
+                  <span className="page-icon-wrap">
+                    <PageItemIcon cover={page.cover} variant="sidebar" />
+                    <TeamspaceBadge teamspaceId={page.teamspaceId!} />
+                  </span>
+                ) : (
+                  <PageItemIcon cover={page.cover} variant="sidebar" />
+                )}
+              </span>
+            )}
           </>
         ) : shouldShow ? (
           <Chevron
@@ -308,17 +324,6 @@ function PageItemView({
           </span>
         ) : (
           <span className="page-item-title">{title}</span>
-        )}
-
-        {isTeamspaceRoot && memberCount != null && !editing && (
-          <span
-            className="page-item-ts-members"
-            data-hidden={showActions || undefined}
-            title={t("teamspaces.memberCount", { count: memberCount })}
-          >
-            <SbUsersIcon size={12} strokeWidth={2} aria-hidden />
-            {memberCount}
-          </span>
         )}
 
         {markedOffline && !editing && (

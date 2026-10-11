@@ -26,9 +26,9 @@
     display: flex;
     flex-direction: column;
 
-    // A teamspace's pages (design 42): set in past its tile, hanging off a
-    // hairline under the tile's centre.
-    &--teamspace {
+    // A top-level page's pages (design 48): set in past its icon, hanging off
+    // a hairline under the icon's centre.
+    &--top-level {
       position: relative;
       padding-left: 32px;
 

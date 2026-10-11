@@ -38,7 +38,6 @@ import type {
   Teamspace,
   Group,
 } from "src/types";
-import { effectiveMemberCount } from "src/types";
 import { PageItem } from "../../pages/page-item/page-item";
 import "./sidebar-sections.scss";
 import "./sidebar-tree.scss";
@@ -141,7 +140,6 @@ function TreeRow({
   onToggleExpand,
   dropTarget,
   activeId,
-  memberCountByPageId,
   canEdit,
   reorganize,
 }: {
@@ -151,7 +149,6 @@ function TreeRow({
   onToggleExpand: (id: ID) => void;
   dropTarget: DropTarget;
   activeId: ID | null;
-  memberCountByPageId: Map<ID, number>;
   canEdit: (page: Page) => boolean;
   reorganize: (page: Page) => boolean;
 }) {
@@ -214,7 +211,7 @@ function TreeRow({
           <PageItem
             page={page}
             depth={0}
-            memberCount={memberCountByPageId.get(page.id)}
+            topLevel={depth === 0}
             expanded={isExpanded}
             onToggleExpand={onToggleExpand}
             canEditContent={canEdit(page)}
@@ -227,9 +224,7 @@ function TreeRow({
         <div
           className={[
             "sidebar-tree__children",
-            depth === 0 &&
-              page.teamspaceId === page.id &&
-              "sidebar-tree__children--teamspace",
+            depth === 0 && "sidebar-tree__children--top-level",
           ]
             .filter(Boolean)
             .join(" ")}
@@ -244,7 +239,6 @@ function TreeRow({
                 onToggleExpand={onToggleExpand}
                 dropTarget={dropTarget}
                 activeId={activeId}
-                memberCountByPageId={memberCountByPageId}
                 canEdit={canEdit}
                 reorganize={reorganize}
               />
@@ -293,7 +287,6 @@ function TreeSection({
   onRename,
   onDelete,
   onHide,
-  memberCountByPageId,
   sortMode,
   onSetSortMode,
   isLoading,
@@ -316,7 +309,6 @@ function TreeSection({
   onRename?: (c: PageCategory) => void;
   onDelete?: (c: PageCategory) => void;
   onHide?: (c: SidebarSectionKey) => void;
-  memberCountByPageId: Map<ID, number>;
   sortMode: SortMode;
   onSetSortMode: (category: PageCategory, mode: SortMode) => void;
   isLoading?: boolean;
@@ -483,7 +475,6 @@ function TreeSection({
             onToggleExpand={onToggleExpand}
             dropTarget={dropTarget}
             activeId={activeId}
-            memberCountByPageId={memberCountByPageId}
             canEdit={canEdit}
             reorganize={reorganize}
           />
@@ -532,8 +523,6 @@ const EMPTY_NODES: PageTreeNode[] = [];
 
 export const SidebarTree = memo(function SidebarTree({
   tree,
-  teamspaces,
-  groups,
   onMovePage,
   onAddPageToSection,
   onRenameSection,
@@ -547,12 +536,6 @@ export const SidebarTree = memo(function SidebarTree({
   flatSections,
   canReorganize,
 }: SidebarTreeProps) {
-  const memberCountByPageId = useMemo(() => {
-    const m = new Map<ID, number>();
-    for (const ts of teamspaces) m.set(ts.id, effectiveMemberCount(ts, groups));
-    return m;
-  }, [teamspaces, groups]);
-
   const { person } = useCurrentPerson();
   const personId = person?.id;
 
@@ -1004,7 +987,6 @@ export const SidebarTree = memo(function SidebarTree({
         onRename={onRenameSection}
         onDelete={onDeleteSection}
         onHide={handleHide}
-        memberCountByPageId={memberCountByPageId}
         sortMode={getSortMode(sortModeByCategory, key)}
         onSetSortMode={onSetSortMode}
         isLoading={isLoading}

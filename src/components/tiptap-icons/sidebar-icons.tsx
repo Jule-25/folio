@@ -81,18 +81,8 @@ export const SbExpandIcon = icon(
 // New page.
 export const SbPlusIcon = icon("SbPlusIcon", <path d="M12 5v14M5 12h14" />);
 
-// The teamspace row's chevron (points right; rotated when open).
+// A top-level row's chevron (points right; rotated when open).
 export const SbChevronRightIcon = icon(
   "SbChevronRightIcon",
   <path d="m9 6 6 6-6 6" />,
-);
-
-// A teamspace row's members count: two people.
-export const SbUsersIcon = icon(
-  "SbUsersIcon",
-  <>
-    <circle cx="9" cy="8" r="3.5" />
-    <path d="M2.5 20v-1a5 5 0 0 1 5-5h3a5 5 0 0 1 5 5v1" />
-    <path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 14.2A5 5 0 0 1 21.5 19v1" />
-  </>,
 );
