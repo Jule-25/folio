@@ -36,7 +36,6 @@ import { calculateSidebarWidth } from "src/lib/utils";
 import { StarIcon } from "src/components/tiptap-icons";
 import { useSearch } from "./search/search-context";
 import { requestFindFocus } from "src/lib/find-store";
-import { UserMenu } from "./user-menu/user-menu";
 import { HomeToolbar } from "../home/home-toolbar";
 
 function Expand() {
@@ -253,10 +252,6 @@ export const DesktopToolbarContent = ({ view }: ContentProps) => {
         )}
 
         {view === "page" && <MorePopover />}
-
-        {/* Account — always the last item, at the far right. */}
-        <Spacer orientation="horizontal" size={8} />
-        <UserMenu />
       </ToolbarGroup>
     </>
   );
@@ -286,9 +281,6 @@ export const TabletToolbarContent = ({ view }: ContentProps) => {
         {view === "page" && (
           <MorePopover includeTheme={true} editedPage={activePage} />
         )}
-
-        <Spacer orientation="horizontal" size={6} />
-        <UserMenu />
       </ToolbarGroup>
     </>
   );
@@ -323,9 +315,6 @@ export const MobileToolbarContent = ({ view }: ContentProps) => {
             />
           </>
         )}
-
-        <Spacer orientation="horizontal" size={4} />
-        <UserMenu />
       </ToolbarGroup>
     </>
   );
