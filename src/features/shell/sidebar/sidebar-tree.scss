@@ -25,6 +25,28 @@
   &__children {
     display: flex;
     flex-direction: column;
+
+    // A teamspace's pages (design 42): set in past its tile, hanging off a
+    // hairline under the tile's centre.
+    &--teamspace {
+      position: relative;
+      padding-left: 32px;
+
+      &::before {
+        content: "";
+        position: absolute;
+        left: 40px; // the tile's centre
+        top: 3px;
+        bottom: 3px;
+        width: 1px;
+        background: var(--sb-guide-color, rgba(55, 53, 47, 0.12));
+        pointer-events: none;
+
+        .dark & {
+          background: var(--sb-guide-color, rgba(255, 255, 255, 0.09));
+        }
+      }
+    }
   }
 
   // reorder indicator — a thin brand line at the top or bottom edge
@@ -71,16 +93,30 @@
   font-size: 14px;
   line-height: 1.4;
   font-weight: 500;
-   font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
+  font-family:
+    ui-sans-serif,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI Variable Display",
+    "Segoe UI",
+    Helvetica,
+    "Apple Color Emoji",
+    "Noto Sans Arabic",
+    "Noto Sans Hebrew",
+    Arial,
+    sans-serif,
+    "Segoe UI Emoji",
+    "Segoe UI Symbol";
   -webkit-font-smoothing: auto;
-  
+
   color: #9b9b9b;
-  transition: background 0.12s ease, color 0.12s ease;
+  transition:
+    background 0.12s ease,
+    color 0.12s ease;
 
   svg {
     flex: none;
     opacity: 0.75;
-    
   }
 
   &:hover {
@@ -93,7 +129,6 @@
   }
 
   .dark & {
-    
     &:hover {
       background: var(--tt-bg-subtle, rgba(255, 255, 255, 0.06));
       color: var(--tt-text-primary, rgba(255, 255, 255, 0.75));

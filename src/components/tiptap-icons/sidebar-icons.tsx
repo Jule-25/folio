@@ -1,4 +1,4 @@
-import type { SVGProps } from "react";
+import { makeLineIcon as icon, type LineIconProps } from "./line-icon";
 
 // Folio's own sidebar glyphs, drawn for the Dense list sidebar (design 13)
 // its quiet top row (design 18) and bottom dock (design 27): Home, Inbox,
@@ -10,38 +10,7 @@ import type { SVGProps } from "react";
 //   <SbPageIcon size={15} />
 //   <SbInboxIcon strokeWidth={2} />
 
-export interface SidebarIconProps extends SVGProps<SVGSVGElement> {
-  size?: number | string;
-}
-
-function icon(name: string, children: React.ReactNode) {
-  function SidebarIcon({
-    size = 16,
-    strokeWidth = 1.8,
-    ...rest
-  }: SidebarIconProps) {
-    return (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        width={size}
-        height={size}
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-        focusable="false"
-        {...rest}
-      >
-        {children}
-      </svg>
-    );
-  }
-  SidebarIcon.displayName = name;
-  return SidebarIcon;
-}
+export type SidebarIconProps = LineIconProps;
 
 // A house: pitched roof and walls in one stroke, a door cut into the floor.
 export const SbHomeIcon = icon(
@@ -111,3 +80,19 @@ export const SbExpandIcon = icon(
 
 // New page.
 export const SbPlusIcon = icon("SbPlusIcon", <path d="M12 5v14M5 12h14" />);
+
+// The teamspace row's chevron (points right; rotated when open).
+export const SbChevronRightIcon = icon(
+  "SbChevronRightIcon",
+  <path d="m9 6 6 6-6 6" />,
+);
+
+// A teamspace row's members count: two people.
+export const SbUsersIcon = icon(
+  "SbUsersIcon",
+  <>
+    <circle cx="9" cy="8" r="3.5" />
+    <path d="M2.5 20v-1a5 5 0 0 1 5-5h3a5 5 0 0 1 5 5v1" />
+    <path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 14.2A5 5 0 0 1 21.5 19v1" />
+  </>,
+);

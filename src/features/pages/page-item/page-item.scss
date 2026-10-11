@@ -1,12 +1,12 @@
 :root {
   --page-icon-bg: rgba(0, 0, 0, 0.04);
   --page-icon-shadow: 0px 1px 2px rgba(0, 0, 0, 0.2);
-   --tt-button-active-bg-color: var(--tt-gray-light-a-50);
+  --tt-button-active-bg-color: var(--tt-gray-light-a-50);
 }
 .dark {
   --page-icon-bg: rgba(255, 255, 255, 0.06);
   --page-icon-shadow: 0px 1px 2px rgba(0, 0, 0, 0.5);
-   --tt-button-active-bg-color: var(--tt-gray-dark-a-50);
+  --tt-button-active-bg-color: var(--tt-gray-dark-a-50);
 }
 
 .page-item-tree {
@@ -15,7 +15,7 @@
   gap: 0; // rows sit ~1px apart (PageItem's own 1px spacer), like the nav rows
 }
 
-.page-options-btn{
+.page-options-btn {
   color: var(--tt-text-color);
 }
 // A page row in the sidebar. Height, font and colors come from the
@@ -109,8 +109,17 @@
     }
   }
 
-  &.is-teamspace-root{
-    min-height: 36px;
+  // A teamspace (design 42): chevron, a tile in its colour, a bold name and
+  // its member count on the right.
+  &.is-teamspace-root {
+    height: 34px;
+    min-height: 34px;
+    padding-left: 4px;
+
+    .page-item-title {
+      font-weight: 600;
+      color: var(--sb-active-color) !important;
+    }
   }
 
   &.active {
@@ -174,7 +183,6 @@
 }
 
 .page-expand-btn {
-
   &.visible {
     visibility: visible;
     display: block;
@@ -215,7 +223,7 @@
   background-color: rgba(255, 255, 255, 0.09);
 }
 
-.page-item-options-card{
+.page-item-options-card {
   box-shadow: var(--tt-shadow-elevated-md);
   border-radius: var(--tt-radius-lg);
   border: 1px solid var(--tt-border-color);
@@ -276,4 +284,96 @@
   flex-shrink: 0;
   margin-left: 4px;
   color: var(--tt-text-secondary);
+}
+
+// ── Teamspace row parts (design 42) ─────────────────────────────────────
+.page-item-ts-chevron {
+  all: unset;
+  box-sizing: border-box;
+  flex: none;
+  width: 16px;
+  height: 20px;
+  margin-right: 2px;
+  display: grid;
+  place-items: center;
+  border-radius: 4px;
+  color: var(--sb-icon-color);
+  cursor: pointer;
+
+  svg {
+    display: block;
+    transition: transform 0.15s ease;
+  }
+
+  &[data-expanded="true"] svg {
+    transform: rotate(90deg);
+  }
+
+  &:hover {
+    color: var(--sb-active-color);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--tt-brand-color-500);
+    outline-offset: -2px;
+  }
+}
+
+.page-item-ts-tile {
+  --ts-tint: #6229ff;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  margin-right: 9px;
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--ts-tint) 13%, transparent);
+  box-shadow: inset 0 0 0 1px
+    color-mix(in srgb, var(--ts-tint) 22%, transparent);
+
+  .dark & {
+    background: color-mix(in srgb, var(--ts-tint) 22%, transparent);
+    box-shadow: inset 0 0 0 1px
+      color-mix(in srgb, var(--ts-tint) 36%, transparent);
+  }
+
+  .page-icon {
+    width: 16px;
+    height: 16px;
+    display: grid;
+    place-items: center;
+    color: var(--ts-tint);
+  }
+}
+
+.page-item-ts-initial {
+  font-family: var(--sb-font);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--ts-tint);
+}
+
+.page-item-ts-members {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 4px 0 auto;
+  padding-left: 6px;
+  font-family: var(--sb-font);
+  font-size: 11.5px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--sb-label-color, var(--tt-text-secondary));
+
+  svg {
+    display: block;
+  }
+
+  // Hover actions take its place.
+  &[data-hidden] {
+    display: none;
+  }
 }

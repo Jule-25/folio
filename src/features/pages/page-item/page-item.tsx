@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "@tanstack/react-location";
 import { CardItemGroup } from "src/components/tiptap-ui-primitive/card";
@@ -35,13 +35,33 @@ import { getActiveEditor } from "../../editor/context/active-editor-store";
 import { setEditorTitle } from "../../editor/utils/doc-title";
 import { CloudDownload } from "lucide-react";
 import { useAvailableOffline } from "../available-offline";
+import {
+  SbChevronRightIcon,
+  SbUsersIcon,
+} from "src/components/tiptap-icons/sidebar-icons";
+import { colorForPersonId } from "src/lib/person-color";
+
+// A teamspace's colour: its icon's colour when it has one, otherwise a
+// stable colour from its id.
+function teamspaceTint(page: Page): string {
+  const c = page.cover.color;
+  if (page.cover.target === "Icons" && c && c !== "var(--tt-text-color)")
+    return c;
+  return colorForPersonId(page.id);
+}
+
+function initialOf(title: string): string {
+  return Array.from(title.trim())[0]?.toUpperCase() ?? "T";
+}
 
 interface PageItemProps {
   page: Page;
   depth?: number;
   disableActive?: boolean;
-  /** Optional second line under the title (e.g. a teamspace member count). */
+  /** Optional second line under the title. */
   subtitle?: string;
+  /** A teamspace row's member count, shown on its right (design 42). */
+  memberCount?: number;
   /** Every row is collapsible now — this just drives the caret's rotation. */
   expanded?: boolean;
   onToggleExpand?: (id: ID) => void;
@@ -80,6 +100,7 @@ function PageItemView({
   depth = 0,
   disableActive = false,
   subtitle,
+  memberCount,
   expanded = false,
   onToggleExpand,
   canEditContent = false,
@@ -193,7 +214,38 @@ function PageItemView({
         onMouseOver={() => setShouldShow(true)}
         onMouseLeave={() => setShouldShow(false)}
       >
-        {shouldShow ? (
+        {isTeamspaceRoot ? (
+          // Design 42: chevron, then a tile tinted in the teamspace's colour.
+          <>
+            <button
+              type="button"
+              className="page-item-ts-chevron"
+              data-expanded={expanded}
+              aria-expanded={expanded}
+              aria-label={expanded ? "Collapse" : "Expand"}
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleExpand?.(page.id);
+              }}
+            >
+              <SbChevronRightIcon size={12} strokeWidth={2} />
+            </button>
+            <span
+              className="page-item-ts-tile"
+              style={{ "--ts-tint": teamspaceTint(page) } as CSSProperties}
+              aria-hidden="true"
+            >
+              {page.cover.iconName ? (
+                <PageItemIcon
+                  cover={page.cover}
+                  styles={{ width: 16, height: 16, fontSize: 14 }}
+                />
+              ) : (
+                <span className="page-item-ts-initial">{initialOf(title)}</span>
+              )}
+            </span>
+          </>
+        ) : shouldShow ? (
           <Chevron
             expanded={expanded}
             size="small"
@@ -256,6 +308,17 @@ function PageItemView({
           </span>
         ) : (
           <span className="page-item-title">{title}</span>
+        )}
+
+        {isTeamspaceRoot && memberCount != null && !editing && (
+          <span
+            className="page-item-ts-members"
+            data-hidden={showActions || undefined}
+            title={t("teamspaces.memberCount", { count: memberCount })}
+          >
+            <SbUsersIcon size={12} strokeWidth={2} aria-hidden />
+            {memberCount}
+          </span>
         )}
 
         {markedOffline && !editing && (
