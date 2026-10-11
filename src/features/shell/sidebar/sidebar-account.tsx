@@ -10,6 +10,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuPortal,
   DropdownMenuTrigger,
 } from "src/components/tiptap-ui-primitive/dropdown-menu";
 import { useCurrentPerson } from "src/hooks/use-session";
@@ -20,6 +21,11 @@ import "./sidebar-account.scss";
 // Your account: avatar, name, "Account & settings" — or, `compact`, just the
 // avatar (the dock's last slot). Click → a menu above it: who you are, Edit
 // profile (workspace settings on My account) and Log out.
+//
+// The menu is portalled into #root and raised above the sidebar (z-index
+// 120 docked, up to 950 floating / on mobile); the dropdown's own z-index
+// (50) would leave it hidden behind the sidebar.
+const MENU_STYLE = { zIndex: 999 } as const;
 export const SidebarAccount = memo(
   ({ compact = false }: { compact?: boolean }) => {
     const { t } = useTranslation();
@@ -73,55 +79,58 @@ export const SidebarAccount = memo(
             )}
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent
-          side="top"
-          align={compact ? "end" : "start"}
-          sideOffset={6}
-          portal
-        >
-          <Card className="sb-account-menu">
-            <CardBody>
-              <div className="sb-account-menu__identity">
-                <Avatar size="sm" src={avatarSrc} name={person.name} />
-                <span className="sb-account-menu__identity-text">
-                  <span className="sb-account__name">{person.name}</span>
-                  {person.email && (
-                    <span className="sb-account__meta">{person.email}</span>
-                  )}
-                </span>
-              </div>
-              <Separator orientation="horizontal" />
-              <ButtonGroup>
-                <DropdownMenuItem asChild>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => settings?.openTo("my-account")}
-                  >
-                    <UserCircle size={16} className="tiptap-button-icon" />
-                    <span className="tiptap-button-text">
-                      {t("account.editProfile", "Edit profile")}
-                    </span>
-                  </Button>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="sb-account-menu__danger"
-                    disabled={signingOut}
-                    onClick={() => void logOut()}
-                  >
-                    <LogOut size={16} className="tiptap-button-icon" />
-                    <span className="tiptap-button-text">
-                      {t("account.logOut", "Log out")}
-                    </span>
-                  </Button>
-                </DropdownMenuItem>
-              </ButtonGroup>
-            </CardBody>
-          </Card>
-        </DropdownMenuContent>
+        <DropdownMenuPortal container={document.getElementById("root")}>
+          <DropdownMenuContent
+            side="top"
+            align={compact ? "end" : "start"}
+            sideOffset={6}
+            collisionPadding={8}
+            style={MENU_STYLE}
+          >
+            <Card className="sb-account-menu">
+              <CardBody>
+                <div className="sb-account-menu__identity">
+                  <Avatar size="sm" src={avatarSrc} name={person.name} />
+                  <span className="sb-account-menu__identity-text">
+                    <span className="sb-account__name">{person.name}</span>
+                    {person.email && (
+                      <span className="sb-account__meta">{person.email}</span>
+                    )}
+                  </span>
+                </div>
+                <Separator orientation="horizontal" />
+                <ButtonGroup>
+                  <DropdownMenuItem asChild>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => settings?.openTo("my-account")}
+                    >
+                      <UserCircle size={16} className="tiptap-button-icon" />
+                      <span className="tiptap-button-text">
+                        {t("account.editProfile", "Edit profile")}
+                      </span>
+                    </Button>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="sb-account-menu__danger"
+                      disabled={signingOut}
+                      onClick={() => void logOut()}
+                    >
+                      <LogOut size={16} className="tiptap-button-icon" />
+                      <span className="tiptap-button-text">
+                        {t("account.logOut", "Log out")}
+                      </span>
+                    </Button>
+                  </DropdownMenuItem>
+                </ButtonGroup>
+              </CardBody>
+            </Card>
+          </DropdownMenuContent>
+        </DropdownMenuPortal>
       </DropdownMenu>
     );
   },
