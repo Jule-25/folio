@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -347,7 +347,11 @@ export function Landing({
   );
 }
 
-// ── Overview ──────────────────────────────────────────────────────────────
+// ── Overview (design C) ───────────────────────────────────────────────────
+// One-column hero (centred pitch, then the real editor stretched across the
+// page),
+// a bento of what else Folio does (each tile opens its tour page), questions,
+// and a gradient call to action.
 function OverviewView({
   c,
   lang,
@@ -359,92 +363,100 @@ function OverviewView({
   onGetStarted: () => void;
   onSignIn: () => void;
 }) {
-  const sections = TOUR.nav.flatMap((n) => n.sections);
+  const o = c.overview;
   return (
-    <div className="landing-page">
-      <section className="landing-hero">
-        <h1>{c.hero.title}</h1>
-        <p className="landing-lead">{c.hero.lead}</p>
-        <div className="landing-actions">
-          <Button
-            type="button"
-            variant="primary"
-            size="large"
-            className="landing-cta"
-            onClick={onGetStarted}
-          >
-            <span className="tiptap-button-text">{c.hero.primary}</span>
-          </Button>
-          <Button
-            type="button"
-            size="large"
-            className="landing-cta"
-            onClick={() => go(pageHref("editor"))}
-          >
-            <span className="tiptap-button-text">{c.hero.secondary}</span>
-          </Button>
+    <div className="landing-page landing-page--wide">
+      <section className="landing-split">
+        <div className="landing-split__text">
+          <span className="landing-pill">{o.eyebrow}</span>
+          <h1 className="landing-display">
+            {o.title1}
+            <br />
+            {o.title2}
+            <span className="landing-display__accent">{o.titleAccent}</span>.
+          </h1>
+          <p className="landing-lead">{o.lead}</p>
+          <div className="landing-actions">
+            <Button
+              type="button"
+              variant="primary"
+              size="large"
+              className="landing-cta"
+              onClick={onGetStarted}
+            >
+              <span className="tiptap-button-text">{c.hero.primary}</span>
+            </Button>
+            <Button
+              type="button"
+              size="large"
+              className="landing-cta"
+              onClick={() => go(pageHref("editor"))}
+            >
+              <span className="tiptap-button-text">{c.hero.secondary}</span>
+            </Button>
+          </div>
+          <span className="landing-split__hint">{o.hint}</span>
         </div>
-      </section>
-
-      <LiveEditor c={c} lang={lang} examples={TOUR.tries.overview ?? []} />
-      <TryLinks
-        c={c}
-        lang={lang}
-        page="overview"
-        examples={TOUR.tries.overview}
-      />
-
-      <section className="landing-block">
-        <h2 className="landing-h2">{c.tour}</h2>
-        <div className="landing-grid landing-grid--3">
-          {sections.map((s) => {
-            const Icon = SECTION_ICONS[s];
-            return (
-              <a
-                key={s}
-                href={pageHref(navOf(s))}
-                className="landing-card-link"
-              >
-                <Card className="landing-card">
-                  <CardBody className="landing-card__content">
-                    <span className="landing-card__icon">
-                      <Icon size={18} />
-                    </span>
-                    <span className="landing-card__title">
-                      {c.sections[s].label}
-                    </span>
-                    <span className="landing-muted">{c.sections[s].blurb}</span>
-                  </CardBody>
-                </Card>
-              </a>
-            );
-          })}
+        <div className="landing-split__visual">
+          <LiveEditor c={c} lang={lang} examples={TOUR.tries.overview ?? []} />
         </div>
       </section>
 
       <section className="landing-block">
-        <h2 className="landing-h2">{c.roles.title}</h2>
-        <div className="landing-grid landing-grid--3">
-          {c.roles.items.map((r) => (
-            <Card key={r.title} className="landing-card">
-              <CardBody className="landing-card__content">
-                <span className="landing-card__title">{r.title}</span>
-                <span className="landing-muted">{r.body}</span>
-              </CardBody>
-            </Card>
+        <h2 className="landing-h2 landing-h2--big">{o.bentoTitle}</h2>
+        <div className="landing-bento">
+          <BentoTile c={c} section="databases" wide>
+            <span className="landing-bento__chips">
+              {c.views.map((v) => (
+                <span key={v} className="landing-bento__chip">
+                  {v}
+                </span>
+              ))}
+            </span>
+          </BentoTile>
+          <BentoTile c={c} section="offline">
+            <span className="landing-bento__chips">
+              {c.offlineSteps.map((st) => (
+                <span
+                  key={st.pill}
+                  className={`landing-bento__state landing-bento__state--${st.tone}`}
+                >
+                  {st.pill}
+                </span>
+              ))}
+            </span>
+          </BentoTile>
+          <BentoTile c={c} section="teamspaces" />
+          <BentoTile c={c} section="comments" />
+          <BentoTile c={c} section="rooms" />
+          <BentoTile c={c} section="templates" full tinted />
+        </div>
+      </section>
+
+      <section className="landing-faq">
+        <h2 className="landing-h2 landing-h2--big">{o.faqTitle}</h2>
+        <div className="landing-faq__list">
+          {o.faq.map((f, i) => (
+            <details key={f.q} className="landing-faq__item" open={i === 0}>
+              <summary>
+                {f.q}
+                <ChevronRight size={18} className="landing-faq__chevron" />
+              </summary>
+              <p>{f.a}</p>
+            </details>
           ))}
         </div>
       </section>
 
-      <section className="landing-final">
+      <section className="landing-cta-band">
+        <Grain />
         <h2>{c.final.title}</h2>
-        <p className="landing-lead">{c.final.sub}</p>
+        <p>{c.final.sub}</p>
         <div className="landing-actions">
           <Button
             type="button"
-            variant="primary"
             size="large"
-            className="landing-cta"
+            className="landing-cta landing-cta--light"
             onClick={onGetStarted}
           >
             <span className="tiptap-button-text">{c.final.primary}</span>
@@ -452,7 +464,7 @@ function OverviewView({
           <Button
             type="button"
             size="large"
-            className="landing-cta"
+            className="landing-cta landing-cta--outline"
             onClick={onSignIn}
           >
             <span className="tiptap-button-text">{c.final.secondary}</span>
@@ -460,6 +472,62 @@ function OverviewView({
         </div>
       </section>
     </div>
+  );
+}
+
+// One bento tile: the section's icon, name and one-liner; opens its tour page.
+function BentoTile({
+  c,
+  section,
+  wide = false,
+  full = false,
+  tinted = false,
+  children,
+}: {
+  c: LandingCopy;
+  section: Exclude<SectionId, "overview">;
+  wide?: boolean;
+  full?: boolean;
+  tinted?: boolean;
+  children?: ReactNode;
+}) {
+  const Icon = SECTION_ICONS[section];
+  const cls = [
+    "landing-bento__tile",
+    wide && "landing-bento__tile--wide",
+    full && "landing-bento__tile--full",
+    tinted && "landing-bento__tile--tinted",
+  ]
+    .filter(Boolean)
+    .join(" ");
+  return (
+    <a href={pageHref(navOf(section))} className={cls}>
+      <span className="landing-bento__icon">
+        <Icon size={18} />
+      </span>
+      <span className="landing-bento__title">{c.sections[section].label}</span>
+      <span className="landing-bento__body">{c.sections[section].blurb}</span>
+      {children}
+      <ArrowRight size={16} className="landing-bento__arrow" />
+    </a>
+  );
+}
+
+// Fine grain over a gradient (an SVG noise filter, no image file).
+function Grain() {
+  const id = useId();
+  return (
+    <svg className="landing-grain" aria-hidden width="100%" height="100%">
+      <filter id={id}>
+        <feTurbulence
+          type="fractalNoise"
+          baseFrequency="0.85"
+          numOctaves={3}
+          stitchTiles="stitch"
+        />
+      </filter>
+      <rect width="100%" height="100%" filter={`url(#${id})`} />
+    </svg>
   );
 }
 

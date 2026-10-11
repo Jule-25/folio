@@ -107,6 +107,18 @@ export interface LandingCopy {
   nav: Record<NavId, string>;
   sections: Record<SectionId, SectionCopy>;
   hero: { title: string; lead: string; primary: string; secondary: string };
+  /** The overview page (design C): split hero, bento, FAQ. */
+  overview: {
+    eyebrow: string;
+    title1: string;
+    title2: string;
+    titleAccent: string;
+    lead: string;
+    hint: string;
+    bentoTitle: string;
+    faqTitle: string;
+    faq: { q: string; a: string }[];
+  };
   editor: {
     badge: string;
     hint: string;
@@ -353,6 +365,34 @@ export const LANDING_COPY: Record<LandingLang, LandingCopy> = {
       lead: "Folio is a workspace where teams, schools and communities write, organize and share what they know. Try the editor right here, then take the tour.",
       primary: "Get started free",
       secondary: "Take the tour",
+    },
+    overview: {
+      eyebrow: "Docs · Wiki · Resources",
+      title1: "Write it once.",
+      title2: "Find it ",
+      titleAccent: "forever",
+      lead: "Folio is where teams, schools and communities keep what they know: pages, wikis, databases and the conversations around them.",
+      hint: "This is the real editor. Type / to try it.",
+      bentoTitle: "One workspace, every way of working",
+      faqTitle: "Questions",
+      faq: [
+        {
+          q: "Who is Folio for?",
+          a: "Teams, schools and communities that write, organize and share what they know: docs, wikis, courses and resources.",
+        },
+        {
+          q: "Can I try it before signing up?",
+          a: "Yes. The editor on this page is the real one: type / to add a block or open an example. Nothing is saved.",
+        },
+        {
+          q: "Does it work offline?",
+          a: "Yes. Keep writing without a connection; your changes sync as soon as you’re back online.",
+        },
+        {
+          q: "Can I share a page with people outside my workspace?",
+          a: "Yes. Invite guests who only see the pages you share with them.",
+        },
+      ],
     },
     editor: {
       badge: "Live editor",
@@ -698,6 +738,34 @@ export const LANDING_COPY: Record<LandingLang, LandingCopy> = {
       lead: "Folio est l’espace de travail où équipes, écoles et communautés écrivent, organisent et partagent ce qu’elles savent. Essayez l’éditeur ici même, puis faites la visite.",
       primary: "Commencer gratuitement",
       secondary: "Faire la visite",
+    },
+    overview: {
+      eyebrow: "Docs · Wiki · Ressources",
+      title1: "Écrivez-le une fois.",
+      title2: "Retrouvez-le ",
+      titleAccent: "toujours",
+      lead: "Folio est l’endroit où équipes, écoles et communautés gardent ce qu’elles savent : pages, wikis, bases de données et les conversations autour.",
+      hint: "C’est le vrai éditeur. Tapez / pour essayer.",
+      bentoTitle: "Un seul espace, toutes les façons de travailler",
+      faqTitle: "Questions",
+      faq: [
+        {
+          q: "À qui s’adresse Folio ?",
+          a: "Aux équipes, écoles et communautés qui écrivent, organisent et partagent ce qu’elles savent : docs, wikis, cours et ressources.",
+        },
+        {
+          q: "Puis-je l’essayer avant de m’inscrire ?",
+          a: "Oui. L’éditeur de cette page est le vrai : tapez / pour ajouter un bloc ou ouvrez un exemple. Rien n’est enregistré.",
+        },
+        {
+          q: "Est-ce que ça marche hors ligne ?",
+          a: "Oui. Continuez d’écrire sans connexion ; vos modifications se synchronisent dès que vous êtes de retour en ligne.",
+        },
+        {
+          q: "Puis-je partager une page avec des personnes hors de mon espace ?",
+          a: "Oui. Invitez des invités qui ne voient que les pages que vous partagez avec eux.",
+        },
+      ],
     },
     editor: {
       badge: "Éditeur en direct",

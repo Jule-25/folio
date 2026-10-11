@@ -840,12 +840,34 @@
     order: 10;
     flex: 1 0 100%;
     margin: 0 -12px;
-    padding: 4px 12px 6px;
+    padding: 6px 12px 10px;
     overflow-x: auto;
     scrollbar-width: none;
 
     &::-webkit-scrollbar {
       display: none;
+    }
+  }
+
+  // On that row, roomy pill tabs instead of tight text buttons.
+  .landing-nav__group {
+    flex-wrap: nowrap;
+    gap: 8px;
+
+    .tiptap-button {
+      flex: none;
+      height: 36px;
+      padding: 0 16px;
+      border-radius: 999px;
+      box-shadow: inset 0 0 0 1px var(--l-border);
+      font-size: 14.5px;
+    }
+
+    .tiptap-button[aria-current="page"] {
+      background: var(--l-accent-soft);
+      box-shadow: inset 0 0 0 1px
+        color-mix(in srgb, var(--l-accent) 30%, transparent);
+      color: var(--l-accent-text);
     }
   }
 
@@ -914,5 +936,369 @@
   .landing * {
     transition: none !important;
     animation: none !important;
+  }
+}
+// ══ Overview, design C: split hero, bento, FAQ, gradient call to action ═══
+.landing {
+  --l-grad-a: #8e73ff;
+  --l-grad-b: #3a8bff;
+  --l-hero-tint: linear-gradient(135deg, #ede7ff, #e3eeff);
+
+  &[data-theme="dark"] {
+    --l-hero-tint: linear-gradient(
+      135deg,
+      rgba(123, 92, 255, 0.22),
+      rgba(58, 139, 255, 0.16)
+    );
+  }
+}
+
+.landing-page--wide {
+  max-width: 1200px;
+  gap: 104px;
+  padding-top: 64px;
+}
+
+.landing-pill {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: var(--l-accent-soft);
+  box-shadow: inset 0 0 0 1px
+    color-mix(in srgb, var(--l-accent) 22%, transparent);
+  color: var(--l-accent-text);
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 12px;
+}
+
+.landing-display {
+  font-size: clamp(38px, 5.4vw, 64px);
+  line-height: 1.04;
+  letter-spacing: -0.04em;
+  font-weight: 700;
+
+  &__accent {
+    color: var(--l-accent-text);
+  }
+}
+
+.landing-h2--big {
+  font-size: clamp(26px, 3vw, 40px);
+  letter-spacing: -0.035em;
+  font-weight: 700;
+}
+
+// ── Hero: one column, like Tiptap's: centred pitch, then the live editor
+// stretched across the page.
+.landing-split {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 56px;
+
+  &__text {
+    max-width: 760px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 22px;
+    text-align: center;
+
+    .landing-pill {
+      align-self: center;
+    }
+
+    .landing-lead {
+      max-width: 620px;
+    }
+
+    .landing-actions {
+      justify-content: center;
+    }
+  }
+
+  &__hint {
+    font-size: 13.5px;
+    color: var(--l-muted);
+  }
+
+  // The live editor, stretched across the page, no panel behind it.
+  &__visual {
+    position: relative;
+    width: 100%;
+
+    // Just its border, no shadow.
+    .landing-editor,
+    .dark & .landing-editor {
+      position: relative;
+      box-shadow: none;
+    }
+
+    .landing-editor__page {
+      max-height: 560px;
+    }
+  }
+}
+
+.landing-grain {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0.3;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+// ── Bento ──
+.landing-bento {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 14px;
+
+  &__tile {
+    grid-column: span 2;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 220px;
+    padding: 26px;
+    border-radius: 20px;
+    background: var(--l-surface);
+    box-shadow: inset 0 0 0 1px var(--l-border);
+    transition:
+      box-shadow 0.15s ease,
+      transform 0.15s ease;
+
+    &:hover {
+      box-shadow:
+        inset 0 0 0 1px var(--l-border-2),
+        var(--l-shadow);
+      transform: translateY(-2px);
+    }
+
+    &--wide {
+      grid-column: span 4;
+    }
+
+    &--full {
+      grid-column: span 6;
+      min-height: 160px;
+    }
+
+    &--tinted {
+      background: var(--l-hero-tint);
+    }
+  }
+
+  &__icon {
+    width: 34px;
+    height: 34px;
+    margin-bottom: 6px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    background: var(--l-accent-soft);
+    color: var(--l-accent-text);
+  }
+
+  &__title {
+    font-size: 20px;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+  }
+
+  &__body {
+    max-width: 440px;
+    color: var(--l-muted);
+    font-size: 15px;
+  }
+
+  &__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: auto;
+    padding-top: 14px;
+  }
+
+  &__chip {
+    padding: 5px 10px;
+    border-radius: 8px;
+    background: var(--l-chip);
+    font-size: 13px;
+  }
+
+  &__state {
+    padding: 4px 9px;
+    border-radius: 6px;
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 12px;
+
+    &--online {
+      background: var(--l-online-bg);
+      color: var(--l-online-ink);
+    }
+
+    &--offline {
+      background: var(--l-offline-bg);
+      color: var(--l-offline-ink);
+    }
+
+    &--synced {
+      background: var(--l-synced-bg);
+      color: var(--l-synced-ink);
+    }
+  }
+
+  &__arrow {
+    position: absolute;
+    top: 26px;
+    right: 26px;
+    color: var(--l-muted);
+    transition: transform 0.15s ease;
+  }
+
+  &__tile:hover &__arrow {
+    transform: translateX(3px);
+    color: var(--l-text);
+  }
+}
+
+// ── FAQ ──
+.landing-faq {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px 48px;
+
+  > h2 {
+    flex: 1 1 260px;
+  }
+
+  &__list {
+    flex: 2 1 520px;
+    border-bottom: 1px solid var(--l-border);
+  }
+
+  &__item {
+    border-top: 1px solid var(--l-border);
+    padding: 18px 0;
+
+    summary {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      list-style: none;
+
+      &::-webkit-details-marker {
+        display: none;
+      }
+    }
+
+    p {
+      margin-top: 10px;
+      max-width: 640px;
+      color: var(--l-text-2);
+      font-size: 15.5px;
+      line-height: 1.6;
+    }
+
+    &[open] .landing-faq__chevron {
+      transform: rotate(90deg);
+    }
+  }
+
+  &__chevron {
+    flex: none;
+    color: var(--l-muted);
+    transition: transform 0.15s ease;
+  }
+}
+
+// ── Gradient call to action ──
+.landing-cta-band {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 72px 32px;
+  border-radius: 24px;
+  text-align: center;
+  color: #fff;
+  background:
+    radial-gradient(120% 140% at 0% 0%, var(--l-grad-a) 0%, transparent 55%),
+    radial-gradient(120% 140% at 100% 100%, var(--l-grad-b) 0%, transparent 55%),
+    #2a1e6e;
+
+  > * {
+    position: relative;
+  }
+
+  h2 {
+    font-size: clamp(28px, 3.4vw, 44px);
+    letter-spacing: -0.03em;
+    font-weight: 700;
+  }
+
+  p {
+    max-width: 520px;
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  .landing-actions {
+    justify-content: center;
+    margin-top: 10px;
+  }
+
+  .landing-grain {
+    position: absolute;
+  }
+}
+
+.landing-actions .landing-cta--light.tiptap-button {
+  background: #fff;
+  color: #14131a;
+
+  &:hover {
+    background: #f1effa;
+  }
+}
+
+.landing-actions .landing-cta--outline.tiptap-button {
+  background: transparent;
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+@media (max-width: 760px) {
+  .landing-page--wide {
+    gap: 72px;
+    padding-top: 40px;
+  }
+
+
+  .landing-bento {
+    grid-template-columns: minmax(0, 1fr);
+
+    &__tile,
+    &__tile--wide,
+    &__tile--full {
+      grid-column: auto;
+      min-height: 0;
+    }
   }
 }
