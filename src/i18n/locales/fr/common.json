@@ -1458,7 +1458,8 @@
       "loading": "Chargement…",
       "none": "Aucune source de données",
       "newDatabase": "Nouvelle base de données"
-    }
+    },
+    "emptyList": "Aucune page pour l’instant"
   },
   "toolbar": {
     "blockquote": "Citation",
@@ -1529,5 +1530,15 @@
       "rose": "Fond rose foncé",
       "slate": "Fond ardoise"
     }
+  },
+  "pageStarter": {
+    "hintBefore": "Appuyez sur",
+    "enter": "Entrée",
+    "hintAfter": "pour continuer avec une page vide, ou commencez avec",
+    "templates": "Modèles",
+    "templatesInSpace": "Modèles de cet espace",
+    "noTemplates": "Aucun modèle dans cet espace pour l’instant",
+    "database": "Base de données",
+    "convertFailed": "Impossible de transformer cette page en base de données. Réessayez."
   }
 }

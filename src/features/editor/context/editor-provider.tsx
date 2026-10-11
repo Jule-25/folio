@@ -31,6 +31,10 @@ import { colorForPersonId } from "src/lib/person-color";
 import { useSyncDocTitle } from "../utils/doc-title";
 import { clearActiveEditor, setActiveEditor } from "./active-editor-store";
 import { useCurrentWorkspace } from "src/hooks/use-workspaces";
+import {
+  NewPageStarterExtension,
+  RESTRUCTURE_META,
+} from "../new-page-starter/new-page-starter-extension";
 
 // Exactly the array type useEditorExtensions produces — derived so it can't
 // drift from the real return, whatever member types are in it (one of them
@@ -137,6 +141,12 @@ function EditorInstance({
           new Plugin({
             filterTransaction: (tr: Transaction) => {
               if (!tr.docChanged) return true;
+              // A sanctioned restructure (a page just turned into a
+              // database): let it through and make its result the baseline.
+              if (tr.getMeta(RESTRUCTURE_META)) {
+                frozenStructureRef.current = structuralTypes(tr.doc);
+                return true;
+              }
               if (!isStructuredRef.current) return true;
               const frozen = frozenStructureRef.current;
               if (!frozen) return true;
@@ -153,6 +163,7 @@ function EditorInstance({
     extensions: [
       ...baseExtensions,
       guardExtensionRef.current,
+      NewPageStarterExtension,
       // Collaboration/CollaborationCaret bundle their own @tiptap/core copy,
       // which is nominally distinct from the app's even when structurally
       // identical — cast each to the app's extension type at the boundary.

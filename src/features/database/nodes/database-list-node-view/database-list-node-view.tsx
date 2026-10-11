@@ -9,8 +9,10 @@ import { useNewRecordSkeleton } from "../database-table-node/use-new-record-skel
 import { GroupHeaders } from "../../components/group-headers/group-headers";
 import "./database-list-node-view.scss";
 import { Button } from "src/components/tiptap-ui-primitive/button";
+import { useTranslation } from "react-i18next";
 
 export function DatabaseListNodeView() {
+  const { t } = useTranslation();
   const {
     db,
     attrs,
@@ -97,9 +99,17 @@ export function DatabaseListNodeView() {
         )}
       </div>
 
-      {/* Ungrouped gets one trailing New page; grouped views get one per group
+      {/* Nothing in it yet: say so (the list would otherwise be blank). */}
+      {headers.length === 0 && isEmpty && !creating && (
+        <div className="db-list-empty" contentEditable={false}>
+          {t("database.emptyList")}
+        </div>
+      )}
+
+      {/* Ungrouped gets one trailing New page — also when empty, so there's
+          always a way to add the first one; grouped views get one per group
           from GroupHeaders. */}
-      {headers.length === 0 && !isEmpty && (
+      {headers.length === 0 && (
         <Button
           type="button"
           className="db-new-row"

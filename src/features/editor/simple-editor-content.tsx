@@ -31,6 +31,7 @@ import { BlockCommentHandle } from "src/features/comments/block-comment-handle";
 import { useLayoutMode } from "../shell/hooks/use-layout-mode";
 import { calculatePaddingLeft, calculateSidebarWidth } from "src/lib/utils";
 import { UnavailableOffline } from "./unavailable-offline";
+import { NewPageStarter } from "./new-page-starter";
 
 // ============================================================
 // Memoized leaves
@@ -267,6 +268,8 @@ export function SimpleEditorContent() {
       {editor && <BubbleMenu editor={editor} />}
 
       {editor && <ImageBubble editor={editor} />}
+
+      {editor && <NewPageStarter editor={editor} />}
     </>
   );
 }

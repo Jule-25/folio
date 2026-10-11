@@ -1458,7 +1458,8 @@
       "loading": "Loading…",
       "none": "No data sources",
       "newDatabase": "New database"
-    }
+    },
+    "emptyList": "No pages yet"
   },
   "toolbar": {
     "blockquote": "Blockquote",
@@ -1529,5 +1530,15 @@
       "rose": "Rose background",
       "slate": "Slate background"
     }
+  },
+  "pageStarter": {
+    "hintBefore": "Press",
+    "enter": "Enter",
+    "hintAfter": "to continue with an empty page, or start with",
+    "templates": "Templates",
+    "templatesInSpace": "Templates in this space",
+    "noTemplates": "No templates in this space yet",
+    "database": "Database",
+    "convertFailed": "Couldn't turn this page into a database. Try again."
   }
 }

@@ -36,3 +36,10 @@
 .db-new-row{
   padding-left: 0;
 }
+// An empty list: one quiet line above the New page button.
+.db-list-empty {
+  padding: 8px 2px 4px;
+  font-size: 14px;
+  color: color-mix(in srgb, var(--tt-text-primary) 45%, transparent);
+  user-select: none;
+}

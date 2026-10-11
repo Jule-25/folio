@@ -1,0 +1,151 @@
+// The new-page starter, under the title of a page with nothing in it yet
+// (design 41): a muted hint, Templates ›, then the database views — plain
+// 32px rows, 240px wide, flush with the text (-8px), icons muted until hover.
+:root {
+  --page-starter-color: rgba(55, 53, 47, 0.65);
+  --page-starter-muted: rgba(55, 53, 47, 0.5);
+  --page-starter-strong: rgb(47, 46, 43);
+  --page-starter-hover: rgba(55, 53, 47, 0.06);
+  --page-starter-kbd: rgba(55, 53, 47, 0.07);
+}
+
+.dark {
+  --page-starter-color: #c3c1bc;
+  --page-starter-muted: #8f8d88;
+  --page-starter-strong: #ecebe8;
+  --page-starter-hover: rgba(255, 255, 255, 0.06);
+  --page-starter-kbd: rgba(255, 255, 255, 0.08);
+}
+
+// The widget's element: takes no room until the starter renders into it.
+.new-page-starter-slot:empty {
+  display: none;
+}
+
+.new-page-starter {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 6px 0 16px;
+  color: var(--page-starter-muted);
+  user-select: none;
+  cursor: default;
+
+  &__hint {
+    margin: 0 0 8px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--page-starter-muted);
+  }
+
+  &__kbd {
+    padding: 1px 6px;
+    border-radius: 5px;
+    background: var(--page-starter-kbd);
+    font-family: var(--tt-font-family-mono, ui-monospace, monospace);
+    font-size: 11px;
+    color: var(--page-starter-muted);
+  }
+
+  &__label {
+    margin: 14px 0 4px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--page-starter-muted);
+  }
+
+  &__row {
+    all: unset;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 240px;
+    max-width: 100%;
+    height: 32px;
+    padding: 0 8px;
+    margin-left: -8px;
+    border-radius: 7px;
+    font-size: 14px;
+    color: var(--page-starter-color);
+    cursor: pointer;
+    transition:
+      background 0.12s ease,
+      color 0.12s ease;
+
+    &:hover,
+    &[data-state="open"] {
+      background: var(--page-starter-hover);
+      color: var(--page-starter-strong);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--tt-brand-color-500);
+      outline-offset: -2px;
+    }
+  }
+
+  &__icon,
+  &__chevron {
+    display: inline-grid;
+    flex: none;
+    color: var(--page-starter-muted);
+
+    svg {
+      display: block;
+    }
+  }
+
+  &__row:hover &__icon,
+  &__row[data-state="open"] &__icon {
+    color: var(--page-starter-strong);
+  }
+
+  &__name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+// Templates › — the menu beside the row.
+.new-page-starter-menu {
+  min-width: 230px;
+  max-width: 300px;
+
+  .tiptap-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  &__label {
+    padding: 4px 8px 2px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--page-starter-muted);
+  }
+
+  &__empty {
+    padding: 6px 8px;
+    font-size: 13px;
+    color: var(--page-starter-muted);
+  }
+
+  .tiptap-button-group {
+    width: 100%;
+  }
+
+  .tiptap-button {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  &__browse.tiptap-button {
+    color: var(--tt-brand-color-500);
+  }
+}
