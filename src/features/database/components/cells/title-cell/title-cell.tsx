@@ -10,8 +10,7 @@ import type {
 } from "src/types";
 import { usePatchPage } from "src/hooks/use-patch-page";
 import { patchPage } from "src/api/pages";
-import { usePageView } from "src/features/pages/context/page-view-context";
-import { useActivePage } from "src/features/pages/context/active-page-context";
+import { useOpenRecord } from "../../../hooks/use-open-record";
 
 export function TitleCell({
   value,
@@ -40,8 +39,7 @@ export function TitleCell({
   onEditingChange?: (editing: boolean) => void;
 }) {
   const mutatePage = usePatchPage(({ id, patch }) => patchPage(id, patch));
-  const { setTarget } = usePageView();
-  const { setActivePageId } = useActivePage();
+  const openRecord = useOpenRecord(view);
 
   function handleChange(next: string) {
     onChange(next);
@@ -69,13 +67,7 @@ export function TitleCell({
 
   const openPage = () => {
     if (!pageId || !view) return;
-    if (view.openPageIn === "Side") setTarget({ pageId, view: "Peek" });
-    else if (view.openPageIn === "Center")
-      setTarget({ pageId, view: "Center" });
-    else if (view.openPageIn === "Full") setActivePageId(pageId);
-    else if (view.type === "gallery" || view.type === "board")
-      setTarget({ pageId, view: "Center" });
-    else setTarget({ pageId, view: "Peek" });
+    openRecord(pageId);
   };
 
   // Table edits via popover; every other view edits inline.

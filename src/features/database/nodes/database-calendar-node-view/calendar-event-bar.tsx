@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { createPortal } from "react-dom";
 import type { Editor } from "@tiptap/react";
-import { usePageView } from "src/features/pages/context/page-view-context";
+import { useOpenRecord } from "../../hooks/use-open-record";
 import { DynamicIcon } from "src/features/pages/cover/dynamic-icon";
 import type { CalendarSegment } from "../../hooks/use-calendar-layout";
 import {
@@ -54,19 +54,11 @@ function CalendarBarInner({
   colWidthPxRef: React.RefObject<number>;
   resizeIntentRef: React.RefObject<boolean>;
 }) {
-  const { setTarget } = usePageView();
+  const openRecord = useOpenRecord(view);
   const { nodeRef, handleResizeStart, isResizing, activeHandle } =
     useResizableNode();
 
-  const onOpenRecord = () => {
-    if (view.openPageIn === "Center") {
-      setTarget({ pageId: recordId, view: "Center" });
-    } else if (view.openPageIn === "Side") {
-      setTarget({ pageId: recordId, view: "Peek" });
-    } else {
-      setTarget({ pageId: recordId, view: "Full" });
-    }
-  };
+  const onOpenRecord = () => openRecord(recordId);
 
   function startResizeIntent() {
     resizeIntentRef.current = true;

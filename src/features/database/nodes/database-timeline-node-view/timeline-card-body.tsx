@@ -1,7 +1,7 @@
-import { usePageView } from "src/features/pages/context/page-view-context";
+import { useOpenRecord } from "../../hooks/use-open-record";
 import { Button } from "src/components/tiptap-ui-primitive/button";
 import { DynamicIcon } from "src/features/pages/cover/dynamic-icon";
-import type { CellValue, DatabaseView, ID, Page } from "src/types";
+import type { CellValue, DatabaseView, Page } from "src/types";
 import "./timeline-card-body.scss";
 import { useResizableNode } from "src/components/tiptap-node/resizable-node";
 import { recordSelection } from "../../utils/record-selection-store";
@@ -28,18 +28,8 @@ export function TimelineCardBody({
   clippedRight,
   canResize,
 }: TimelineCardBodyProps) {
-  const { setTarget } = usePageView();
+  const onOpenRecord = useOpenRecord(view);
   const { handleResizeStart, isResizing, activeHandle } = useResizableNode();
-
-  const onOpenRecord = (recordId: ID) => {
-    if (view.openPageIn === "Center") {
-      setTarget({ pageId: recordId, view: "Center" });
-    } else if (view.openPageIn === "Side") {
-      setTarget({ pageId: recordId, view: "Peek" });
-    } else {
-      setTarget({ pageId: recordId, view: "Full" });
-    }
-  };
 
   return (
     // inset: 0 alone stretches this to fill whatever width the parent

@@ -6,8 +6,7 @@ import { Cell } from "../../components/cells/cell";
 import type { CellValue, DatabaseProperty, ID } from "src/types";
 import { CellOverlay } from "../../components/cell-overlay";
 import { isCopiableType } from "../database-board-node-view/utils";
-import { usePageView } from "src/features/pages/context/page-view-context";
-import { useActivePage } from "src/features/pages/context/active-page-context";
+import { useOpenRecord } from "../../hooks/use-open-record";
 
 const EMPTY_PROPERTIES: DatabaseProperty[] = [];
 const EMPTY_COLUMN_VALUES: CellValue[] = [];
@@ -69,19 +68,12 @@ export default function DatabaseCellNodeView({ node, editor }: NodeViewProps) {
   const [editing, setEditing] = useState(false);
   const titleRef = useRef<HTMLDivElement | null>(null);
 
-  const { setTarget } = usePageView();
-  const { setActivePageId } = useActivePage();
-
   const view = data?.view;
+  const openRecord = useOpenRecord(view);
 
   const handleOpen = () => {
     if (!recordId || !view) return;
-    if (view.openPageIn === "Side")
-      setTarget({ pageId: recordId, view: "Peek" });
-    else if (view.openPageIn === "Center")
-      setTarget({ pageId: recordId, view: "Center" });
-    else if (view.openPageIn === "Full") setActivePageId(recordId);
-    else setTarget({ pageId: recordId, view: "Peek" });
+    openRecord(recordId);
   };
 
   const focusTitleEnd = () => {

@@ -1,9 +1,8 @@
-import { usePageView } from "src/features/pages/context/page-view-context";
+import { useOpenRecord } from "../hooks/use-open-record";
 import type {
   CellValue,
   DatabaseProperty,
   DatabaseView,
-  ID,
   Page,
 } from "src/types";
 import { BoardCardCover } from "./board-card-cover";
@@ -40,21 +39,11 @@ export function BoardCardBody({
   ) => void;
   color?: string;
 }) {
-  const { setTarget } = usePageView();
+  const onOpenRecord = useOpenRecord(view);
   const [editing, setEditing] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [dragging, setDragging] = useState(false);
   const { editor } = useCurrentEditor();
-
-  const onOpenRecord = (recordId: ID) => {
-    if (view.openPageIn === "Center") {
-      setTarget({ pageId: recordId, view: "Center" });
-    } else if (view.openPageIn === "Side") {
-      setTarget({ pageId: recordId, view: "Peek" });
-    } else {
-      setTarget({ pageId: recordId, view: "Full" });
-    }
-  };
 
   if (!recordId) return null;
 
@@ -124,9 +113,7 @@ export function BoardCardBody({
           {cardPreview !== "cover" && view.type !== "calendar" && (
             <BoardCardControls
               record={record}
-              onOpenRecord={() =>
-                setTarget({ pageId: recordId, view: "Center" })
-              }
+              onOpenRecord={() => onOpenRecord(recordId)}
               editing={editing}
               onEnableEdit={() => setEditing(true)}
               menuOpen={menuOpen}
