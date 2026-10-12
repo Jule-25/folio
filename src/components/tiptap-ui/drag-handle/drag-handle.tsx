@@ -2,6 +2,7 @@
 import type { Editor } from "@tiptap/core";
 import { DragHandle as TiptapDragHandle } from "./drag-handle-extension-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEditorState } from "@tiptap/react";
 import { DragHandleMenu } from "./drag-handle-menu/drag-handle-menu";
 import { CardItemGroup } from "src/components/tiptap-ui-primitive/card";
 import { Button } from "src/components/tiptap-ui-primitive/button";
@@ -186,6 +187,68 @@ export function DragHandle({ editor }: { editor: Editor | null }) {
     };
     return { placement: "left-start", middleware: [centerOnFirstLine] };
   }, [editor]);
+
+  // ── Multi-block selection: the handle stays on its FIRST block ──────────
+  // While several blocks are selected (marquee, Shift+click, a text
+  // selection across blocks), the grip belongs to the selection, so it sits
+  // beside the first selected block and doesn't follow the pointer. The
+  // library has no "put the handle on this node" call, so we move it the way
+  // it moves itself — a mousemove over that block, which its plugin handles
+  // on the next frame — then lock it there. Cleared selection → unlocked.
+  const multiFirstPos = useEditorState({
+    editor,
+    selector: ({ editor: e }) =>
+      e ? (selectedBlockRange(e)?.from ?? null) : null,
+  });
+  const lockedForSelectionRef = useRef(false);
+
+  useEffect(() => {
+    if (!editor || editor.isDestroyed) return;
+    // The open menu holds its own lock; re-anchor once it closes.
+    if (open) return;
+
+    if (multiFirstPos == null) {
+      if (lockedForSelectionRef.current) {
+        lockedForSelectionRef.current = false;
+        editor.commands.unlockDragHandle();
+      }
+      return;
+    }
+
+    let cancelled = false;
+    let tries = 0;
+    const anchor = () => {
+      if (cancelled || editor.isDestroyed) return;
+      const block = editor.view.nodeDOM(multiFirstPos);
+      if (!(block instanceof HTMLElement)) return;
+      const rect = block.getBoundingClientRect();
+      editor.commands.unlockDragHandle();
+      editor.view.dom.dispatchEvent(
+        new MouseEvent("mousemove", {
+          bubbles: true,
+          clientX: rect.left + 4,
+          clientY: rect.top + Math.min(rect.height / 2, 12),
+        }),
+      );
+      // The plugin places the handle on the next frame; lock after it. A
+      // real mousemove in that same frame can win — then try again.
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => {
+          if (cancelled || editor.isDestroyed) return;
+          if (posRef.current !== multiFirstPos && tries++ < 3) {
+            anchor();
+            return;
+          }
+          editor.commands.lockDragHandle();
+          lockedForSelectionRef.current = true;
+        }),
+      );
+    };
+    anchor();
+    return () => {
+      cancelled = true;
+    };
+  }, [editor, multiFirstPos, open]);
 
   // Hide the drag handle while a column is being resized to avoid
   // it flickering or repositioning during the resize interaction
@@ -532,6 +595,14 @@ export function DragHandle({ editor }: { editor: Editor | null }) {
                   const range = selectedBlockRange(editor);
                   if (range && rangeContains(range, pos)) {
                     multiRangeRef.current = range;
+                    // Anchored to the selection = locked, and a locked
+                    // handle isn't draggable: free it for this press so the
+                    // selection can be dragged (a click re-locks it via the
+                    // menu; a drop changes the selection, which re-anchors).
+                    if (lockedForSelectionRef.current) {
+                      lockedForSelectionRef.current = false;
+                      editor.commands.unlockDragHandle();
+                    }
                     selectBlockRange(editor, range);
                     return;
                   }
