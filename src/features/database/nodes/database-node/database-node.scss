@@ -665,3 +665,28 @@ body.db-row-dragselect {
     content: none !important;
   }
 }
+
+// ── One card selected (board, gallery, timeline) ────────────────────────────
+// A card paints its own background over the record's, so the row tint above
+// never showed: a card being acted on looked exactly like the others. It gets
+// the selection colour laid over it — light enough to read the card through —
+// and a thin ring in the same hue, while:
+//   • its ••• menu (or a picker opened from it: icon, property, move to) is
+//     open — the card controls carry data-open meanwhile;
+//   • or the editor has the record selected (not inside a selected database,
+//     which is tinted as a whole).
+.db-board-card:has(.db-card-controls[data-open]),
+.react-renderer.node-database:not(.ProseMirror-selectednode)
+  .react-renderer.node-databaseRecord.ProseMirror-selectednode
+  :is(.db-board-card, .db-tl-bar) {
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+    background-color: var(--tt-selection-color);
+    box-shadow: inset 0 0 0 1.5px var(--tt-brand-color-400);
+    pointer-events: none;
+  }
+}
