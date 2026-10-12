@@ -398,7 +398,6 @@ export function DatabaseNodeView({
                     />
                   </div>
                 )}
-                {attrs.views.length > 1 && !isOwnPage && <DatabaseTitleBar />}
               </CardItemGroup>
               <CardItemGroup className="db-container">
                 {/* Stays in place while the table scrolls sideways. */}
@@ -407,6 +406,10 @@ export function DatabaseNodeView({
                   className="db-sticky-left"
                   style={{ paddingRight: 20 }}
                 >
+                  {/* The title, above the view tabs and on their left edge —
+                      except on the database's own page, whose page title
+                      already names it. */}
+                  {!isOwnPage && <DatabaseTitleBar />}
                   <DatabaseToolbar />
                   <ChipsRow />
 

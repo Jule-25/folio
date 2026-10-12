@@ -20,7 +20,6 @@ import { FilterControl } from "./filter-control";
 import { SortControl } from "./sort-control";
 import { useDataSource } from "../../hooks/use-data-source";
 import { usePageViewActions } from "src/features/pages/context/page-view-context";
-import { DatabaseTitleBar } from "../database-title-bar";
 import "./database-toolbar.scss";
 import { useDatabaseContext } from "../../context/database-context";
 import { SearchButton } from "./search-button";
@@ -102,7 +101,6 @@ function DatabaseToolbarImpl() {
   } = useDataSource(attrs.sourceId ?? null);
 
   const properties = source?.properties ?? EMPTY_PROPERTIES;
-  const isSingleView = attrs.views.length <= 1;
 
   // Keep controls visible while a popover is open, so they don't vanish from
   // under the user when the mouse leaves the node.
@@ -120,14 +118,6 @@ function DatabaseToolbarImpl() {
   }, [addRecordAsync, setTarget]);
 
   const onToggle = useCallback(() => setCollapsed((v) => !v), []);
-
-  const onAddView = useCallback(
-    (
-      type: "timeline" | "table" | "board" | "list" | "gallery" | "calendar",
-      label: string,
-    ) => db.addView(type, label),
-    [db],
-  );
 
   const onCreateTemplate = useCallback(async () => {
     onTemplateOpenChange(false);
@@ -181,11 +171,9 @@ function DatabaseToolbarImpl() {
       contentEditable={false}
     >
       <CardItemGroup orientation="horizontal">
-        {isSingleView ? (
-          <DatabaseTitleBar onAddView={onAddView} />
-        ) : (
-          <DatabaseViewTabs onRename={onViewOptionsOpenChange} />
-        )}
+        {/* Always the view tabs, even with a single view; the database's
+            title sits above them (DatabaseNodeView), not in their place. */}
+        <DatabaseViewTabs onRename={onViewOptionsOpenChange} />
         <Spacer orientation="horizontal" />
 
         {/* Hover-revealed control cluster. */}
