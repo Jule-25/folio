@@ -80,6 +80,50 @@ export function useDatabaseSeed({
     seededRef.current = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editor, databaseId, sourceId, ready, records, properties]);
+
+  // After the first seed, keep one node per record. A record can exist with
+  // no node here — added from another view of the same source, another page
+  // or another client — and then the board/table/list leaves an empty slot
+  // where it should be (its layout counts it; nothing renders in it). Add the
+  // missing ones; drop duplicates two clients may have both added (the first
+  // in doc order stays, so every client keeps the same one).
+  useEffect(() => {
+    if (!seededRef.current) return;
+    if (!editor || editor.isDestroyed || !editor.isEditable) return;
+    if (!ready || !databaseId || !sourceId) return;
+
+    const info = findDatabaseNode(editor.state.doc, databaseId);
+    if (!info) return;
+
+    const seen = new Set<string>();
+    const duplicates: { from: number; to: number }[] = [];
+    let childPos = info.pos + 1;
+    info.node.forEach((c) => {
+      if (c.type.name === "databaseRecord" && c.attrs.recordId) {
+        const id = c.attrs.recordId as string;
+        if (seen.has(id)) {
+          duplicates.push({ from: childPos, to: childPos + c.nodeSize });
+        }
+        seen.add(id);
+      }
+      childPos += c.nodeSize;
+    });
+    const missing = records.filter((r) => !seen.has(r.id));
+    if (missing.length === 0 && duplicates.length === 0) return;
+
+    const tr = editor.state.tr;
+    tr.setMeta("addToHistory", false);
+    if (missing.length > 0) {
+      const nodes = buildRecordNodes(missing, sourceId, databaseId, properties);
+      tr.insert(
+        info.pos + info.node.nodeSize - 1, // before the database closes
+        nodes.map((json) => editor.schema.nodeFromJSON(json)),
+      );
+    }
+    // Back to front, so earlier positions stay valid (inserts went after).
+    for (const d of [...duplicates].reverse()) tr.delete(d.from, d.to);
+    editor.view.dispatch(tr);
+  }, [editor, databaseId, sourceId, ready, records, properties]);
 }
 
 // ── Targeted row-add: insert a single record node for a newly created row ────

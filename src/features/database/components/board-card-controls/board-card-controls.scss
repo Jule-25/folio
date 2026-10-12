@@ -32,3 +32,17 @@
     white-space: nowrap;
   }
 }
+
+// Position the controls against the card, not the record wrapper around it
+// (its margins pushed them past the card's top-right corner). On the title
+// row (no cover) they sit centred on that row's right end.
+.db-board-card,
+.db-board-card__title {
+  position: relative;
+}
+
+.db-board-card__title > .db-card-controls {
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+}

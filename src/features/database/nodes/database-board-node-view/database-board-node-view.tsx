@@ -162,6 +162,8 @@ export function DatabaseBoardNodeViewImpl() {
         gridAutoRows: "min-content",
         alignItems: "start",
         gap: "0 8px",
+        // Room for the column footers, which hang below their row (below).
+        paddingBottom: 72,
       }}
       onDragOver={(event) => {
         if (!editor) return;
@@ -246,29 +248,44 @@ export function DatabaseBoardNodeViewImpl() {
 
       {/* "New" per column — at the bottom of each column. Placed at a high row
           so it sits after the cards (grid-auto-rows stacks it below). */}
+      {/* The footer's row is shared with the other columns' cards, so it takes
+          no height there (height 0) and hangs below it instead; otherwise its
+          button made that row taller and opened gaps in the other columns. */}
       {columns.map((c) => (
         <div
           key={`new-${c.key}`}
           style={{
             gridColumn: c.col + 1,
             gridRow: c.newRow,
-            background: `color-mix(in srgb, ${c.color} ${c.color !== "var(--tt-color-highlight-gray)" ? "8%" : "100%"}, transparent)`,
-            borderBottomLeftRadius: "var(--tt-radius-lg)",
-            borderBottomRightRadius: "var(--tt-radius-lg)",
+            position: "relative",
+            height: 0,
+            alignSelf: "start",
           }}
         >
-          <Button
-            type="button"
-            className="db-board-col-footer__add"
-            contentEditable={false}
+          <div
             style={{
-              margin: "8px 10px",
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              background: `color-mix(in srgb, ${c.color} ${c.color !== "var(--tt-color-highlight-gray)" ? "8%" : "100%"}, transparent)`,
+              borderBottomLeftRadius: "var(--tt-radius-lg)",
+              borderBottomRightRadius: "var(--tt-radius-lg)",
             }}
-            onClick={() => onNewRecordInGroup(c.key)}
           >
-            <Plus className="tiptap-button-icon" />
-            <span className="tiptap-button-text">New Page</span>
-          </Button>
+            <Button
+              type="button"
+              className="db-board-col-footer__add"
+              contentEditable={false}
+              style={{
+                margin: "8px 10px",
+              }}
+              onClick={() => onNewRecordInGroup(c.key)}
+            >
+              <Plus className="tiptap-button-icon" />
+              <span className="tiptap-button-text">New Page</span>
+            </Button>
+          </div>
         </div>
       ))}
     </div>

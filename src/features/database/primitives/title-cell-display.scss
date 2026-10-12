@@ -114,10 +114,16 @@
 }
 
 // ── Board card cover (unchanged from your file) ─────────────────────────────
+.db-board-card__cover,
+.db-board-card__placeholder {
+  // Same top corners as the card (radius-lg), or the cover's corners show
+  // sharper than the card's bottom ones.
+  border-radius: var(--tt-radius-lg) var(--tt-radius-lg) 0 0;
+}
+
 .db-board-card__cover {
   width: 100%;
   height: 130px;
-  border-radius: var(--tt-radius-xs) var(--tt-radius-xs) 0 0;
   position: relative;
   overflow: hidden;
   cursor: grab;
