@@ -123,7 +123,9 @@ export function HomePageContent({ userName }: { userName?: string }) {
           : sidebarCollapsed
             ? `0 ${marginLeftRight}`
             : "0 auto",
-        paddingLeft: sidebarCollapsed ? 0 : expandedWidth,
+        // On a phone the sidebar is a drawer over the page, so the page keeps
+        // its full width (squeezing it under the drawer broke the layout).
+        paddingLeft: isMobile || sidebarCollapsed ? 0 : expandedWidth,
       }}
     >
       <div className="home-dense">
