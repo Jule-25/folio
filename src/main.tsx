@@ -8,6 +8,11 @@ import "material-symbols/rounded.css";
 
 // import './styles/main.scss'
 import App from "./app/App.tsx";
+import { installStaleChunkRecovery } from "./lib/stale-chunk-recovery";
+
+// A deploy removes the old code chunks; a tab still on the old version
+// reloads onto the new one instead of breaking (see the module).
+installStaleChunkRecovery();
 
 // const originalError = console.error;
 // console.error = (...args) => {

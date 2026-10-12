@@ -48,7 +48,11 @@ export default defineConfig({
               sameOrigin && url.pathname.startsWith("/assets/icons/"),
             handler: "CacheFirst",
             options: {
-              cacheName: "folio-icons",
+              // v2: before /assets/ was left out of the SPA rewrite
+              // (vercel.json), a missing icon chunk came back as index.html
+              // with a 200 and was cached as the icon. A new name leaves
+              // that poisoned cache behind.
+              cacheName: "folio-icons-v2",
               expiration: { maxEntries: 2000, maxAgeSeconds: 365 * DAY },
               cacheableResponse: { statuses: [200] },
             },
