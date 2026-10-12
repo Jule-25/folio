@@ -99,15 +99,15 @@ New database changes go in a new numbered file after the highest one (see [Data 
 
 Two functions keep secrets and third-party calls off the browser:
 
-| Function       | What it does                                            | Secret           |
-| -------------- | ------------------------------------------------------- | ---------------- |
-| `link-preview` | Title, description, image and favicon for web bookmarks | none             |
-| `pexel-search` | Cover image search                                      | `PEXELS_API_KEY` |
+| Function        | What it does                                            | Secret           |
+| --------------- | ------------------------------------------------------- | ---------------- |
+| `link-preview`  | Title, description, image and favicon for web bookmarks | none             |
+| `pexels-search` | Cover image search                                      | `PEXELS_API_KEY` |
 
 ```bash
 supabase secrets set PEXELS_API_KEY=<your key>
 supabase functions deploy link-preview
-supabase functions deploy pexel-search
+supabase functions deploy pexels-search
 ```
 
 ### 6. Collaboration server
