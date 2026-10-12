@@ -1,4 +1,5 @@
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
+import { readFileSync } from "node:fs";
 import react from "@vitejs/plugin-react";
 import { resolve } from "path";
 import { visualizer } from "rollup-plugin-visualizer";
@@ -6,10 +7,33 @@ import { VitePWA } from "vite-plugin-pwa";
 
 const DAY = 60 * 60 * 24;
 
+// lucide-react/dynamic.mjs ends with a sourceMappingURL comment for a .map
+// file the package doesn't ship. It's served unbundled in dev (see
+// optimizeDeps.exclude), so Vite tries to read that map and logs
+// "Failed to load source map" on every start. Load it without the comment.
+// Dev only; nothing changes in the build.
+function lucideDynamicWithoutSourcemap(): Plugin {
+  return {
+    name: "folio:lucide-dynamic-no-sourcemap",
+    apply: "serve",
+    enforce: "pre",
+    load(id) {
+      const file = id.split("?")[0].replace(/\\/g, "/");
+      if (!file.endsWith("/lucide-react/dynamic.mjs")) return null;
+      const code = readFileSync(file, "utf8").replace(
+        /\n\/\/# sourceMappingURL=.*$/m,
+        "",
+      );
+      return { code, map: null };
+    },
+  };
+}
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
+    lucideDynamicWithoutSourcemap(),
     // Service worker: Folio opens with no connection.
     //   • The built app (JS, CSS, fonts, icons) is precached on the first
     //     visit, so a reload works offline.
