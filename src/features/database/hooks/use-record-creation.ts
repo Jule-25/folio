@@ -8,14 +8,12 @@ import type {
   CellValue,
   PropertyType,
   DatabaseProperty,
-  RowTemplate,
 } from "src/types";
 import { insertRecordNode } from "./use-database-seed";
 import { NONE_KEY, valueForGroupKey } from "../utils/group-records";
 import { canWriteGroupValue } from "../utils/group-key";
 import { useWorkspacePeople } from "./use-workspace-people";
-
-const EMPTY_TEMPLATES: RowTemplate[] = [];
+import { startingTemplateId } from "../utils/row-templates";
 
 export function useRecordCreation({
   editor,
@@ -64,24 +62,25 @@ export function useRecordCreation({
     [editor, attrs.id, attrs.sourceId, source],
   );
 
+  // New rows start from the default template, when there is one.
+  const newRecordOpts = useCallback(() => {
+    const templateId = startingTemplateId(source);
+    return templateId ? { templateId } : { title: "" };
+  }, [source]);
+
   const onNewRecord = useCallback(() => {
-    const templates = source?.rowTemplates ?? EMPTY_TEMPLATES;
-    const defaultTemplateId = source?.defaultTemplateId ?? null;
-    const useTemplate =
-      defaultTemplateId && templates.some((t) => t.id === defaultTemplateId)
-        ? defaultTemplateId
-        : undefined;
-    addRecordAsync(useTemplate ? { templateId: useTemplate } : { title: "" })
+    addRecordAsync(newRecordOpts())
       .then((page) => {
         insertNode(page);
         setEditingRecordId(page.id);
       })
       .catch((error) => console.error("Failed to create page", error));
-  }, [addRecordAsync, insertNode, setEditingRecordId, source]);
+  }, [addRecordAsync, insertNode, setEditingRecordId, newRecordOpts]);
 
   const onNewRecordInGroup = useCallback(
     (groupKey: string) => {
-      addRecordAsync({ title: "" })
+      // The column's value goes over the template's.
+      addRecordAsync(newRecordOpts())
         .then((page) => {
           insertNode(page);
           // Computed groups (formula, rollup, created by…) can't be set.
@@ -102,6 +101,7 @@ export function useRecordCreation({
     },
     [
       addRecordAsync,
+      newRecordOpts,
       insertNode,
       setCellValue,
       groupProp,

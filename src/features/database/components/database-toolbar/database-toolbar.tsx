@@ -27,6 +27,7 @@ import { NewRecordButton } from "./new-record-button";
 import { CollapseToggle } from "./collapse-toggle";
 import { useActivePageActions } from "src/features/pages/context/active-page-context";
 import { NoDatePanel } from "../no-date-panel";
+import { startingTemplateId } from "../../utils/row-templates";
 // ── helpers ──────────────────────────────────────────────────────────────────
 
 function getActiveView(attrs: DatabaseAttrs): DatabaseView | undefined {
@@ -111,11 +112,13 @@ function DatabaseToolbarImpl() {
     transition: "opacity 0.2s ease",
   };
 
+  // New starts from the default template, like the "+ New page" row.
   const handleNewPage = useCallback(async () => {
-    addRecordAsync({ title: "" })
+    const templateId = startingTemplateId(source);
+    addRecordAsync(templateId ? { templateId } : { title: "" })
       .then((page) => setTarget({ pageId: page.id, view: "Center" }))
       .catch((error) => console.error("Failed to create page", error));
-  }, [addRecordAsync, setTarget]);
+  }, [addRecordAsync, setTarget, source]);
 
   const onToggle = useCallback(() => setCollapsed((v) => !v), []);
 

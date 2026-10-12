@@ -29,6 +29,7 @@ import { makeDefaultView } from "src/utils/make-default-view";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useCurrentPerson } from "src/hooks/use-session";
 import { useCurrentWorkspace } from "src/hooks/use-workspaces";
+import { templateValues } from "../utils/row-templates";
 
 // module scope, outside the hook
 const patchDataSourceFn = ({
@@ -170,7 +171,17 @@ export function useDataSource(
       const row = makeRow(sourceRef.current, {
         ownerId: person.id,
         title: opts?.templateId ? templatePage?.title : opts?.title,
-        template,
+        // The values set on the template's page (its property panel) are the
+        // template's values; template.values only holds those of templates
+        // saved from a row.
+        template: template && {
+          ...template,
+          values: templateValues(
+            template,
+            templatePage,
+            sourceRef.current.properties,
+          ),
+        },
         content: templatePage?.content ?? undefined,
         cover: templatePage?.cover,
         workspaceId,
