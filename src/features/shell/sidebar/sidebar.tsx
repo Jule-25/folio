@@ -23,6 +23,7 @@ export const Sidebar = memo(() => {
     expandedWidth,
     customizeSidebarOpen,
     setCustomizeSidebarOpen,
+    onCollapsedChange,
   } = useEditorLayout();
   const { mode, isMobile } = useLayoutMode();
   const drawerWidth = calculateDrawerWidth(mode, expandedWidth);
@@ -116,7 +117,23 @@ export const Sidebar = memo(() => {
       <SidebarResizeHandle />
     </Card>
   );
+  // On a phone the open sidebar is a drawer over the page: dim the page behind
+  // it so the editor doesn't compete for attention, and tap it to close.
+  const backdrop = (
+    <div
+      className={`sidebar-backdrop${!collapsed ? " is-open" : ""}`}
+      aria-hidden="true"
+      onClick={() => onCollapsedChange(true)}
+    />
+  );
+
   return mode === "mobile"
-    ? createPortal(<>{sidebarCard}</>, document.body)
+    ? createPortal(
+        <>
+          {backdrop}
+          {sidebarCard}
+        </>,
+        document.body,
+      )
     : sidebarCard;
 });

@@ -1,7 +1,7 @@
 :root {
   // Warm gray, a step darker than the old rgb(249, 248, 245) so it separates
   // from the white page. Keep --sidebar-fog-color in step with it.
-  --sidebar-bg-color: #F4F3EF;
+  --sidebar-bg-color: rgb(244, 243, 239);
   // --sidebar-bg-color: rgb(251, 251, 251);  //rgba(252, 249, 249, 1);
   --sidebar-shadow-color: rgba(240, 239, 237, 0.737);
   --sidebar-text-color: var(--tt-theme-text);
@@ -36,7 +36,7 @@
 }
 
 .dark {
-  --sidebar-bg-color: #1F1F1F;
+  --sidebar-bg-color: #1f1f1f;
   --sidebar-shadow-color: #0f0f0e0c;
   --sidebar-text-secondary: var(--tt-gray-dark-a-600);
 
@@ -806,4 +806,34 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   min-width: 0; /* Allow the button to shrink below its text width */
+}
+
+
+// ── Mobile: the page behind the open sidebar ────────────────────────────────
+// Just under the drawer (z-index 950). Fades with the drawer's slide; while
+// closed it lets every tap through.
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 949;
+  background: rgba(15, 15, 15, 0.4);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.24s ease;
+  -webkit-tap-highlight-color: transparent;
+
+  .dark & {
+    background: rgba(0, 0, 0, 0.6);
+  }
+
+  &.is-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-backdrop {
+    transition: none;
+  }
 }
