@@ -54,9 +54,9 @@ export const SidebarHeader = memo(() => {
               }}
             >
               {collapsed ? (
-                <SbExpandIcon size={15} className="tiptap-button-icon" />
+                <SbExpandIcon size={18} className="tiptap-button-icon" />
               ) : (
-                <SbCollapseIcon size={15} className="tiptap-button-icon" />
+                <SbCollapseIcon size={18} className="tiptap-button-icon" />
               )}
             </Button>
           </span>

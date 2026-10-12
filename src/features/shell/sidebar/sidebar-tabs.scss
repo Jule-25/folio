@@ -73,28 +73,57 @@ $ease-out: cubic-bezier(0.32, 0.72, 0, 1);
     }
   }
 
-  // Collapse and New page: two quiet 28px icon buttons after the switcher.
+  // Collapse and New page: two quiet 32px icon buttons after the switcher.
+  // Collapse shows only while the top row is hovered or focused (always on
+  // touch screens). Hidden, it takes no room (so the switcher's chevron sits
+  // right next to New page); shown, it slides in between them.
   &__collapse {
     display: inline-flex;
     align-items: center;
     flex-shrink: 0;
+    max-width: 0;
+    margin-right: -2px; // cancels the row gap while hidden
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      max-width 0.18s ease,
+      margin 0.18s ease,
+      opacity 0.12s ease;
+  }
+
+  &:hover &__collapse,
+  &:focus-within &__collapse {
+    max-width: 32px;
+    margin-right: 0;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  @media (hover: none) {
+    &__collapse {
+      max-width: 32px;
+      margin-right: 0;
+      opacity: 1;
+      pointer-events: auto;
+    }
   }
 
   // [data-size] outranks the Button primitive's own "large" sizing.
   &__collapse .tiptap-button[data-size],
   &__new.tiptap-button[data-size] {
     flex: none;
-    width: 28px;
-    height: 28px;
-    min-width: 28px;
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
     padding: 0;
     justify-content: center;
     border-radius: var(--sb-row-radius);
     color: var(--sb-icon-color);
 
     .tiptap-button-icon {
-      width: 15px;
-      height: 15px;
+      width: 18px;
+      height: 18px;
       color: inherit;
     }
 
@@ -102,11 +131,6 @@ $ease-out: cubic-bezier(0.32, 0.72, 0, 1);
       background: var(--sb-hover-bg);
       color: var(--sb-active-color);
     }
-  }
-
-  &__new.tiptap-button[data-size] .tiptap-button-icon {
-    width: 16px;
-    height: 16px;
   }
 }
 
@@ -134,7 +158,8 @@ $ease-out: cubic-bezier(0.32, 0.72, 0, 1);
 
 @media (prefers-reduced-motion: reduce) {
   .sb-nav-row,
-  .sb-top__back {
+  .sb-top__back,
+  .sb-top__collapse {
     transition-duration: 0s !important;
     transform: none !important;
   }

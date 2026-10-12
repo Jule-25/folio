@@ -78,6 +78,15 @@ export const SbExpandIcon = icon(
   </>,
 );
 
+// New page, as a square with a pen writing into its top-right corner.
+export const SbComposeIcon = icon(
+  "SbComposeIcon",
+  <>
+    <path d="M11 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5" />
+    <path d="M17.6 3.4a2 2 0 0 1 2.9 2.9L12 14.8l-3.6.8.8-3.6z" />
+  </>,
+);
+
 // New page.
 export const SbPlusIcon = icon("SbPlusIcon", <path d="M12 5v14M5 12h14" />);
 
