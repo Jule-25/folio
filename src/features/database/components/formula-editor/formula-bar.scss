@@ -125,6 +125,17 @@
   }
 }
 
+// ── Properties grid (properties-panel) ──────────────────────────────────────
+.formula-properties {
+  &__grid {
+    display: grid;
+    // As many ~150px columns as fit, so the list wraps into 2–4 columns
+    // instead of one tall stack.
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 4px;
+  }
+}
+
 // ── Function help (functions-panel, function-detail) ───────────────────────
 .formula-functions {
   &__head {
@@ -217,5 +228,16 @@
     font-size: 12px;
     opacity: 0.6;
     white-space: nowrap;
+  }
+}
+
+// On a 375px phone the editor card is only ~343px wide, so the 150px/120px
+// column floors still force two cramped columns. Drop both grids to a single
+// column there. Kept last on purpose: both base rules above carry the same
+// specificity, so only source order makes this override win.
+@media (max-width: 375px) {
+  .formula-properties__grid,
+  .formula-functions__grid {
+    grid-template-columns: 1fr;
   }
 }
