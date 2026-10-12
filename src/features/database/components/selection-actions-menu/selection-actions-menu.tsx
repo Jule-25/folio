@@ -22,7 +22,6 @@ import {
 
 import {
   AddToFavoritesItem,
-  CommentItem,
   CopyLinkItem,
   DuplicateRecordItem,
   EditIconItem,
@@ -72,7 +71,7 @@ export function SelectionActionsMenu({
   onAddToFavorites,
   onEditIcon,
   // onComment,
-  // onMoveTo,
+  onMoveTo,
   onOpenIn,
   onLayout,
   onPropertyVisibility,
@@ -92,11 +91,9 @@ export function SelectionActionsMenu({
   onAddToFavorites?: () => void;
   onEditIcon?: () => void;
   onComment?: () => void;
-  onMoveTo?: (
-    recordId: string,
-    newParentId: string | null,
-    category?: string | undefined,
-  ) => void;
+  /** Open the destination picker. The caller owns the picker (it anchors
+   *  outside this menu, which closes); without it, Move to isn't shown. */
+  onMoveTo?: () => void;
   onOpenIn?: (mode: OpenInMode) => void;
   onOpenEditProperty?: (propertyId: string) => void;
   /** Card layout options (cover fit, size) — board/gallery only. */
@@ -273,15 +270,15 @@ export function SelectionActionsMenu({
     t("database.selectionActions.propertyVisibility"),
   ].some(matchesAction);
 
-  const showOpenActions = [
-    t("database.selectionActions.openIn"),
-    t("blockMenu.comment"),
-  ].some(matchesAction);
+  // Comment comes back with row discussions (#169).
+  const showOpenActions = [t("database.selectionActions.openIn")].some(
+    matchesAction,
+  );
 
   const showRecordActions = [
     t("people.copyLink"),
     t("actions.duplicate"),
-    t("moveTo.label"),
+    ...(onMoveTo ? [t("moveTo.label")] : []),
     t("ui.moveToTrash"),
   ].some(matchesAction);
 
@@ -388,7 +385,7 @@ export function SelectionActionsMenu({
           </CardItemGroup>
         )}
 
-        {/* ── Open / comment actions ────────────────────────── */}
+        {/* ── Open actions ──────────────────────────────────── */}
 
         {(showPageActions || showLayoutActions) && showOpenActions && (
           <Separator orientation="horizontal" style={{ height: 0.5 }} />
@@ -403,13 +400,6 @@ export function SelectionActionsMenu({
               >
                 <OpenInFlyout onOpen={(mode) => run(() => onOpenIn?.(mode))} />
               </NavigableMenuItem>
-            )}
-
-            {matchesAction(t("blockMenu.comment")) && (
-              <CommentItem
-                label={t("blockMenu.comment")}
-                onComment={() => {}}
-              />
             )}
           </CardItemGroup>
         )}
@@ -435,8 +425,11 @@ export function SelectionActionsMenu({
               />
             )}
 
-            {matchesAction(t("moveTo.label")) && (
-              <MoveToItem label={t("moveTo.label")} onOpen={() => {}} />
+            {onMoveTo && matchesAction(t("moveTo.label")) && (
+              <MoveToItem
+                label={t("moveTo.label")}
+                onOpen={() => run(onMoveTo)}
+              />
             )}
 
             {matchesAction(t("ui.moveToTrash")) && (

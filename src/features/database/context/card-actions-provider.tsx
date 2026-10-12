@@ -20,9 +20,13 @@ import { useDataSource } from "../hooks/use-data-source";
 import type { Target } from "src/features/pages/cover/types";
 import { useActivePageActions } from "src/features/pages/context/active-page-context";
 import { usePageViewActions } from "src/features/pages/context/page-view-context";
+import { removeRecordNodes } from "../utils/remove-record-nodes";
+import { recordSelection } from "../utils/record-selection-store";
 
 export function CardActionsProvider({ children }: { children: ReactNode }) {
-  const { source, sortedRecords, visibleProperties, db } = useDatabaseContext();
+  const { source, sortedRecords, visibleProperties, db, editor, attrs } =
+    useDatabaseContext();
+  const databaseId = attrs.id;
   const { setActivePageId } = useActivePageActions();
   const { setTarget } = usePageViewActions();
   const { setCellValue, removeRecordAsync, addRecordAsync } = useDataSource(
@@ -75,14 +79,26 @@ export function CardActionsProvider({ children }: { children: ReactNode }) {
         });
       },
 
-      moveRecord: (recordId, newParentId, category) =>
+      // Moved under another page, a record leaves the database: it becomes
+      // an ordinary page there (no source, no property values), and its
+      // row/card goes from this database's document and selection.
+      moveRecord: (recordId, newParentId, category) => {
         patchPageMutate({
           id: recordId,
           patch: {
             parentId: newParentId,
             category: (category as PageCategory) ?? "Private",
+            sourceId: null,
+            values: null,
           },
-        }),
+        });
+        if (editor && !editor.isDestroyed && databaseId) {
+          removeRecordNodes(editor, databaseId, [recordId]);
+          if (recordSelection.isSelected(databaseId, recordId)) {
+            recordSelection.toggle(databaseId, recordId);
+          }
+        }
+      },
 
       setRecordIcon: (recordId, iconName, color, target) => {
         const r = getRecord(recordId);
@@ -129,6 +145,8 @@ export function CardActionsProvider({ children }: { children: ReactNode }) {
     addRecordAsync,
     setActivePageId,
     setTarget,
+    editor,
+    databaseId,
   ]);
 
   // Publish to the store for the portaled drag-handle Menu (outside the tree).

@@ -13,6 +13,7 @@ import { useRef, useState } from "react";
 import { IconPickerPopover } from "src/features/pages/cover";
 import type { Target } from "src/features/pages/cover/types";
 import { PropertyEditorPopover } from "../property-editor-popover";
+import { MoveToPopover } from "../move-to-popover";
 
 export function CardActionsMenu({
   record,
@@ -32,6 +33,7 @@ export function CardActionsMenu({
   const anchorRef = useRef<HTMLButtonElement>(null);
   const [iconEditOpen, setIconEditOpen] = useState(false);
   const [editingPropertyId, setEditingPropertyId] = useState<ID | null>(null);
+  const [moveToOpen, setMoveToOpen] = useState(false);
 
   const cardActions = useCardActions();
   if (!cardActions) return null;
@@ -105,6 +107,20 @@ export function CardActionsMenu({
           onChange={(v) => setValue(record.id, editingPropertyId!, v)}
           onEditProperty={(id) => openEditProperty(id)}
         />
+        <MoveToPopover
+          open={moveToOpen}
+          onOpenChange={(o) => {
+            if (!o) {
+              setMoveToOpen(false);
+              onPreventClose?.(false);
+            }
+          }}
+          anchorRef={anchorRef}
+          currentPageId={record.id}
+          onMove={(newParentId, category) =>
+            moveRecord(record.id, newParentId, category)
+          }
+        />
       </>
     );
   }
@@ -148,7 +164,10 @@ export function CardActionsMenu({
               onPreventClose?.(true);
               setIconEditOpen(true);
             }}
-            onMoveTo={moveRecord}
+            onMoveTo={() => {
+              onPreventClose?.(true);
+              setMoveToOpen(true);
+            }}
             lastEditedBy={lastEditedBy}
             lastEditedAt={lastEditedAt}
             onClose={() => onOpenChange(false)}

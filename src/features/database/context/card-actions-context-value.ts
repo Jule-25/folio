@@ -23,6 +23,8 @@ export interface CardActionsValue {
 
   // ── Page-level actions ────────────────────────────────────────────────────
   toggleFavorite: (recordId: ID) => void;
+  /** Move the record's page under another page. It leaves the database: it
+   *  becomes an ordinary page there and its row/card goes from the view. */
   moveRecord: (recordId: ID, newParentId: ID | null, category?: string) => void;
   setRecordIcon: (
     recordId: ID,
