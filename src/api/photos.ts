@@ -29,7 +29,28 @@ export async function searchPhotos(
     photos?: Photo[];
     error?: string;
   }>("pexels-search", { body: { query: q, orientation, perPage } });
-  if (error) throw new Error(error.message);
+  if (error) {
+    // A non-2xx answer arrives as a generic FunctionsHttpError whose
+    // `context` is the Response, with the function's reason ({ error }) in
+    // its body. Other failures (FunctionsFetchError: the request never got
+    // an answer; FunctionsRelayError) carry no Response.
+    const ctx = (error as { context?: unknown }).context;
+    let status: number | undefined;
+    let reason: string | undefined;
+    if (ctx instanceof Response) {
+      status = ctx.status;
+      const body = (await ctx
+        .clone()
+        .json()
+        .catch(() => null)) as { error?: string } | null;
+      reason = body?.error;
+    } else if (ctx instanceof Error) {
+      reason = ctx.message;
+    }
+    const message = `${error.name}${status ? ` ${status}` : ""}: ${reason ?? error.message}`;
+    console.error("Photo search failed:", message, error);
+    throw new Error(message);
+  }
   if (data?.error) throw new Error(data.error);
   return data?.photos ?? [];
 }

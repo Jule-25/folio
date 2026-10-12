@@ -17,6 +17,7 @@ export function UnsplashTab({ onSelect }: PexelsTabProps) {
     data: photos = [],
     isFetching,
     isError,
+    error,
   } = useQuery({
     queryKey: ["pexels", debouncedQuery],
     queryFn: () => searchPhotos(debouncedQuery),
@@ -65,6 +66,12 @@ export function UnsplashTab({ onSelect }: PexelsTabProps) {
           }}
         >
           Photos couldn't load. Try again in a moment.
+          {error?.message && (
+            <>
+              <br />
+              <span style={{ opacity: 0.8 }}>({error.message})</span>
+            </>
+          )}
         </p>
       ) : (
         <>
