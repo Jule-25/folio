@@ -9,11 +9,16 @@
 export function toDate(value: unknown): Date | null {
   if (value == null || value === "") return null;
 
-  const date = value instanceof Date
-    ? new Date(value.getTime())
-    : typeof value === "number"
-      ? new Date(value)
-      : new Date(String(value));
+  if (typeof value === "object" && value !== null && "start" in value) {
+    return toDate((value as { start: unknown }).start);
+  }
+
+  const date =
+    value instanceof Date
+      ? new Date(value.getTime())
+      : typeof value === "number"
+        ? new Date(value)
+        : new Date(String(value));
 
   return isNaN(date.getTime()) ? null : date;
 }
