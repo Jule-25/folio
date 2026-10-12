@@ -19,6 +19,7 @@ import type { NormalizedNestedOptions } from "@tiptap/extension-drag-handle";
 import { createPortal } from "react-dom";
 import { recordSelection } from "src/features/database/utils/record-selection-store";
 import { RecordDragMenu } from "src/features/database/components/record-drag-menu";
+import { readDatabaseData } from "src/features/database/utils/database-bridge";
 import { GripVerticalIcon } from "src/components/tiptap-icons";
 import { useTranslation } from "react-i18next";
 import { insertBlockWithMenu } from "./insert-block";
@@ -91,7 +92,12 @@ function firstLineMiddle(block: HTMLElement): number {
   );
 }
 
-const nestedOptions = {
+// Records of these views are rows: they get the handle (and its record
+// menu). Cards and bars (board, gallery, calendar, timeline) have their own
+// controls; the handle goes to the database itself there.
+const ROW_VIEWS = new Set(["table", "list"]);
+
+const makeNestedOptions = (editor: Editor | null) => ({
   enabled: true,
   edgeDetection: {
     threshold: -80,
@@ -116,6 +122,15 @@ const nestedOptions = {
           return 1000;
         }
 
+        if (name === "databaseRecord") {
+          const databaseId = node.attrs.databaseId as string | null;
+          const viewType =
+            editor && databaseId
+              ? readDatabaseData(editor, databaseId)?.view?.type
+              : undefined;
+          if (viewType && !ROW_VIEWS.has(viewType)) return 1000;
+        }
+
         if (
           name === "bulletList" ||
           name === "orderedList" ||
@@ -133,13 +148,14 @@ const nestedOptions = {
       },
     },
   ],
-};
+});
 
 export function DragHandle({ editor }: { editor: Editor | null }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [target, setTarget] = useState("paragraph");
   const [hideHandle, setHideHandle] = useState(false);
+  const nestedOptions = useMemo(() => makeNestedOptions(editor), [editor]);
   const isDraggingRef = useRef(false);
   const targetRef = useRef(target);
   const posRef = useRef(-1);
