@@ -1,4 +1,5 @@
 import type { DatabaseProperty, Page, CalcType } from "src/types";
+import { toDate } from "./date-values";
 
 export const CALC_LABEL: Record<CalcType, string> = {
   none: "Calculate",
@@ -56,8 +57,14 @@ export function getCalcGroups(prop: DatabaseProperty): CalcGroup[] {
   return groups;
 }
 
-export function getCellValue(record: Page, propertyId: string): unknown {
-  return record.values?.[propertyId] ?? null;
+export function getCellValue(
+  record: Page,
+  property: DatabaseProperty,
+): unknown {
+  if (property.config.type === "created_time") return record.createdAt ?? null;
+  if (property.config.type === "edited_time")
+    return record.updatedAt ?? record.createdAt ?? null;
+  return record.values?.[property.id] ?? null;
 }
 
 export function runCalc(calc: CalcType, values: unknown[]): string {
@@ -85,8 +92,8 @@ export function runCalc(calc: CalcType, values: unknown[]): string {
         : `${Math.round((nonEmpty.length / total) * 100)}%`;
     case "earliest_date": {
       const dates = nonEmpty
-        .map((v) => new Date(String(v)))
-        .filter((d) => !isNaN(d.getTime()));
+        .map(toDate)
+        .filter((d): d is Date => d !== null);
       if (!dates.length) return "";
       return new Date(
         Math.min(...dates.map((d) => d.getTime())),
@@ -94,8 +101,8 @@ export function runCalc(calc: CalcType, values: unknown[]): string {
     }
     case "latest_date": {
       const dates = nonEmpty
-        .map((v) => new Date(String(v)))
-        .filter((d) => !isNaN(d.getTime()));
+        .map(toDate)
+        .filter((d): d is Date => d !== null);
       if (!dates.length) return "";
       return new Date(
         Math.max(...dates.map((d) => d.getTime())),
@@ -103,8 +110,8 @@ export function runCalc(calc: CalcType, values: unknown[]): string {
     }
     case "date_range": {
       const dates = nonEmpty
-        .map((v) => new Date(String(v)))
-        .filter((d) => !isNaN(d.getTime()));
+        .map(toDate)
+        .filter((d): d is Date => d !== null);
       if (dates.length < 2) return "";
       const min = Math.min(...dates.map((d) => d.getTime()));
       const max = Math.max(...dates.map((d) => d.getTime()));
