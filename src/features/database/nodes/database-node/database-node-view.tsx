@@ -323,20 +323,24 @@ export function DatabaseNodeView({
   if (!attrs.sourceId) {
     return (
       <NodeViewWrapper as="div" data-type="database" contentEditable={false}>
-        <DataSourcePicker
-          onSelect={(sourceId, pageId, isLinked, savedView) =>
-            updateAttributes({
-              ...attrs,
-              sourceId,
-              pageId: pageId ?? attrs.pageId ?? null,
-              isLinked: !!isLinked,
-              title: "",
-              ...(savedView
-                ? { views: [savedView], activeViewId: savedView.id }
-                : {}),
-            })
-          }
-        />
+        {/* The picker isn't a .db-node (which positions itself), so it takes
+            the text column like any other block: .top-level-block. */}
+        <div className="top-level-block">
+          <DataSourcePicker
+            onSelect={(sourceId, pageId, isLinked, savedView) =>
+              updateAttributes({
+                ...attrs,
+                sourceId,
+                pageId: pageId ?? attrs.pageId ?? null,
+                isLinked: !!isLinked,
+                title: "",
+                ...(savedView
+                  ? { views: [savedView], activeViewId: savedView.id }
+                  : {}),
+              })
+            }
+          />
+        </div>
       </NodeViewWrapper>
     );
   }
