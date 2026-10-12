@@ -56,8 +56,14 @@ export function getCalcGroups(prop: DatabaseProperty): CalcGroup[] {
   return groups;
 }
 
-export function getCellValue(record: Page, propertyId: string): unknown {
-  return record.values?.[propertyId] ?? null;
+export function getCellValue(
+  record: Page,
+  property: DatabaseProperty,
+): unknown {
+  if (property.config.type === "created_time") return record.createdAt ?? null;
+  if (property.config.type === "edited_time")
+    return record.updatedAt ?? record.createdAt ?? null;
+  return record.values?.[property.id] ?? null;
 }
 
 export function runCalc(calc: CalcType, values: unknown[]): string {

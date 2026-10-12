@@ -30,6 +30,9 @@ export function getCellValue(
     const id = record.editedBy ?? record.ownerId;
     return id ? [{ id }] : [];
   }
+  if (prop?.config.type === "created_time") return record.createdAt ?? null;
+  if (prop?.config.type === "edited_time")
+    return record.updatedAt ?? record.createdAt ?? null;
   return record.values?.[propertyId] ?? null;
 }
 
