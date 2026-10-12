@@ -1,35 +1,35 @@
 // ─── Move to (destination picker) ───────────────────────────────────────────
-// A within-popover panel that lets the user move a record's PAGE under another
-// page (reparent). Self-contained: it reads the page list from usePages() and
-// performs the move via patchPageAsync (parentId + category), the same mutation
-// the sidebar's drag-to-reparent uses.
+// Where a record's page can be moved: a search box and the pages, most
+// recently edited first. Same look and keys as the block menu's Move to
+// (↑ ↓ to pick, Enter to move, Escape to close), and its styles.
 //
-// This first version is a searchable FLAT list of destinations (search a page,
-// pick it). The image's expandable tree-drill (move INTO a page's subtree via
-// the `>` chevrons) and the space switcher are deferred enhancements — the flat
-// search covers the common case (find the destination, move).
+// The record and its own subpages aren't offered (a page can't go inside
+// itself), nor the trash or templates. After the move, a toast names the
+// destination with a link to open it.
 import { useMemo, useState } from "react";
-import { ChevronLeft, Search } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { Search } from "lucide-react";
 import { Button } from "src/components/tiptap-ui-primitive/button";
-import {
-  Card,
-  CardBody,
-  CardGroupLabel,
-  CardHeader,
-  CardItemGroup,
-} from "src/components/tiptap-ui-primitive/card";
-import { Input } from "src/components/tiptap-ui-primitive/input";
-import { DynamicIcon } from "src/features/pages/cover/dynamic-icon";
+import { Card } from "src/components/tiptap-ui-primitive/card";
+import { PageItemIcon } from "src/features/pages/page-item/page-item-icon";
+import { useOptionalActivePage } from "src/features/pages/context/active-page-context";
+import { useToast } from "src/features/shell/toast";
 import { usePages } from "src/hooks/use-pages";
 import type { ID, Page } from "src/types";
+import "src/components/tiptap-ui/move-to-dropdown/move-to-dropdown.scss";
+
+const MAX_RESULTS = 40;
+
+const normalize = (s: string) =>
+  s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
 interface MoveToPanelProps {
   /** The record's page — the thing being moved (excluded from destinations,
    *  along with its own descendants). */
   currentPageId: ID;
-  /** Perform the move. The composer wires this to patchPageAsync (parentId +
-   *  category). newParentId null = move to a top-level section. */
+  /** Perform the move. newParentId null = move to a top-level section. */
   onMove: (newParentId: ID | null, category?: string) => void;
+  /** Close without moving. */
   onBack: () => void;
   spaceName?: string;
 }
@@ -62,76 +62,94 @@ export function MoveToPanel({
   currentPageId,
   onMove,
   onBack,
-  spaceName,
 }: MoveToPanelProps) {
+  const { t } = useTranslation();
   const { data: pages } = usePages();
+  const { setActivePageId } = useOptionalActivePage();
+  const toast = useToast();
   const [query, setQuery] = useState("");
+  const [active, setActive] = useState(0);
 
   const excluded = useMemo(
     () => collectSubtreeIds(currentPageId, pages ?? []),
     [currentPageId, pages],
   );
 
-  const destinations = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return (
-      (pages ?? [])
-        .filter((p) => !excluded.has(p.id))
-        // Not into the trash or a template.
-        .filter((p) => p.deletedAt == null && p.category !== "Template")
-        .filter((p) => (q ? (p.title ?? "").toLowerCase().includes(q) : true))
-    );
+  const results = useMemo(() => {
+    const q = normalize(query.trim());
+    return (pages ?? [])
+      .filter((p) => !excluded.has(p.id))
+      .filter((p) => p.deletedAt == null && p.category !== "Template")
+      .filter((p) => !q || normalize(p.title || "").includes(q))
+      .sort((a, b) => Number(b.updatedAt ?? 0) - Number(a.updatedAt ?? 0))
+      .slice(0, MAX_RESULTS);
   }, [pages, excluded, query]);
 
+  const move = (page: Page) => {
+    onMove(page.id, page.category);
+    const title = page.title || t("page.newPage");
+    toast.show(t("moveTo.done", { title }), "success", {
+      label: t("moveTo.open"),
+      onClick: () => setActivePageId(page.id),
+    });
+  };
+
   return (
-    <Card className="db-actions-menu db-move-to">
-      <CardHeader>
-        <Button
-          variant="ghost"
-          onClick={onBack}
-          style={{ background: "transparent" }}
-        >
-          <ChevronLeft size={16} className="tiptap-button-icon" />
-        </Button>
-        <div className="db-move-to__search">
-          <Search size={14} className="tiptap-button-icon" />
-          <Input
-            autoFocus
-            value={query}
-            placeholder="Move page to..."
-            onChange={(e) => setQuery(e.target.value)}
-          />
-        </div>
-      </CardHeader>
-
-      <CardBody style={{ width: "100%" }}>
-        <CardGroupLabel>{query ? "Results" : "Suggested"}</CardGroupLabel>
-        <CardItemGroup>
-          {destinations.map((p) => (
-            <Button
-              key={p.id}
-              variant="ghost"
-              className="db-move-to__row"
-              style={{ justifyContent: "flex-start", width: "100%" }}
-              onClick={() => onMove(p.id, p.category)}
-            >
-              <DynamicIcon name={p.cover?.iconName ?? "file-text"} size={16} />
-              <span className="tiptap-button-text">
-                {p.title || "Untitled"}
-              </span>
-            </Button>
-          ))}
-          {destinations.length === 0 && (
-            <span className="db-panel__empty">No destinations</span>
-          )}
-        </CardItemGroup>
-      </CardBody>
-
-      {spaceName && (
-        <div className="db-move-to__footer">
-          <span className="tiptap-button-text">{spaceName}</span>
-        </div>
-      )}
+    <Card className="move-to-card">
+      <label className="move-to-search">
+        <Search size={14} />
+        <input
+          autoFocus
+          value={query}
+          placeholder={t("moveTo.search")}
+          aria-label={t("moveTo.search")}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setActive(0);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") {
+              e.preventDefault();
+              onBack();
+              return;
+            }
+            e.stopPropagation();
+            if (e.key === "ArrowDown") {
+              e.preventDefault();
+              setActive((i) => Math.min(results.length - 1, i + 1));
+            } else if (e.key === "ArrowUp") {
+              e.preventDefault();
+              setActive((i) => Math.max(0, i - 1));
+            } else if (e.key === "Enter") {
+              e.preventDefault();
+              if (results[active]) move(results[active]);
+            }
+          }}
+        />
+      </label>
+      <div className="move-to-list" role="listbox">
+        {results.length === 0 && (
+          <div className="move-to-empty">{t("moveTo.none")}</div>
+        )}
+        {results.map((page, i) => (
+          <Button
+            key={page.id}
+            type="button"
+            variant="ghost"
+            role="option"
+            aria-selected={i === active}
+            data-highlighted={i === active}
+            className="move-to-item"
+            onMouseEnter={() => setActive(i)}
+            onClick={() => move(page)}
+          >
+            <PageItemIcon cover={page.cover} styles={{ fontSize: 14 }} />
+            <span className="tiptap-button-text">
+              {page.title || t("page.newPage")}
+            </span>
+          </Button>
+        ))}
+      </div>
     </Card>
   );
 }
