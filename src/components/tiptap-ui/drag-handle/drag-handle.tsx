@@ -157,13 +157,31 @@ export function DragHandle({ editor }: { editor: Editor | null }) {
   const computePositionConfig = useMemo<Partial<ComputePositionConfig>>(() => {
     const centerOnFirstLine: Middleware = {
       name: "centerOnFirstLine",
-      fn({ y, rects, elements }) {
+      fn({ x, y, rects, elements }) {
         if (!editor || targetRef.current === "Record") return {};
         const block = editor.view.nodeDOM(posRef.current);
         if (!(block instanceof HTMLElement)) return {};
-        const top = elements.reference.getBoundingClientRect().top;
+        const ref = elements.reference.getBoundingClientRect();
         const middle = firstLineMiddle(block);
-        return { y: y + (middle - top) - rects.floating.height / 2 };
+        const next = {
+          x,
+          y: y + (middle - ref.top) - rects.floating.height / 2,
+        };
+
+        // A database's box starts at the editor's far left (it spans the
+        // full width so wide tables can scroll), so "left of the block" put
+        // the handle under the sidebar. Anchor it beside the database's
+        // visible content instead: its title/toolbar column, or the source
+        // picker before it has a source.
+        if (targetRef.current === "Database") {
+          const content =
+            block.querySelector<HTMLElement>(".db-sticky-left") ??
+            block.querySelector<HTMLElement>(".top-level-block");
+          if (content) {
+            next.x = x + (content.getBoundingClientRect().left - ref.left);
+          }
+        }
+        return next;
       },
     };
     return { placement: "left-start", middleware: [centerOnFirstLine] };
@@ -223,8 +241,8 @@ export function DragHandle({ editor }: { editor: Editor | null }) {
               target={target}
               editor={editor!}
               side="left"
-              align="center"
-              sideOffset={4}
+              align="start"
+              sideOffset={6}
             />,
             document.body,
           )
