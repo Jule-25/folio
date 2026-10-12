@@ -33,7 +33,7 @@ function CalcCell({ prop, records, calc, onChange }: CalcCellProps) {
     return <div className="db-calc-cell db-calc-cell--empty" />;
   }
 
-  const values = records.map((r) => getCellValue(r, prop.id));
+  const values = records.map((r) => getCellValue(r, prop));
   const result = runCalc(calc, values);
   const iconName = PROPERTY_TYPE_ICONS[prop.config.type];
 

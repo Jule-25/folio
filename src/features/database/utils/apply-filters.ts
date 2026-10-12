@@ -6,6 +6,7 @@ import type {
 import { NO_VALUE_OPERATORS } from "src/types/filter-types";
 import type { Page, DatabaseProperty } from "src/types";
 import { relationRecordIds } from "src/lib/relation-ids";
+import { toDate } from "./date-values";
 
 /**
  * A record's value for a property.
@@ -30,6 +31,9 @@ export function getCellValue(
     const id = record.editedBy ?? record.ownerId;
     return id ? [{ id }] : [];
   }
+  if (prop?.config.type === "created_time") return record.createdAt ?? null;
+  if (prop?.config.type === "edited_time")
+    return record.updatedAt ?? record.createdAt ?? null;
   return record.values?.[propertyId] ?? null;
 }
 
@@ -260,9 +264,8 @@ function matchesRule(
     DATE_OPS.has(op)
   ) {
     const toDay = (v: unknown): number | null => {
-      if (v == null || v === "") return null;
-      const d = new Date(String(v));
-      return isNaN(d.getTime())
+      const d = toDate(v);
+      return d === null
         ? null
         : new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
     };
@@ -326,7 +329,7 @@ function matchesRule(
     // Date — is_within still handled here (operates on raw value)
     case "is_within": {
       const now = new Date();
-      const d = new Date(String(value));
+      const d = toDate(value);
       const ranges: Record<string, [Date, Date]> = {
         past_week: [new Date(now.getTime() - 7 * 864e5), now],
         past_month: [new Date(now.getTime() - 30 * 864e5), now],
@@ -339,7 +342,7 @@ function matchesRule(
       };
       const range = ranges[String(ruleValue)];
       if (!range) return false;
-      return d >= range[0] && d <= range[1];
+      return d !== null && d >= range[0] && d <= range[1];
     }
 
     default:
