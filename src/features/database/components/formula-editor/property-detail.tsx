@@ -179,7 +179,7 @@ export default function PropertyDetail({
   const resolveList = properties ?? [property];
 
   return (
-    <CardItemGroup style={{ minWidth: 500 }}>
+    <CardItemGroup style={{ minWidth: "min(500px, calc(100vw - 32px))" }}>
       <CardItemGroup>
         <span style={{ fontWeight: 500, fontSize: 13 }}>{property.name}</span>
         <p style={{ fontSize: 12, opacity: 0.5 }}>Returns {returnType}</p>

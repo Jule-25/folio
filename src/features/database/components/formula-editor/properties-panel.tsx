@@ -26,19 +26,20 @@ export default function PropertiesPanel({
   return (
     <CardItemGroup
       orientation="vertical"
-      style={{ alignItems: "stretch", gap: 6, width: "100%" }}
+      style={{
+        alignItems: "stretch",
+        gap: 6,
+        width: "100%",
+        // The card primitive sets `min-width: max-content`; inside a
+        // viewport-bound card that would stop the panel from narrowing.
+        minWidth: 0,
+      }}
     >
       <CardGroupLabel>Properties</CardGroupLabel>
 
       {/* Auto-flowing grid: fits as many ~150px columns as the width allows,
           so the list wraps into 2–4 columns instead of one tall stack. */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",
-          gap: 4,
-        }}
-      >
+      <div className="formula-properties__grid">
         {properties.map((prop) => (
           <Button
             key={prop.id}

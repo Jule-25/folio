@@ -25,7 +25,12 @@ export default function FunctionDetail({
 
   return (
     <CardItemGroup
-      style={{ minWidth: 500, width: "100%", alignItems: "stretch" }}
+      style={{
+        // Tracks the editor card: 500px on desktop, viewport-bound on phones.
+        minWidth: "min(500px, calc(100vw - 32px))",
+        width: "100%",
+        alignItems: "stretch",
+      }}
       orientation="vertical"
     >
       <div className="formula-fn-detail__head">

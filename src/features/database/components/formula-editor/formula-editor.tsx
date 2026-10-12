@@ -95,7 +95,13 @@ export default function FormulaEditor({
   }
 
   return (
-    <Card className="formula-editor" style={{ minWidth: 600 }}>
+    <Card
+      className="formula-editor"
+      // 600px on a wide screen, but never wider than the viewport minus the
+      // 16px gutters. The editor opens in a flyout anchored to a property
+      // header, so a flat 600px floor pushed it off-screen on phones.
+      style={{ width: "min(600px, calc(100vw - 32px))" }}
+    >
       <CardHeader>
         <CardItemGroup style={{ width: "100%" }}>
           <FormulaBar

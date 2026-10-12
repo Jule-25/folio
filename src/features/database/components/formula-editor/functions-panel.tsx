@@ -46,7 +46,13 @@ export default function FunctionsPanel({
   return (
     <CardItemGroup
       orientation="vertical"
-      style={{ alignItems: "stretch", gap: 6, width: "100%" }}
+      style={{
+        alignItems: "stretch",
+        gap: 6,
+        width: "100%",
+        // See properties-panel: drop the primitive's max-content floor.
+        minWidth: 0,
+      }}
     >
       <div className="formula-functions__head">
         <CardGroupLabel>{t("database.formulaHelp.functions")}</CardGroupLabel>
