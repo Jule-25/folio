@@ -604,3 +604,37 @@ body.db-row-dragselect {
   box-sizing: border-box;
   max-width: min(var(--db-editor-width, 100%), var(--db-visible-width, 100%));
 }
+// ── The whole database selected (its drag handle) ───────────────────────────
+// A NodeSelection on the database also marks every record and cell inside it
+// .ProseMirror-selectednode (each node view sees itself inside the selected
+// range). The single-row / single-cell rules above then fired on ALL of them:
+// a ring + corner dot on every cell, borders dropped, backgrounds cleared —
+// the purple grid. Inside a selected database, cells keep their normal look,
+// and the database gets one tint over its content instead.
+.react-renderer.node-database.ProseMirror-selectednode {
+  .db-node-grid .react-renderer.ProseMirror-selectednode {
+    .db-node-cell,
+    .db-node-cell--atom {
+      box-shadow: none !important;
+      border-radius: 0 !important;
+      border: none !important;
+      border-right: 1px solid var(--tt-border-color) !important;
+      background-color: var(--tt-bg-color) !important;
+    }
+
+    .db-node-cell::after,
+    .db-node-cell--atom::after {
+      content: none !important;
+    }
+  }
+
+  .db-container::after {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    z-index: 50;
+    border-radius: 6px;
+    background-color: var(--tt-selection-color);
+    pointer-events: none;
+  }
+}
