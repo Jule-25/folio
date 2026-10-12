@@ -638,3 +638,30 @@ body.db-row-dragselect {
     pointer-events: none;
   }
 }
+
+// ── One record selected (its drag handle) ───────────────────────────────────
+// Same cause as above, one level down: selecting a record marks each of its
+// cells .ProseMirror-selectednode too, so every cell got the single-cell ring
+// and corner dot. A selected record reads as one tinted row instead: no ring
+// or dot, the cells keep their right border, and the row is tinted. (Not
+// inside a selected database — that one is tinted as a whole, above.)
+.react-renderer.node-database:not(.ProseMirror-selectednode)
+  .db-node-grid
+  .react-renderer.node-databaseRecord.ProseMirror-selectednode
+  .react-renderer.ProseMirror-selectednode {
+  .db-node-cell,
+  .db-node-cell--atom {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    border: none !important;
+    border-right: 1px solid var(--tt-border-color) !important;
+    background:
+      linear-gradient(var(--tt-selection-color), var(--tt-selection-color)),
+      var(--tt-bg-color) !important;
+  }
+
+  .db-node-cell::after,
+  .db-node-cell--atom::after {
+    content: none !important;
+  }
+}
