@@ -14,6 +14,7 @@ import { useUnreadCounts } from "src/hooks/use-chat";
 import { spaceHomePath, useCurrentSpace } from "src/hooks/use-current-space";
 import { useIsMobile } from "src/hooks/use-breakpoint";
 import { isMac } from "src/lib/tiptap-utils";
+import { useSpaceAccent } from "../space-accent/space-accent";
 import { requestFindFocus } from "src/lib/find-store";
 import {
   Tooltip,
@@ -74,6 +75,8 @@ export const SidebarDock = memo(() => {
   const isMobile = useIsMobile();
   const space = useCurrentSpace();
   const { sidebarView, setSidebarView, onCollapsedChange } = useEditorLayout();
+  // Inside a teamspace, the dock wears its colour.
+  const accent = useSpaceAccent();
 
   const { unreadCount } = useNotificationState();
   // Workspace invitations count as something waiting in the inbox.
@@ -103,7 +106,8 @@ export const SidebarDock = memo(() => {
 
   return (
     <div
-      className="sb-dock"
+      className={`sb-dock${accent ? ` ${accent.className}` : ""}`}
+      style={accent?.style}
       role="tablist"
       aria-label={t("sidebar.navigation", "Sidebar")}
     >

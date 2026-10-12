@@ -19,6 +19,8 @@ import { TabItem, TabList } from "src/components/tiptap-ui-primitive/tabs";
 import { HomeForYou } from "./home-rail";
 import { useGuidesRead } from "./use-guides-read";
 import { homeWhen } from "./home-time";
+import { TeamspaceHero } from "./teamspace-hero";
+import { useSpaceAccent } from "../shell/space-accent/space-accent";
 import "./home-page-content.scss";
 
 // Home: the greeting, "For you" (the latest notifications and unread rooms,
@@ -111,12 +113,15 @@ export function HomePageContent({ userName }: { userName?: string }) {
   };
 
   const isMobile = useIsMobile();
+  // Inside a teamspace, Home wears its colour and opens on its hero.
+  const accent = useSpaceAccent();
   const marginLeftRight = isMobile ? "16px" : "6vw";
 
   return (
     <div
-      className="home-page-content"
+      className={`home-page-content${accent ? ` ${accent.className}` : ""}`}
       style={{
+        ...accent?.style,
         maxWidth: "100%",
         margin: isMobile
           ? `0 ${marginLeftRight}`
@@ -130,6 +135,14 @@ export function HomePageContent({ userName }: { userName?: string }) {
     >
       <div className="home-dense">
         <div className="home-dense__body">
+          {teamspaceId && (
+            <TeamspaceHero
+              teamspaceId={teamspaceId}
+              page={space.kind === "teamspace" ? space.page : null}
+              pinned={pinned}
+            />
+          )}
+
           <Greeting name={userName} className="home-dense__greeting" compact />
 
           <HomeForYou onOpenInbox={openInbox} />

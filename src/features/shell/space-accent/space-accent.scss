@@ -1,0 +1,52 @@
+// A teamspace's colour, worn by its space. `--space-accent` is set on the
+// element (useSpaceAccent); everything inside that uses the brand tokens —
+// primary buttons, active tabs, links — takes the teamspace's colour instead
+// of Folio's purple. Shades are mixed from the one colour; the button shades
+// are darkened a little so white text stays readable on light colours.
+.space-accent {
+  --tt-brand-color-50: color-mix(in srgb, var(--space-accent) 8%, #fff);
+  --tt-brand-color-100: color-mix(in srgb, var(--space-accent) 16%, #fff);
+  --tt-brand-color-200: color-mix(in srgb, var(--space-accent) 32%, #fff);
+  --tt-brand-color-300: color-mix(in srgb, var(--space-accent) 55%, #fff);
+  --tt-brand-color-400: var(--space-accent);
+  --tt-brand-color-500: color-mix(in srgb, var(--space-accent) 85%, #000);
+  --tt-brand-color-600: color-mix(in srgb, var(--space-accent) 72%, #000);
+  --tt-brand-color-700: color-mix(in srgb, var(--space-accent) 60%, #000);
+  --tt-brand-color-800: color-mix(in srgb, var(--space-accent) 48%, #000);
+  --tt-brand-color-900: color-mix(in srgb, var(--space-accent) 36%, #000);
+}
+
+// The dock (foot of the sidebar) wears the colour; the rest of the sidebar
+// stays neutral. No hairline: a soft wash of the colour that fades out to
+// the right, so the dock blends into the sidebar instead of sitting on it.
+// The active tab is tinted in the same colour.
+.sb-dock.space-accent {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--space-accent) 18%, var(--sb-dock-bg)) 0%,
+    color-mix(in srgb, var(--space-accent) 7%, var(--sb-dock-bg)) 60%,
+    var(--sb-dock-bg) 100%
+  );
+  box-shadow: 0 4px 14px
+    color-mix(in srgb, var(--space-accent) 12%, transparent);
+
+  --sb-dock-active-bg: color-mix(in srgb, var(--space-accent) 18%, transparent);
+  --sb-dock-active-color: color-mix(in srgb, var(--space-accent) 75%, #000);
+
+  .dark & {
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--space-accent) 26%, var(--sb-dock-bg)) 0%,
+      color-mix(in srgb, var(--space-accent) 9%, var(--sb-dock-bg)) 60%,
+      var(--sb-dock-bg) 100%
+    );
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+
+    --sb-dock-active-bg: color-mix(
+      in srgb,
+      var(--space-accent) 28%,
+      transparent
+    );
+    --sb-dock-active-color: color-mix(in srgb, var(--space-accent) 55%, #fff);
+  }
+}

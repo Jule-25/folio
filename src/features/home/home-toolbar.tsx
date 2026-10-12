@@ -17,6 +17,7 @@ import { useActivePageActions } from "../pages/context/active-page-context";
 import { PageItemIcon } from "../pages/page-item/page-item-icon";
 import { HomeSearch } from "./home-search";
 import { useHomeActions } from "./use-home-actions";
+import { useSpaceAccent } from "../shell/space-accent/space-accent";
 import "./home-toolbar.scss";
 
 // The app toolbar on the home view: Home / teamspace / today's date on the
@@ -33,6 +34,8 @@ export function HomeToolbar({
   size?: "desktop" | "tablet" | "mobile";
 }) {
   const compact = size !== "desktop";
+  // Inside a teamspace, New page wears its colour.
+  const accent = useSpaceAccent();
   // Three columns: crumbs | search | actions. The two sides share the free
   // space equally, so the search sits in the middle of the toolbar.
   return (
@@ -48,7 +51,10 @@ export function HomeToolbar({
       ) : (
         <Spacer />
       )}
-      <ToolbarGroup className="home-toolbar__side home-toolbar__actions">
+      <ToolbarGroup
+        className={`home-toolbar__side home-toolbar__actions${accent ? ` ${accent.className}` : ""}`}
+        style={accent?.style}
+      >
         <HomeActions compact={compact} />
       </ToolbarGroup>
     </>

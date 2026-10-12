@@ -855,6 +855,13 @@
       "in": "Dans",
       "editedBy": "Dernière modif.",
       "when": "Quand"
+    },
+    "teamspaceHero": {
+      "open": "Ouvrir la page",
+      "invite": "Inviter",
+      "pinned": "Épinglées pour l’équipe",
+      "members_one": "{{count}} membre",
+      "members_other": "{{count}} membres"
     }
   },
   "greeting": {

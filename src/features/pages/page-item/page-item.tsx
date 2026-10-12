@@ -36,16 +36,7 @@ import { setEditorTitle } from "../../editor/utils/doc-title";
 import { CloudDownload } from "lucide-react";
 import { useAvailableOffline } from "../available-offline";
 import { SbChevronRightIcon } from "src/components/tiptap-icons/sidebar-icons";
-import { colorForPersonId } from "src/lib/person-color";
-
-// A teamspace's colour: its icon's colour when it has one, otherwise a
-// stable colour from its id.
-function teamspaceTint(page: Page): string {
-  const c = page.cover.color;
-  if (page.cover.target === "Icons" && c && c !== "var(--tt-text-color)")
-    return c;
-  return colorForPersonId(page.id);
-}
+import { teamspaceTint } from "src/lib/teamspace-color";
 
 function initialOf(title: string): string {
   return Array.from(title.trim())[0]?.toUpperCase() ?? "T";
