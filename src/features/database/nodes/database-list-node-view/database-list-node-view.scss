@@ -5,25 +5,62 @@
 .db-list-grid .react-renderer.node-databaseCell {
   display: contents;
 }
-.db-record__cells > div {
-  grid-auto-flow: column;
-  white-space: inherit;
-  display: grid;
-  grid-auto-columns: max-content;    // each auto-created column hugs its content
-  grid-template-columns: minmax(200px, 1fr);  // first column (title) flexible
-  gap: 15px;
+// ── Rows (board 54) ─────────────────────────────────────────────────────────
+// The list is as wide as the database (the page's text column, or the block
+// it's in). Each record's box is one row spanning the list's grid, with its
+// cells on the grid's own tracks (subgrid), so a property sits in the same
+// column on every row. The record box is a real box here (the gallery's
+// stylesheet flattens record boxes to display: contents — not in a list), so
+// the drag handle has a row to sit beside.
+.db-list {
   width: var(--db-editor-width);
- 
+  max-width: 100%;
+}
+
+.db-list-grid {
+  column-gap: 15px;
+}
+
+// The records' containers are flattened, so each record box is a direct item
+// of .db-list-grid and its subgrid gets the list's tracks.
+.db-list-grid__body,
+.db-list-grid__body > [data-node-view-content-react] {
+  display: contents;
+}
+
+// (Class doubled: a column pads every .react-renderer in it by 12px, which
+// shifted every row but the first.)
+.db-list-grid .react-renderer.node-databaseRecord.node-databaseRecord {
+  padding: 0;
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  align-items: center;
+  min-width: 0;
+  border-radius: var(--tt-radius-sm, 6px);
   transition: background-color 0.15s ease;
-  .db-cell{
-    font-size: 13px;
-  }
-  &:hover{
-  
+
+  &:hover {
     background-color: var(--tt-gray-light-a-50);
     .dark & {
       background-color: var(--tt-gray-dark-a-50);
     }
+  }
+
+  // The cells' wrapper is flattened too: the cells are the row's grid items.
+  .db-record__cells > div {
+    display: contents;
+  }
+
+  // Each cell is one grid item (its open-page button floats inside it).
+  .db-node-cell {
+    display: block;
+    position: relative;
+    min-width: 0;
+  }
+
+  .db-cell {
+    font-size: 13px;
   }
 }
 

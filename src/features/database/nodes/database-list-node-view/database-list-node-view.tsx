@@ -34,7 +34,16 @@ export function DatabaseListNodeView() {
 
   const collapsedKeys = new Set(activeView?.collapsedGroups ?? []);
 
-  const gridTemplateColumns = `minmax(220px, 1fr) repeat(${visibleProperties.length}, max-content)`;
+  // One track per visible property, in their order (the cells' order). The
+  // title takes the free space; every other property hugs its widest value,
+  // so each one lines up across the rows at the right edge (Notion's list).
+  // Each row is a subgrid of these tracks (database-list-node-view.scss).
+  const gridTemplateColumns =
+    visibleProperties
+      .map((p) =>
+        p.config.type === "title" ? "minmax(120px, 1fr)" : "max-content",
+      )
+      .join(" ") || "minmax(120px, 1fr)";
 
   const toggleGroup = useCallback(
     (key: string) => {
