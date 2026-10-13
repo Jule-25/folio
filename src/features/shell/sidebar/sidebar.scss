@@ -838,15 +838,17 @@
   }
 }
 
-// ── Page list scrollbar ──
-// Thicker than the app-wide slim pill (simple-editor.scss): a 12px gutter
-// with an 8px thumb, easy to see and grab in a long page tree.
-.sidebar-pages {
-  &::-webkit-scrollbar {
-    width: 12px;
-  }
+// ── Sidebar scrollbar ──
+// Notion's sidebar bar: the browser's own full-width scrollbar, arrows and
+// all, in a quiet grey on a clear track. Setting the standard properties is
+// what turns the app-wide ::-webkit-scrollbar pill (simple-editor.scss) off
+// for this element, so Chrome and Edge draw their native bar instead.
+// The body (SidebarBody's CardBody) is the element that scrolls.
+.sidebar-body-content {
+  scrollbar-width: auto;
+  scrollbar-color: rgba(55, 53, 47, 0.25) transparent;
 
-  &::-webkit-scrollbar-thumb {
-    border-width: 2px;
+  .dark & {
+    scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
   }
 }
