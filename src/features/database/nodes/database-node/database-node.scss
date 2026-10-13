@@ -698,7 +698,14 @@ body.db-row-dragselect {
 // Inside those, the database sizes to the block instead — the same thing
 // columns do (column-view.scss).
 // (blockquote > *: the quote is itself a top-level block sized by the var.)
-:is(.callout-content, li, blockquote > *, .appendix__body) {
+// Columns get the offset resets too (they already had the width).
+:is(
+    [data-type="column"],
+    .callout-content,
+    li,
+    blockquote > *,
+    .appendix__body
+  ) {
   --db-editor-width: 100%;
 
   // The page-level offsets are for databases at the top of the page, which
@@ -719,5 +726,29 @@ body.db-row-dragselect {
   .top-level-block {
     width: 100%;
     transform: none;
+  }
+}
+
+// ── Nested: the database keeps the block's width ────────────────────────────
+// .db-container is max-content wide (so wide tables can scroll), and nested
+// views are 100% of it (--db-editor-width: 100%). With the toolbar collapsed
+// the max-content shrank to the narrow toolbar, and the gallery, board or
+// list shrank with it. Nested, they take the block's width instead.
+:is(
+    [data-type="column"],
+    .callout-content,
+    li,
+    blockquote > *,
+    .appendix__body
+  ) {
+  // The wrapper around it is a card group, which is max-content wide by
+  // default too (min-width: max-content), so it needs the same.
+  .db-node > .tiptap-card-item-group {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .db-container {
+    width: 100%;
   }
 }
