@@ -99,7 +99,10 @@ function PageItemView({
   const navigate = useNavigate();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(page.title);
-  const [shouldShow, setShouldShow] = useState(false);
+  // Hover is CSS only (:hover): React state per row lagged behind fast
+  // pointer moves and could stay "on" when mouseleave was missed. State is
+  // kept only for the options menu, so the buttons stay while it's open.
+  const [menuOpen, setMenuOpen] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const { activePageId, setActivePageId } = useActivePage();
@@ -186,11 +189,10 @@ function PageItemView({
     width: 20,
     minHeight: 20,
     height: 20,
-    opacity: shouldShow ? 1 : 0,
   };
 
   // Touch screens have no hover: keep the enter arrow visible there.
-  const showActions = shouldShow || (isMobile && isTeamspaceRoot);
+  const touchActions = isMobile && isTeamspaceRoot;
 
   // Design 48: top-level rows (a teamspace is always one) keep a visible
   // chevron and a 24px icon slot; only a teamspace's icon sits on a tile.
@@ -203,9 +205,9 @@ function PageItemView({
         orientation="horizontal"
         className={`page-item ${isActive ? "active" : ""} ${isTeamspaceRoot ? "is-teamspace-root" : ""} ${lead ? "is-top-level" : ""}`}
         style={{ paddingLeft: `${6 + depth * 14}px` }}
+        data-menu-open={menuOpen || undefined}
+        data-touch-actions={touchActions || undefined}
         onClick={() => onSelect(page.id)}
-        onMouseOver={() => setShouldShow(true)}
-        onMouseLeave={() => setShouldShow(false)}
       >
         {lead ? (
           <>
@@ -252,23 +254,27 @@ function PageItemView({
               </span>
             )}
           </>
-        ) : shouldShow ? (
-          <Chevron
-            expanded={expanded}
-            size="small"
-            variant="ghost"
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleExpand?.(page.id);
-            }}
-          />
-        ) : withBadge ? (
-          <span className="page-icon-wrap">
-            <PageItemIcon cover={page.cover} variant="sidebar" />
-            <TeamspaceBadge teamspaceId={page.teamspaceId!} />
-          </span>
         ) : (
-          <PageItemIcon cover={page.cover} variant="sidebar" />
+          <>
+            {/* The icon, swapped for the caret on hover (CSS). */}
+            <Chevron
+              expanded={expanded}
+              size="small"
+              variant="ghost"
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleExpand?.(page.id);
+              }}
+            />
+            {withBadge ? (
+              <span className="page-icon-wrap">
+                <PageItemIcon cover={page.cover} variant="sidebar" />
+                <TeamspaceBadge teamspaceId={page.teamspaceId!} />
+              </span>
+            ) : (
+              <PageItemIcon cover={page.cover} variant="sidebar" />
+            )}
+          </>
         )}
 
         <Spacer orientation="horizontal" size={1} />
@@ -329,11 +335,7 @@ function PageItemView({
         )}
 
         {(canEditContent || pinnable || isTeamspaceRoot) && (
-          <CardItemGroup
-            orientation="horizontal"
-            className="page-item-actions"
-            style={{ maxWidth: showActions ? "fit-content" : 0 }}
-          >
+          <CardItemGroup orientation="horizontal" className="page-item-actions">
             {pinnable && (
               <Button
                 style={smallButtonStyle}
@@ -358,8 +360,7 @@ function PageItemView({
             {canEditContent && (
               <>
                 <PageItemOptions
-                  shouldShow={shouldShow}
-                  onOpenChange={(v) => setShouldShow(v)}
+                  onOpenChange={setMenuOpen}
                   page={page}
                   onRenameAsync={async () => setEditing(true)}
                 />
@@ -385,7 +386,6 @@ function PageItemView({
                 aria-label={t("sidebar.enterTeamspace", "Enter teamspace")}
                 style={{
                   ...smallButtonStyle,
-                  opacity: showActions ? 1 : 0,
                   border: "0.5px solid var(--tt-border-color)",
                   background:
                     "color-mix(in srgb, var(--tt-text-primary) 8%, transparent)",

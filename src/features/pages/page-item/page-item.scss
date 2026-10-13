@@ -35,9 +35,11 @@
   font-weight: 400;
   color: var(--sb-row-color, #5f5e59);
   max-width: calc(var(--sidebar-width, 290px) - 5px);
-  transition:
-    background 0.12s ease,
-    color 0.12s ease;
+  // CardItemGroup sizes to its content (min-width: max-content), which beat
+  // the max-width above: a long title pushed the row (and its buttons) past
+  // the sidebar's edge. Let it shrink so the title truncates instead.
+  min-width: 0;
+  // No transition: hover follows the pointer at once, like the nav rows.
 
   // The icon and the hover caret take the same 20px column.
   > .page-icon,
@@ -98,14 +100,23 @@
       color: var(--sb-active-color);
     }
 
-    .page-item-title {
-      max-width: calc(var(--sidebar-width, 290px) - 124px);
+  }
+
+  // Rows below the top level: the caret takes the icon's place on hover.
+  &:not(.is-top-level) {
+    > .chevron {
+      display: none;
     }
 
-    .page-item-actions {
-      opacity: 1;
-      width: 55px !important;
-      max-width: 55px;
+    &:hover {
+      > .chevron {
+        display: flex;
+      }
+
+      > .page-icon,
+      > .page-icon-wrap {
+        display: none;
+      }
     }
   }
 
@@ -131,27 +142,30 @@
     }
 
     .page-item-title {
-      max-width: calc(var(--sidebar-width, 290px) - 124px);
       font-weight: 600;
     }
   }
 
+  // The row's buttons (pin, options, new page, enter): shown on hover, while
+  // focused, and while the options menu is open. They take the room they
+  // need and the title gives way (ellipsis), so they always fit, whatever
+  // the sidebar's width.
   .page-item-actions {
-    display: flex;
+    display: none;
+    flex: none;
     align-items: center;
     gap: 1px;
-    width: 55px;
-    pointer-events: none;
-    transition: opacity 0.1s;
-    // no width:0 or overflow:hidden — space is always reserved
+    margin-left: auto;
+    padding-left: 4px;
   }
 
-  &:hover .page-item-actions,
-  &.active .page-item-actions {
-    opacity: 1;
-    pointer-events: auto;
-    width: 55px;
-    max-width: 55px;
+  &:hover,
+  &:focus-within,
+  &[data-menu-open],
+  &[data-touch-actions] {
+    .page-item-actions {
+      display: flex;
+    }
   }
 
   .page-item-title {
@@ -167,7 +181,6 @@
   font-size: var(--sb-font-size, 14px);
   color: inherit !important;
   opacity: 1;
-  max-width: calc(var(--sidebar-width, 290px) - 60px);
   flex: 1;
   min-width: 0;
   overflow: hidden;

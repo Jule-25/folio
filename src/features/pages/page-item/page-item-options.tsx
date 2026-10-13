@@ -22,15 +22,15 @@ import { useCurrentWorkspace } from "src/hooks/use-workspaces";
 interface PageItemOptionsProps {
   page: Page;
   onRenameAsync: () => Promise<void>;
+  /** Told when the menu opens and closes (the row keeps its buttons shown
+   *  while it's open). */
   onOpenChange: (v: boolean) => void;
-  shouldShow: boolean;
 }
 
 export function PageItemOptions({
   page,
   onRenameAsync,
   onOpenChange,
-  shouldShow,
 }: PageItemOptionsProps) {
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -59,6 +59,12 @@ export function PageItemOptions({
 
   // if (!canDeletePage) return null; TODO: NEEDS FIXING
 
+  // Picking an item closes the menu, and tells the row.
+  const close = () => {
+    setMenuOpen(false);
+    onOpenChange(false);
+  };
+
   if (!menuOpen) {
     return (
       <Button
@@ -67,6 +73,7 @@ export function PageItemOptions({
         onClick={(e) => {
           e.stopPropagation();
           setMenuOpen(true);
+          onOpenChange(true);
         }}
         tooltip={"Options"}
       >
@@ -88,7 +95,6 @@ export function PageItemOptions({
           <Button
             variant="ghost"
             className="page-options-btn"
-            style={{ opacity: shouldShow ? 1 : 0 }}
             onClick={(e) => e.stopPropagation()}
           >
             <TbDots {...SB_ICON_SM} className="tiptap-button-icon" />
@@ -113,6 +119,7 @@ export function PageItemOptions({
                 }}
                 onClick={async (e) => {
                   e.stopPropagation();
+                  close();
                   await onRenameAsync();
                 }}
               >
@@ -134,6 +141,7 @@ export function PageItemOptions({
                   const child = makeChildPage(page, t("page.newPage"));
                   createPage.mutate(child);
                   setActivePageId(child.id);
+                  close();
                 }}
               >
                 <Plus className="tiptap-button-icon" />
@@ -153,7 +161,7 @@ export function PageItemOptions({
                 onClick={(e) => {
                   e.stopPropagation();
                   handleDeletePage();
-                  onOpenChange(false);
+                  close();
                 }}
               >
                 <Trash2 className="tiptap-button-icon" />
