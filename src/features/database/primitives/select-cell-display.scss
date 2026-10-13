@@ -27,14 +27,16 @@
     text-overflow: ellipsis;
     font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol" !important;
     -webkit-font-smoothing: auto;
-    color: var(--tt-text-primary);
+    // The pill's ink (a darkened / lightened accent), like Notion's.
+    color: inherit;
     font-size: inherit;
     line-height: 1.4;
     font-weight: 400;
   }
 
   // Unset cell — a quiet placeholder, not a coloured pill.
-  &--empty {
+  &--empty,
+  .dark &--empty {
     background: transparent;
     color: color-mix(in srgb, var(--tt-text-primary) 40%, transparent);
   }

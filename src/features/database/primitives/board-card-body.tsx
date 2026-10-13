@@ -12,6 +12,7 @@ import { BoardCardControls } from "../components/board-card-controls/board-card-
 import { useState } from "react";
 import { useCurrentEditor } from "@tiptap/react";
 import type { DragStorage } from "../extensions";
+import { normalizeColor } from "../utils/pill-colors";
 import "./board-card-body.scss";
 
 export function BoardCardBody({
@@ -23,7 +24,7 @@ export function BoardCardBody({
   view,
   recordId,
   setCellValue,
-  color = "gray",
+  color,
 }: {
   record: Page;
   properties: DatabaseProperty[];
@@ -54,9 +55,16 @@ export function BoardCardBody({
       data-type="database-record"
       data-view-type={view.type}
       data-dragging={dragging}
+      // In a coloured board column the card takes its colour (see
+      // board-card-body.scss): a tinted border, and a tinted card in dark.
+      data-accent={(view.type === "board" && !!color) || undefined}
       draggable
       style={{
-        // backgroundColor: `color-mix(in srgb, ${color} 14%, transparent)`,
+        ...(view.type === "board" && color
+          ? ({
+              "--card-accent": `var(--tt-color-accent-${normalizeColor(color)})`,
+            } as React.CSSProperties)
+          : {}),
         borderRadius: "var(--tt-radius-lg)",
         padding: 0,
         margin: view.type === "gallery" ? "0px !important" : undefined,

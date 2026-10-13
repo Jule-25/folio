@@ -231,6 +231,31 @@
     0px 2px 3px 0px rgba(12, 12, 13, 0.25);
 }
 
+/* Accent colors — one vivid tone per colour, the same in both themes.
+   Database pills, board columns and cards are mixed from it with the page
+   background (see database/utils/pill-colors.scss), the way Notion does.
+   Gray, blue and green are Notion's; the rest are matched to them. */
+:root {
+  --tt-color-accent-gray: #8e8b86;
+  --tt-color-accent-brown: hsl(19, 28%, 50%);
+  --tt-color-accent-orange: hsl(28, 75%, 52%);
+  --tt-color-accent-yellow: hsl(42, 72%, 48%);
+  --tt-color-accent-lime: hsl(85, 50%, 43%);
+  --tt-color-accent-green: #46a171;
+  --tt-color-accent-mint: hsl(160, 45%, 44%);
+  --tt-color-accent-teal: hsl(178, 55%, 39%);
+  --tt-color-accent-cyan: hsl(192, 65%, 46%);
+  --tt-color-accent-blue: #2783de;
+  --tt-color-accent-slate: hsl(215, 20%, 55%);
+  --tt-color-accent-indigo: hsl(235, 55%, 60%);
+  --tt-color-accent-purple: hsl(270, 50%, 60%);
+  --tt-color-accent-violet: hsl(258, 55%, 62%);
+  --tt-color-accent-magenta: hsl(305, 45%, 54%);
+  --tt-color-accent-pink: hsl(330, 60%, 57%);
+  --tt-color-accent-rose: hsl(348, 65%, 58%);
+  --tt-color-accent-red: hsl(4, 70%, 56%);
+}
+
 /* Text colors */
 :root {
   /* — original 9 — */

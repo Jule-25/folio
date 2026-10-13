@@ -9,6 +9,24 @@
     }
   }
 
+  // In a coloured column (Notion's recipe, see pill-colors.scss): light — a
+  // white card with a 22% border; dark — a 20% card with a 24% border.
+  &[data-view-type="board"][data-accent] {
+    border: 1px solid
+      color-mix(in srgb, var(--card-accent) 22%, var(--tt-bg-color));
+    background-color: var(--tt-bg-color);
+
+    .dark & {
+      border: 1px solid
+        color-mix(in srgb, var(--card-accent) 24%, var(--tt-bg-color));
+      background-color: color-mix(
+        in srgb,
+        var(--card-accent) 20%,
+        var(--tt-bg-color)
+      );
+    }
+  }
+
 
   &[data-view-type="gallery"],
   &[data-view-type="calendar"]{

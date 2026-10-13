@@ -11,6 +11,16 @@ import { Spacer } from "src/components/tiptap-ui-primitive/spacer";
 import { BoardColumnMenu } from "../../components/board-column-menu";
 import type { BoardView, DatabaseProperty, ID } from "src/types";
 import type { DragStorage } from "../../extensions";
+import { normalizeColor } from "../../utils/pill-colors";
+
+// A coloured column's accent (see pill-colors.scss), or null for a column
+// without a colour.
+const accentOf = (color: string | undefined) =>
+  color ? `var(--tt-color-accent-${normalizeColor(color)})` : null;
+
+// The column's faint wash: 6% of the accent on the page.
+const laneOf = (accent: string) =>
+  `color-mix(in srgb, ${accent} 6%, var(--tt-bg-color))`;
 
 // Synthetic record for display only (rendered in a readonly Cell to show a
 // column's group value) — never saved, so workspaceId is a throwaway "".
@@ -177,7 +187,7 @@ export function DatabaseBoardNodeViewImpl() {
     >
       {/* Column lane backgrounds — span the full column height, behind cards. */}
       {columns.map((c) =>
-        c.color ? (
+        accentOf(c.color) ? (
           <div
             key={`lane-${c.key}`}
             className="db-board-lane"
@@ -187,8 +197,7 @@ export function DatabaseBoardNodeViewImpl() {
               gridRow: `1 / span ${c.newRow - 1}`,
               // gridRow: `1 / ${c.newRow + 1}`,
               // gridRow: `1 / span ${c.newRow}`, // header + cards + New page row
-              background: `color-mix(in srgb, ${c.color} ${c.color !== "var(--tt-color-highlight-gray)" ? "8%" : "100%"}, transparent)`,
-
+              background: laneOf(accentOf(c.color)!),
               borderBottomLeftRadius: 0,
               borderBottomRightRadius: 0,
             }}
@@ -204,7 +213,13 @@ export function DatabaseBoardNodeViewImpl() {
           key={c.key}
           data-col-key={c.key}
           className="db-board-col-header"
-          style={{ gridColumn: c.col + 1, gridRow: 1 }}
+          style={
+            {
+              gridColumn: c.col + 1,
+              gridRow: 1,
+              "--col-ink": accentOf(c.color) ?? undefined,
+            } as React.CSSProperties
+          }
           onMouseOver={() => {
             if (menuVisible.value === true) return;
             setMenuVisible({ id: c.key, value: true });
@@ -268,7 +283,12 @@ export function DatabaseBoardNodeViewImpl() {
               top: 0,
               left: 0,
               right: 0,
-              background: `color-mix(in srgb, ${c.color} ${c.color !== "var(--tt-color-highlight-gray)" ? "8%" : "100%"}, transparent)`,
+              background: accentOf(c.color)
+                ? laneOf(accentOf(c.color)!)
+                : undefined,
+              ...(accentOf(c.color)
+                ? ({ "--col-ink": accentOf(c.color) } as React.CSSProperties)
+                : {}),
               borderBottomLeftRadius: "var(--tt-radius-lg)",
               borderBottomRightRadius: "var(--tt-radius-lg)",
             }}

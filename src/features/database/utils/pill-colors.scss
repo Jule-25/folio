@@ -1,62 +1,61 @@
-
-// Shared colour variants for every pill in the database (select, multi-select,
-// status). One place to add a colour; every pill gets it.
+// Shared colours for every coloured thing in a database: pills (select,
+// multi-select, status) and board columns and cards. One place to add a
+// colour; everything gets it.
 //
-// Each colour derives BOTH halves from ONE token — --tt-color-text-<name>:
-//   • ink  = the token itself (full strength)
-//   • fill = a low-alpha mix of the same token
+// Each colour is ONE vivid accent, --tt-color-accent-<name>, the same in both
+// themes. Every surface is that accent mixed with the page background at a
+// fixed amount — Notion's recipe, measured from its board view:
 //
-// The obvious alternative (highlight token for the fill, text token for the ink)
-// only works in light mode. Folio's highlight tokens are mid-tones in dark mode,
-// and so are the text tokens, so a coloured label on a highlight fill has almost
-// no contrast. Deriving both from one token behaves identically in both themes.
+//                         light            dark
+//   column background     6%               6%
+//   card background       white            20%
+//   card border           22%              24%
+//   pill background       28%              63%
+//   pill text             45% + #191919    12% + white
+//   dot, count, "+ New"   the accent       the accent
 
 $pill-colors: "gray", "brown", "orange", "yellow", "lime", "green", "mint",
   "teal", "cyan", "blue", "slate", "indigo", "purple", "violet", "magenta",
   "pink", "rose", "red";
 
-// How much of the colour bleeds into the fill. One number tunes every pill in
-// the app (Notion sits around 15–20%).
-$pill-tint: 18%;
+// The page the colours are mixed with.
+$page: var(--tt-bg-color);
+
+// A pill painted in one accent. Exposes it as --pill-accent (status dot).
+@mixin pill-paint($accent) {
+  --pill-accent: #{$accent};
+  background: color-mix(in srgb, #{$accent} 28%, #{$page});
+  color: color-mix(in srgb, #{$accent} 45%, #191919);
+
+  .dark & {
+    background: color-mix(in srgb, #{$accent} 63%, #{$page});
+    color: color-mix(in srgb, #{$accent} 12%, #fff);
+  }
+}
 
 // Generates `#{$base}--gray`, `#{$base}--blue`, … for a BEM block.
 // Usage: @include pill-color-variants(".select-badge");
 @mixin pill-color-variants($base) {
   @each $c in $pill-colors {
     #{$base}--#{$c} {
-      background: color-mix(
-        in srgb,
-        var(--tt-color-text-#{$c}) #{$pill-tint},
-        transparent
-      );
-      color: var(--tt-color-text-#{$c});
+      @include pill-paint(var(--tt-color-accent-#{$c}));
     }
   }
 }
 
-// TINT-only: faint background from the colour token, NO text colour.
-// Same token/loop shape as pill-color-variants — just the fill, weaker, no ink.
+// Board columns: exposes the accent as --col-ink (header count, "+ New",
+// cards) and gives the column its faint wash.
 @mixin pill-tint-variants($base) {
   @each $c in $pill-colors {
     #{$base}--#{$c} {
-      background: color-mix(
-        in srgb,
-        var(--tt-color-text-#{$c}) 8%,
-        transparent
-      );
+      --col-ink: var(--tt-color-accent-#{$c});
+      background: color-mix(in srgb, var(--col-ink) 6%, #{$page});
     }
   }
 }
 
-@mixin pill-tint-variants($base) {
-  @each $c in $pill-colors {
-    #{$base}--#{$c} {
-      --col-ink: var(--tt-color-text-#{$c});          // expose the token
-      background: color-mix(in srgb, var(--col-ink) 8%, transparent);
-    }
-  }
-}
-// The shape of a pill, without any colour. Colour comes from the variants above.
+// The shape of a pill, without any colour. Colour comes from the variants
+// above; an uncoloured pill (or an unknown colour) is gray.
 @mixin pill-base {
   display: inline-flex;
   align-items: center;
@@ -72,11 +71,5 @@ $pill-tint: 18%;
   white-space: nowrap;
   user-select: none;
 
-  // Default (uncoloured) pill — also the fallback for an unknown colour name.
-  background: color-mix(
-    in srgb,
-    var(--tt-color-text-gray) #{$pill-tint},
-    transparent
-  );
-  color: var(--tt-color-text-gray);
+  @include pill-paint(var(--tt-color-accent-gray));
 }

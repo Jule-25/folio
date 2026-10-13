@@ -142,3 +142,23 @@
     font-weight: 500;
   }
 }
+
+// ── A coloured column (Notion's recipe, see pill-colors.scss) ────────────────
+// --col-ink is the column's accent: the count and "+ New page" use it as is,
+// and the "+ New page" border takes 22% (24% in dark).
+.db-board-col-header[style*="--col-ink"] .db-board-col-header__count {
+  color: var(--col-ink);
+}
+
+[style*="--col-ink"] > .db-board-col-footer__add {
+  color: var(--col-ink);
+  border-color: color-mix(in srgb, var(--col-ink) 22%, var(--tt-bg-color));
+
+  .dark & {
+    border-color: color-mix(in srgb, var(--col-ink) 24%, var(--tt-bg-color));
+  }
+
+  &:hover {
+    background: color-mix(in srgb, var(--col-ink) 10%, transparent);
+  }
+}
