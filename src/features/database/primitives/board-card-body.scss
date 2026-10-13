@@ -9,6 +9,22 @@
     }
   }
 
+  // Hover: the card lights up a little (a light wash in dark, a faint shade
+  // in light), over whatever its background is.
+  &[data-view-type="board"]:hover {
+    background-image: linear-gradient(
+      rgba(55, 53, 47, 0.035),
+      rgba(55, 53, 47, 0.035)
+    );
+
+    .dark & {
+      background-image: linear-gradient(
+        rgba(255, 255, 255, 0.055),
+        rgba(255, 255, 255, 0.055)
+      );
+    }
+  }
+
   // In a coloured column (Notion's recipe, see pill-colors.scss): light — a
   // white card with a 22% border; dark — a 20% card with a 24% border.
   &[data-view-type="board"][data-accent] {

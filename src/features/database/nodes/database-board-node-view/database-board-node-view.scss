@@ -150,15 +150,37 @@
   color: var(--col-ink);
 }
 
-[style*="--col-ink"] > .db-board-col-footer__add {
+// "+ New page" hover: a faint wash, never the button's grey fill (which went
+// dark on a dark board). Set through the button's own colour variables — its
+// hover rule outranks a plain background override, and its dark-mode
+// variables are as specific as one class more (the class is doubled to win).
+.db-board-grid .db-board-col-footer__add.db-board-col-footer__add.tiptap-button {
+  --tt-button-default-bg-color: transparent;
+  --tt-button-hover-bg-color: color-mix(
+    in srgb,
+    var(--tt-text-primary) 5%,
+    transparent
+  );
+}
+
+[style*="--col-ink"]
+  > .db-board-col-footer__add.db-board-col-footer__add.tiptap-button {
+  --tt-button-hover-bg-color: color-mix(
+    in srgb,
+    var(--col-ink) 10%,
+    transparent
+  );
+  --tt-button-hover-text-color: var(--col-ink);
+  --tt-button-hover-icon-color: var(--col-ink);
+  --tt-button-default-icon-color: var(--col-ink);
   color: var(--col-ink);
   border-color: color-mix(in srgb, var(--col-ink) 22%, var(--tt-bg-color));
 
-  .dark & {
-    border-color: color-mix(in srgb, var(--col-ink) 24%, var(--tt-bg-color));
+  .tiptap-button-icon {
+    color: var(--col-ink);
   }
 
-  &:hover {
-    background: color-mix(in srgb, var(--col-ink) 10%, transparent);
+  .dark & {
+    border-color: color-mix(in srgb, var(--col-ink) 24%, var(--tt-bg-color));
   }
 }
