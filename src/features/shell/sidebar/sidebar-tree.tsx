@@ -93,6 +93,11 @@ const treeCollisionDetection: CollisionDetection = (args) => {
   return pageHit ? [pageHit] : collisions;
 };
 
+// A page opened from a flat list (Recent) — the tree doesn't reveal it, so
+// a sub-page there doesn't expand its parents. Set on that row's click,
+// read once by the reveal effect when the page becomes active.
+let noRevealPageId: ID | null = null;
+
 export interface SidebarTreeProps {
   tree: Record<PageCategory, PageTreeNode[]>;
   teamspaces: Teamspace[];
@@ -440,15 +445,23 @@ function TreeSection({
         ))
       ) : flat ? (
         rows.map((node) => (
-          <PageItem
+          // Opened from a flat list (Recent): leave the tree as it is.
+          <div
             key={node.page.id}
-            page={node.page}
-            depth={0}
-            disableActive={false}
-            showChevron={false}
-            canEditContent={canEdit(node.page)}
-            showTeamspaceBadge
-          />
+            style={{ display: "contents" }}
+            onClickCapture={() => {
+              noRevealPageId = node.page.id;
+            }}
+          >
+            <PageItem
+              page={node.page}
+              depth={0}
+              disableActive={false}
+              showChevron={false}
+              canEditContent={canEdit(node.page)}
+              showTeamspaceBadge
+            />
+          </div>
         ))
       ) : flatten && rows.length === 0 ? (
         <div
@@ -878,6 +891,11 @@ export const SidebarTree = memo(function SidebarTree({
 
   useEffect(() => {
     if (activePageId == null) return;
+
+    // Opened from Recent: don't expand its parents or open its section.
+    const skip = noRevealPageId === activePageId;
+    noRevealPageId = null;
+    if (skip) return;
 
     const node = nodeById.get(activePageId);
     if (!node) return;
