@@ -1,13 +1,11 @@
 import {
   ArrowUpDown,
-  Bell,
   ChevronLeft,
   Copy,
   Group,
   Layout,
   Link as LinkIcon,
   ListFilter,
-  ListTree,
   Lock,
   SlidersHorizontal,
   Trash2,
@@ -52,6 +50,12 @@ import { MenuRow } from "../menu-row";
 import { usePanelTransition } from "../../hooks/use-panel-transition";
 import { SpinnerRing } from "src/components/tiptap-ui-primitive/spinner-ring";
 import { PanelSlide } from "../panel-slide";
+import { ConfirmDialog } from "src/features/shell/confirm-dialog";
+
+// The delete confirmation is portaled to <body>, outside the options panel:
+// pressing inside it must not count as a click outside the panel.
+const isInConfirmDialog = (target: EventTarget | null) =>
+  !!(target as HTMLElement | null)?.closest?.('[role="alertdialog"]');
 
 function SubPanelHeader({
   title,
@@ -105,6 +109,7 @@ function ViewOptionsContent({
   view,
   db,
   onClose,
+  onDone,
   properties,
   onCopyLink,
 }: {
@@ -112,11 +117,16 @@ function ViewOptionsContent({
   db: UseDatabaseReturn;
   properties: DatabaseProperty[];
   onClose?: () => void;
+  /** Closes the options after Duplicate or Delete (defaults to onClose). */
+  onDone?: () => void;
   onCopyLink?: () => void;
 }) {
   const { t } = useTranslation();
   const [name, setName] = useState(view.name);
   const [copied, setCopied] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  // A database keeps at least one view.
+  const canDelete = db.views.length > 1;
 
   const panelTitles: Record<string, string> = {
     properties: t("database.viewOptions.properties"),
@@ -380,20 +390,9 @@ function ViewOptionsContent({
             onClick={() => db.pushPanel({ type: "group" })}
             disabled={locked}
           />
-          <MenuRow
-            Icon={ListTree}
-            label={t("database.viewOptions.subItems")}
-            onClick={locked ? undefined : () => {}}
-            disabled={locked}
-          />
+          {/* Sub-items (#166) and notifications come back with their features. */}
 
           <Separator orientation="horizontal" />
-
-          <MenuRow
-            Icon={Bell}
-            label={t("database.viewOptions.notifications")}
-            onClick={() => {}}
-          />
 
           <MenuRow
             Icon={Lock}
@@ -415,21 +414,42 @@ function ViewOptionsContent({
             onClick={handleCopy}
           />
 
+          {/* The copy becomes the active view (duplicateView switches to it). */}
           <MenuRow
             Icon={Copy}
             label={t("database.viewOptions.duplicate")}
-            onClick={locked ? undefined : () => {}}
+            onClick={
+              locked
+                ? undefined
+                : () => {
+                    db.duplicateView(view.id);
+                    (onDone ?? onClose)?.();
+                  }
+            }
             disabled={locked}
           />
-          <MenuRow
-            Icon={Trash2}
-            label={t("database.viewOptions.delete")}
-            onClick={locked ? undefined : () => {}}
-            disabled={locked}
-            danger
-          />
+          {canDelete && (
+            <MenuRow
+              Icon={Trash2}
+              label={t("database.viewOptions.delete")}
+              onClick={locked ? undefined : () => setConfirmDelete(true)}
+              disabled={locked}
+              danger
+            />
+          )}
         </CardBody>
       )}
+      <ConfirmDialog
+        open={confirmDelete}
+        message={t("database.views.deleteConfirm")}
+        confirmLabel={t("database.views.deleteView")}
+        onCancel={() => setConfirmDelete(false)}
+        onConfirm={() => {
+          setConfirmDelete(false);
+          db.deleteView(view.id);
+          (onDone ?? onClose)?.();
+        }}
+      />
     </Card>
   );
 }
@@ -472,6 +492,7 @@ export function ViewOptionsPopover({
       // The IconPicker popover is portaled outside panelRef — don't treat clicks
       // inside any popper content as "outside".
       const el = target as HTMLElement;
+      if (isInConfirmDialog(el)) return;
       if (
         el.closest?.(
           "[data-radix-popper-content-wrapper], [data-radix-popover-content]",
@@ -553,12 +574,19 @@ export function ViewOptionsPopover({
           avoidCollisions
           collisionPadding={4}
           style={{ zIndex: 999 }}
+          onInteractOutside={(e) => {
+            if (isInConfirmDialog(e.target)) e.preventDefault();
+          }}
         >
           <ViewOptionsContent
             properties={properties}
             view={view}
             db={db}
             onCopyLink={onCopyLink}
+            onDone={() => {
+              setOpen(false);
+              db.resetPanel();
+            }}
           />
         </PopoverContent>
       </PopoverPortal>

@@ -22,6 +22,7 @@ import { useActivePageActions } from "src/features/pages/context/active-page-con
 import { usePageViewActions } from "src/features/pages/context/page-view-context";
 import { removeRecordNodes } from "../utils/remove-record-nodes";
 import { recordSelection } from "../utils/record-selection-store";
+import { useDeleteRecords } from "../hooks/use-delete-records";
 
 export function CardActionsProvider({ children }: { children: ReactNode }) {
   const { source, sortedRecords, visibleProperties, db, editor, attrs } =
@@ -32,6 +33,8 @@ export function CardActionsProvider({ children }: { children: ReactNode }) {
   const { setCellValue, removeRecordAsync, addRecordAsync } = useDataSource(
     source?.id,
   );
+
+  const deleteRecords = useDeleteRecords(removeRecordAsync);
 
   const dbRef = useRef(db);
   useEffect(() => {
@@ -57,9 +60,9 @@ export function CardActionsProvider({ children }: { children: ReactNode }) {
       setValue: (recordId, propertyId, v) =>
         setCellValue(recordId, propertyId, v as CellValue<PropertyType>),
 
-      deleteRecord: (recordId) => {
-        void removeRecordAsync(recordId);
-      },
+      // Undoable (#170). Several records deleted together (the record menu
+      // calls this once per record) share one toast.
+      deleteRecord: (recordId) => deleteRecords([recordId]),
 
       duplicateRecord: (recordId) => {
         const r = getRecord(recordId);
@@ -141,7 +144,7 @@ export function CardActionsProvider({ children }: { children: ReactNode }) {
     visibleProperties,
     patchPageMutate,
     setCellValue,
-    removeRecordAsync,
+    deleteRecords,
     addRecordAsync,
     setActivePageId,
     setTarget,

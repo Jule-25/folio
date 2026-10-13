@@ -5,6 +5,7 @@ import { recordSelection } from "../../utils/record-selection-store";
 import "./selection-toolbar.scss";
 import { useDatabaseContext } from "../../context/database-context";
 import { useDataSource } from "../../hooks/use-data-source";
+import { useDeleteRecords } from "../../hooks/use-delete-records";
 import { removeRecordNodes } from "../../utils/remove-record-nodes";
 import { SelectionCount } from "./selection-count";
 import { PropertyControls } from "./property-controls";
@@ -53,6 +54,7 @@ export function SelectionToolbar({
   const properties = source?.properties ?? EMPTY_PROPERTIES;
 
   const { setCellValue, removeRecordAsync } = useDataSource(source?.id);
+  const deleteRecords = useDeleteRecords(removeRecordAsync);
 
   const onSetValue = useCallback(
     (propertyId: ID, value: unknown) =>
@@ -63,11 +65,13 @@ export function SelectionToolbar({
   const onDelete = useCallback(() => {
     if (editor && attrs.id) {
       // Two operations, as the record-delete contract requires:
-      // 1) the pages (data)   2) the nodes (document)
-      recordIds.forEach((id) => removeRecordAsync(id));
+      // 1) the pages (data) — after the Undo toast's time (#170)
+      // 2) the nodes (document) — now; Undo's rows get theirs back from
+      //    the database's seed
+      deleteRecords(recordIds);
       removeRecordNodes(editor, attrs.id, recordIds);
     }
-  }, [recordIds, removeRecordAsync, editor, attrs.id]);
+  }, [recordIds, deleteRecords, editor, attrs.id]);
 
   const onDeleteSelection = useCallback(() => {
     onDelete();

@@ -129,3 +129,39 @@
 .db-board-grid[data-card-size="small"] .db-board-card-cover { height: 90px; }
 .db-board-grid[data-card-size="medium"] .db-board-card-cover { height: 120px; }
 .db-board-grid[data-card-size="large"] .db-board-card-cover { height: 160px; }
+// ── Drag to reorder ──
+// The tab being dragged dims; a 2px bar marks where it will land.
+.db-view-tabs[data-reordering] {
+  cursor: grabbing;
+
+  button {
+    cursor: grabbing;
+  }
+}
+
+.db-view-tabs .db-view-tab {
+  position: relative;
+
+  &[data-dragging] {
+    opacity: 0.45;
+  }
+
+  &[data-drop]::before {
+    content: "";
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    width: 2px;
+    border-radius: 999px;
+    background: var(--tt-brand-color-400);
+    pointer-events: none;
+  }
+
+  &[data-drop="before"]::before {
+    left: -3px;
+  }
+
+  &[data-drop="after"]::before {
+    right: -3px;
+  }
+}

@@ -2,8 +2,8 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useCurrentEditor } from "@tiptap/react";
 import {
   Popover,
+  PopoverAnchor,
   PopoverContent,
-  PopoverTrigger,
 } from "src/components/tiptap-ui-primitive/popover";
 import "./cell-editor-popover.scss";
 
@@ -37,6 +37,17 @@ export function CellEditorPopover({
   const [uncontrolled, setUncontrolled] = useState(false);
   const { editor } = useCurrentEditor();
   const rootRef = useRef<HTMLDivElement>(null);
+  // The box opens over the whole table cell, not the text inside it: the
+  // display's height changes with the cell (wrapped titles are shorter than
+  // the 34px row), so a fixed offset from it landed the box up and to the
+  // left (#175). Outside a table cell, it opens over the display itself.
+  const anchorRef = useRef({
+    getBoundingClientRect: () => {
+      const el = rootRef.current;
+      const cell = el?.closest<HTMLElement>(".db-node-cell") ?? el;
+      return cell?.getBoundingClientRect() ?? new DOMRect();
+    },
+  });
 
   const open = controlledOpen ?? uncontrolled;
   const setOpen = onOpenChange ?? setUncontrolled;
@@ -99,33 +110,35 @@ export function CellEditorPopover({
   // Editing → mount the Radix Popover (defaultOpen so it opens immediately).
   return (
     <Popover open onOpenChange={setOpen} defaultOpen>
-      <PopoverTrigger asChild>
-        <div
-          ref={rootRef}
-          className="db-cell-editor__display"
-          data-editing="true"
-          role="button"
-          tabIndex={0}
-          onClick={() => setOpen(true)}
-        >
-          {trigger}
-        </div>
-      </PopoverTrigger>
+      {/* No PopoverTrigger: it registers itself as the anchor, and swapping
+          it out for the custom anchor remounts this div (detached → 0×0). */}
+      <PopoverAnchor virtualRef={anchorRef} />
+      <div
+        ref={rootRef}
+        className="db-cell-editor__display"
+        data-editing="true"
+        role="button"
+        tabIndex={0}
+        onClick={() => setOpen(true)}
+      >
+        {trigger}
+      </div>
       <PopoverContent
         side="bottom"
         align="start"
-        sideOffset={-38}
-        alignOffset={-2}
+        sideOffset={0}
         avoidCollisions={false}
         onOpenAutoFocus={(e) => e.preventDefault()}
         onPointerDownOutside={(e) => e.preventDefault()}
         onFocusOutside={(e) => e.preventDefault()}
         className="db-cell-editor__popover"
         style={{
-          width: width ?? "calc(var(--radix-popover-trigger-width) + 4px)",
+          // Placed below the cell, then pulled up by the cell's height, so its
+          // top-left sits on the cell's top-left at any row height.
+          marginTop: "calc(-1 * var(--radix-popover-trigger-height))",
+          width: width ?? "var(--radix-popover-trigger-width)",
           minWidth: "var(--radix-popover-trigger-width)",
-          minHeight:
-            minHeight ?? "calc(var(--radix-popover-trigger-height) + 4px)",
+          minHeight: minHeight ?? "var(--radix-popover-trigger-height)",
         }}
       >
         <div className="db-cell-editor__box">

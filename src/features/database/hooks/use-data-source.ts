@@ -26,7 +26,14 @@ import { useDataSource as useDataSourceApi } from "src/hooks/use-data-sources";
 import { useChangePropertyType } from "src/hooks/use-change-property-type";
 import { useMaterializeComputedColumn } from "src/hooks/use-materialized-computed-column";
 import { makeDefaultView } from "src/utils/make-default-view";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useSyncExternalStore,
+} from "react";
+import { pendingRecordDeletes } from "../utils/pending-record-deletes";
 import { useCurrentPerson } from "src/hooks/use-session";
 import { useCurrentWorkspace } from "src/hooks/use-workspaces";
 import { templateValues } from "../utils/row-templates";
@@ -487,10 +494,23 @@ export function useDataSource(
     return (id: string) => names.get(id);
   }, [people]);
 
+  // Rows deleted but still inside their Undo window (#170) are left out.
+  const pendingDeletes = useSyncExternalStore(
+    pendingRecordDeletes.subscribe,
+    pendingRecordDeletes.getSnapshot,
+  );
   const resolvedRecords = useMemo(() => {
     if (!source) return [];
     const pages = allPages ?? [];
-    const withLinks = resolveMirrorRelations(rows, source.properties, pages);
+    const liveRows =
+      pendingDeletes.size > 0
+        ? rows.filter((r) => !pendingDeletes.has(r.id))
+        : rows;
+    const withLinks = resolveMirrorRelations(
+      liveRows,
+      source.properties,
+      pages,
+    );
     const withRollups = resolveRecordRollups(
       withLinks,
       source.properties,
@@ -498,7 +518,7 @@ export function useDataSource(
       pages,
     );
     return resolveRecordFormulas(withRollups, source.properties, personName);
-  }, [rows, source, allPages, allSources, personName]);
+  }, [rows, source, allPages, allSources, personName, pendingDeletes]);
 
   return {
     source,

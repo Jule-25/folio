@@ -1468,7 +1468,9 @@
       "none": "No data sources",
       "newDatabase": "New database"
     },
-    "emptyList": "No pages yet"
+    "emptyList": "No pages yet",
+    "rowsDeleted_one": "Deleted {{count}} row",
+    "rowsDeleted_other": "Deleted {{count}} rows"
   },
   "toolbar": {
     "blockquote": "Blockquote",

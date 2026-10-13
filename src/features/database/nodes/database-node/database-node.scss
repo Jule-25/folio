@@ -690,3 +690,13 @@ body.db-row-dragselect {
     pointer-events: none;
   }
 }
+
+// ── Databases nested in blocks (#177) ───────────────────────────────────────
+// Gallery, list, calendar and timeline size to --db-editor-width, the page's
+// content width. Inside a callout, list item, quote or appendix there is less
+// room than that (padding, the bullet, the icon), so they ran past the block.
+// Inside those, the database sizes to the block instead — the same thing
+// columns do (column-view.scss).
+:is(.callout-content, li, blockquote, .appendix__body) {
+  --db-editor-width: 100%;
+}
