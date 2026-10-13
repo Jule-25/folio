@@ -43,16 +43,41 @@
    
     height: 100%;              // fill the grid cell (which is stretched to row height)
 
+    // Notion's gallery card: light — the page colour with a hairline ring and
+    // a soft drop; dark — the page lifted 5% toward white with a faint ring.
+    // The ring sits on this slot, not the card: overflow: hidden would clip it.
+    box-shadow:
+      0 0 0 1px rgba(15, 15, 15, 0.1),
+      0 2px 4px rgba(15, 15, 15, 0.06);
+    .dark & {
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.075);
+    }
 
-    .db-board-card{
-      height: 100%;           
+    // Doubled class: beats board-card-body's [data-view-type] colours.
+    .db-board-card.db-board-card{
+      height: 100%;
       display: flex;
       flex-direction: column;
       border-radius: var(--tt-radius-lg) !important;
-    
-      background-color: var(--tt-gray-light-a-100);
+      box-shadow: none;
+
+      background-color: var(--tt-bg-color);
       .dark & {
-        background-color: var(--tt-gray-dark-a-50);
+        background-color: color-mix(in srgb, #fff 5%, var(--tt-bg-color));
+      }
+
+      // Hover: a faint shade (light) / a light wash (dark), like board cards.
+      &:hover {
+        background-image: linear-gradient(
+          rgba(55, 53, 47, 0.035),
+          rgba(55, 53, 47, 0.035)
+        );
+        .dark & {
+          background-image: linear-gradient(
+            rgba(255, 255, 255, 0.055),
+            rgba(255, 255, 255, 0.055)
+          );
+        }
       }
     }
 

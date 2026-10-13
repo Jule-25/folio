@@ -837,3 +837,16 @@
     transition: none;
   }
 }
+
+// ── Page list scrollbar ──
+// Thicker than the app-wide slim pill (simple-editor.scss): a 12px gutter
+// with an 8px thumb, easy to see and grab in a long page tree.
+.sidebar-pages {
+  &::-webkit-scrollbar {
+    width: 12px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-width: 2px;
+  }
+}
