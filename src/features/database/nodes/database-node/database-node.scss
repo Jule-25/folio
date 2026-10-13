@@ -697,6 +697,27 @@ body.db-row-dragselect {
 // room than that (padding, the bullet, the icon), so they ran past the block.
 // Inside those, the database sizes to the block instead — the same thing
 // columns do (column-view.scss).
-:is(.callout-content, li, blockquote, .appendix__body) {
+// (blockquote > *: the quote is itself a top-level block sized by the var.)
+:is(.callout-content, li, blockquote > *, .appendix__body) {
   --db-editor-width: 100%;
+
+  // The page-level offsets are for databases at the top of the page, which
+  // span the editor's full width: .db-node steps in by the sidebar's width,
+  // and the source picker / cover (.top-level-block) shift right by the
+  // page's block indent. Nested, the block they're in is already indented,
+  // so they landed that far to the right again — the picker out of view,
+  // the database half outside the callout.
+  .db-node {
+    margin-left: 0;
+    padding-right: 0;
+  }
+
+  .db-container {
+    margin-right: 0;
+  }
+
+  .top-level-block {
+    width: 100%;
+    transform: none;
+  }
 }

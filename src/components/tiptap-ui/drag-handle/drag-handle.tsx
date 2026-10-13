@@ -129,7 +129,15 @@ const makeNestedOptions = (editor: Editor | null) => ({
               ? readDatabaseData(editor, databaseId)?.view?.type
               : undefined;
           if (viewType && !ROW_VIEWS.has(viewType)) return 1000;
+          // A row beats its database (below), so the handle stays on rows.
+          return -300;
         }
+
+        // A database inside a callout, quote, list or appendix gets its own
+        // handle: the containers below otherwise win over everything in
+        // them, so the handle grabbed the whole callout and the database
+        // couldn't be dragged on its own.
+        if (name === "database") return -250;
 
         if (
           name === "bulletList" ||
