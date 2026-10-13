@@ -944,7 +944,9 @@
     "copyToClipboard": "Copier dans le presse-papiers",
     "copyAnchorLink": "Copier le lien d'ancrage",
     "deleteNode": "Supprimer le nœud",
-    "resetFormatting": "Effacer la mise en forme"
+    "resetFormatting": "Effacer la mise en forme",
+    "search": "Rechercher une action…",
+    "noResults": "Aucune action trouvée"
   },
   "blockTypes": {
     "paragraph": "Paragraphe",

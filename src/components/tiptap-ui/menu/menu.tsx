@@ -6,7 +6,8 @@ import {
 import { Separator } from "src/components/tiptap-ui-primitive/separator";
 import type { Editor } from "@tiptap/core";
 import { NodeSelection } from "@tiptap/pm/state";
-import { Columns2, MessagesSquare } from "lucide-react";
+import { Columns2, MessagesSquare, Search } from "lucide-react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import ColorDropdownMenu from "src/components/tiptap-ui/color-dropdown-menu";
 import AlignmentDropdownMenu from "src/components/tiptap-ui/alignment-dropdown-menu";
 import { TurnIntoDropdown } from "src/components/tiptap-ui/turn-into-dropdown";
@@ -32,6 +33,19 @@ import {
 } from "src/lib/block-selection";
 
 const SNAPSHOT_MAX = 600;
+
+const normalize = (s: string) =>
+  s
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+
+const firstVisibleItem = (card: HTMLElement | null) =>
+  Array.from(
+    card?.querySelectorAll<HTMLElement>(
+      '.group [role="menuitem"], .group button',
+    ) ?? [],
+  ).find((el) => el.offsetParent !== null) ?? null;
 
 // The block the drag handle selected is a columns block, or sits inside one:
 // offer to unwrap the columns. Read when the menu opens (it renders on
@@ -111,8 +125,76 @@ export function Menu({
   const blockCount = countSelectedBlocks(editor.state.selection);
   const several = blockCount > 1;
 
+  // Search actions: the rows whose text doesn't match are hidden (by their
+  // own visible text, so every row is covered, dropdowns included), along
+  // with groups left empty and the separators.
+  const cardRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const emptyRef = useRef<HTMLDivElement>(null);
+  const [query, setQuery] = useState("");
+
+  // The menu focuses itself on open; put the cursor in the search instead.
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => inputRef.current?.focus());
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  useLayoutEffect(() => {
+    const card = cardRef.current;
+    if (!card) return;
+    const q = normalize(query.trim());
+    let any = false;
+    card.querySelectorAll<HTMLElement>(":scope > .group").forEach((group) => {
+      let groupAny = false;
+      for (const row of Array.from(group.children) as HTMLElement[]) {
+        // The item's label, not its shortcut badge ("Ctrl+D" shouldn't
+        // match "ctrl").
+        let label = row.textContent ?? "";
+        row.querySelectorAll(".tiptap-badge").forEach((badge) => {
+          label = label.replace(badge.textContent ?? "", "");
+        });
+        const match = !q || normalize(label).includes(q);
+        row.style.display = match ? "" : "none";
+        if (match) groupAny = true;
+      }
+      group.style.display = groupAny ? "" : "none";
+      if (groupAny) any = true;
+    });
+    if (emptyRef.current) emptyRef.current.hidden = any;
+  }, [query]);
+
   return (
-    <Card className="menu">
+    <Card
+      ref={cardRef}
+      className="menu"
+      data-searching={query.trim() ? "" : undefined}
+    >
+      <label className="menu-search">
+        <Search size={14} aria-hidden />
+        <input
+          ref={inputRef}
+          value={query}
+          placeholder={t("blockMenu.search")}
+          aria-label={t("blockMenu.search")}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => {
+            // Escape closes the menu (the menu listens for it).
+            if (e.key === "Escape") return;
+            // Keep the menu's type-ahead out of the search.
+            e.stopPropagation();
+            if (e.key === "ArrowDown") {
+              e.preventDefault();
+              firstVisibleItem(cardRef.current)?.focus();
+            } else if (e.key === "Enter" && query.trim()) {
+              e.preventDefault();
+              firstVisibleItem(cardRef.current)?.click();
+            }
+          }}
+        />
+      </label>
+      <div ref={emptyRef} className="menu-empty" hidden>
+        {t("blockMenu.noResults")}
+      </div>
       <CardGroupLabel className="title">
         {several ? t("blockMenu.blocksSelected", { count: blockCount }) : title}
       </CardGroupLabel>

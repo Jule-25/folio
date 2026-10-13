@@ -61,3 +61,45 @@
   }
 }
 
+// Search actions, at the top of the block menu.
+.menu-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 6px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--tt-border-color);
+  color: var(--tt-color-text-gray);
+
+  &:focus-within {
+    border-color: var(--tt-brand-color-400);
+  }
+
+  input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    font: inherit;
+    font-size: 13px;
+    color: var(--tt-text-color, inherit);
+  }
+}
+
+.menu-empty {
+  padding: 6px 8px;
+  font-size: 13px;
+  color: var(--tt-color-text-gray);
+}
+
+// While searching, the results are one list: no title, no separators.
+.menu[data-searching] {
+  > .title,
+  > .tiptap-separator {
+    display: none;
+  }
+}

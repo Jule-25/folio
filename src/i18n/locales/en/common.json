@@ -944,7 +944,9 @@
     "copyToClipboard": "Copy to clipboard",
     "copyAnchorLink": "Copy anchor link",
     "deleteNode": "Delete node",
-    "resetFormatting": "Reset Formatting"
+    "resetFormatting": "Reset Formatting",
+    "search": "Search actions…",
+    "noResults": "No actions found"
   },
   "blockTypes": {
     "paragraph": "Paragraph",
