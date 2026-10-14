@@ -21,6 +21,97 @@
 // A page row in the sidebar. Height, font and colors come from the
 // sidebar row tokens (--sb-*, sidebar.scss) so pages line up with the
 // Search / Home / Library rows: 6px in, a 20px icon box, 7px to the title.
+
+.page-item {
+  .page-item-leading {
+    position: relative;
+    display: inline-flex;
+    flex: 0 0 24px;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    margin-right: 2px;
+  }
+
+  .page-item-icon,
+  .page-item-disclosure {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    box-sizing: border-box;
+  }
+
+  .page-item-icon {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: none;
+    transition: opacity 100ms ease;
+  }
+
+  .page-item-disclosure {
+    padding: 0;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 100ms ease,
+      background-color 100ms ease;
+
+    svg {
+      transition: transform 120ms ease;
+    }
+
+    &[data-expanded="true"] svg {
+      transform: rotate(90deg);
+    }
+
+    &:hover {
+      background: color-mix(
+        in srgb,
+        var(--tt-text-primary) 8%,
+        transparent
+      );
+    }
+  }
+
+  // Replace the icon with the chevron when the row is hovered.
+  &:hover,
+  &:focus-within {
+    .page-item-icon {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .page-item-disclosure {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+
+  // Keep the disclosure visible on touch layouts that expose
+  // actions without a hover interaction.
+  &[data-touch-actions] {
+    .page-item-icon {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .page-item-disclosure {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+}
+
 .page-item {
   border-radius: var(--sb-row-radius, var(--tt-radius-sm)) !important;
   gap: 0;

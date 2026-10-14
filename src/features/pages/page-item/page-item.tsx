@@ -26,7 +26,6 @@ import {
 } from "../context/active-page-context";
 import { useCreatePage } from "src/hooks/use-create-page";
 import { makeChildPage } from "src/utils/make-page";
-import { Chevron } from "src/components/tiptap-ui-primitive/chevron";
 import { usePageCapabilities } from "src/hooks/use-page-role";
 import { useIsMobile } from "src/hooks/use-breakpoint";
 import { useEditorLayoutActions } from "../../shell/context/editor-layout-context";
@@ -209,21 +208,24 @@ function PageItemView({
         data-touch-actions={touchActions || undefined}
         onClick={() => onSelect(page.id)}
       >
-        {lead ? (
-          <>
-            <button
-              type="button"
-              className="page-item-lead-chevron"
-              data-expanded={expanded}
-              aria-expanded={expanded}
-              aria-label={expanded ? "Collapse" : "Expand"}
-              onClick={(e) => {
-                e.stopPropagation();
-                onToggleExpand?.(page.id);
-              }}
-            >
-              <SbChevronRightIcon size={12} strokeWidth={2} />
-            </button>
+        {/* Leading slot: the chevron replaces the icon on hover. */}
+        <span className="page-item-leading">
+          <button
+            type="button"
+            className="page-item-disclosure"
+            data-expanded={expanded}
+            aria-expanded={expanded}
+            aria-label={expanded ? "Collapse" : "Expand"}
+            tabIndex={-1}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleExpand?.(page.id);
+            }}
+          >
+            <SbChevronRightIcon size={12} strokeWidth={2} />
+          </button>
+
+          <span className="page-item-icon">
             {isTeamspaceRoot ? (
               <span
                 className="page-item-ts-tile"
@@ -241,32 +243,7 @@ function PageItemView({
                   </span>
                 )}
               </span>
-            ) : (
-              <span className="page-item-lead-icon">
-                {withBadge ? (
-                  <span className="page-icon-wrap">
-                    <PageItemIcon cover={page.cover} variant="sidebar" />
-                    <TeamspaceBadge teamspaceId={page.teamspaceId!} />
-                  </span>
-                ) : (
-                  <PageItemIcon cover={page.cover} variant="sidebar" />
-                )}
-              </span>
-            )}
-          </>
-        ) : (
-          <>
-            {/* The icon, swapped for the caret on hover (CSS). */}
-            <Chevron
-              expanded={expanded}
-              size="small"
-              variant="ghost"
-              onClick={(e) => {
-                e.stopPropagation();
-                onToggleExpand?.(page.id);
-              }}
-            />
-            {withBadge ? (
+            ) : withBadge ? (
               <span className="page-icon-wrap">
                 <PageItemIcon cover={page.cover} variant="sidebar" />
                 <TeamspaceBadge teamspaceId={page.teamspaceId!} />
@@ -274,8 +251,8 @@ function PageItemView({
             ) : (
               <PageItemIcon cover={page.cover} variant="sidebar" />
             )}
-          </>
-        )}
+          </span>
+        </span>
 
         <Spacer orientation="horizontal" size={1} />
 
