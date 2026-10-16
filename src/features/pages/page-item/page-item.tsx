@@ -243,11 +243,6 @@ function PageItemView({
                   </span>
                 )}
               </span>
-            ) : withBadge ? (
-              <span className="page-icon-wrap">
-                <PageItemIcon cover={page.cover} variant="sidebar" />
-                <TeamspaceBadge teamspaceId={page.teamspaceId!} />
-              </span>
             ) : (
               <PageItemIcon cover={page.cover} variant="sidebar" />
             )}
@@ -310,6 +305,8 @@ function PageItemView({
             <title>{t("offline.keep.badge")}</title>
           </CloudDownload>
         )}
+
+        {withBadge && <TeamspaceBadge teamspaceId={page.teamspaceId!} />}
 
         {(canEditContent || pinnable || isTeamspaceRoot) && (
           <CardItemGroup orientation="horizontal" className="page-item-actions">
