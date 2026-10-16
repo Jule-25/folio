@@ -27,13 +27,7 @@ import "./mention-extension.scss";
 import { MentionView } from "./mention-view";
 import type { Page, Person } from "src/types";
 
-const FORBIDDEN_BLOCKS = [
-  "codeBlock",
-  "table",
-  "tableCell",
-  "tableHeader",
-  "code",
-] as const;
+const FORBIDDEN_BLOCKS = ["codeBlock", "code"] as const;
 
 const isInForbiddenBlock = (editor: Editor) =>
   FORBIDDEN_BLOCKS.some((block) => editor.isActive(block));

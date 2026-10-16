@@ -21,6 +21,7 @@ import {
   type SlashCommand as SlashItem,
 } from "./slash-commands";
 import i18n from "src/i18n/config";
+import { canInsertHere } from "src/components/tiptap-extension/containment-extension";
 import {
   getRecentSlashIds,
   normalize,
@@ -34,13 +35,9 @@ const isColorItem = (cmd: SlashItem) => cmd.id.startsWith("color-");
 const isColorStructural = (cmd: SlashItem) =>
   cmd.id === "colorsDivider" || cmd.id === "colors";
 
-const FORBIDDEN_BLOCKS = [
-  "codeBlock",
-  "table",
-  "tableCell",
-  "tableHeader",
-  "code",
-] as const;
+// No slash menu in code. (Table cells have one: Containment leaves out the
+// blocks a cell refuses — see canInsertHere below.)
+const FORBIDDEN_BLOCKS = ["codeBlock", "code"] as const;
 
 const isInForbiddenBlock = (editor: Editor) =>
   FORBIDDEN_BLOCKS.some((block) => editor.isActive(block));
@@ -261,7 +258,9 @@ export const SlashCommand = Extension.create<
         }
 
         // Rebuild fresh each query so a language switch re-localizes the menu.
-        const commands = getSlashCommands(i18n.t).filter(keep);
+        const commands = getSlashCommands(i18n.t).filter(
+          (cmd) => keep(cmd) && (!cmd.node || canInsertHere(editor, cmd.node)),
+        );
         const q = normalize(query || "");
 
         // No query: recently used first, then every block (colors hidden).

@@ -15,13 +15,7 @@ import { exitSuggestion, type SuggestionProps } from "@tiptap/suggestion";
 import { EmojiNodeView } from "./emoji-node-view";
 import type { Editor } from "@tiptap/core";
 
-const FORBIDDEN_BLOCKS = [
-  "codeBlock",
-  "table",
-  "tableCell",
-  "tableHeader",
-  "code",
-] as const;
+const FORBIDDEN_BLOCKS = ["codeBlock", "code"] as const;
 
 const isInForbiddenBlock = (editor: Editor) =>
   FORBIDDEN_BLOCKS.some((block) => editor.isActive(block));

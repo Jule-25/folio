@@ -324,6 +324,13 @@ body,
   margin: 0;
 }
 
+// Blocks inside another block (a callout, a list item, a table cell…; the
+// Containment extension marks them). Page-wide sizes — var(--db-editor-width)
+// — mean the block's own width there, so nothing nested runs past it.
+[data-contained-in] {
+  --db-editor-width: 100%;
+}
+
 .top-level-block {
   transform: translateX(
     calc(var(--block-margin-left, 0px) + var(--block-padding-left, 0px))

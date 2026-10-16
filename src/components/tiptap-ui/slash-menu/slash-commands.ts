@@ -59,6 +59,9 @@ export interface SlashCommand {
   highlightColor?: string;
   textColor?: string;
   isActive?: (editor: Editor) => boolean;
+  /** The block node it inserts, when a container may refuse it (a table
+   *  cell refuses tables, databases, columns… — see Containment). */
+  node?: string;
   run?: (editor: Editor, page?: Page) => void;
   runAsync?: (editor: Editor, options: Options) => Promise<void>;
 }
@@ -175,6 +178,7 @@ export function getSlashCommands(t: TFunction): SlashCommand[] {
     },
     {
       id: "breadcrumb",
+      node: "breadcrumb",
       type: "command",
       title: t("slash.items.breadcrumb.title"),
       description: t("slash.items.breadcrumb.description"),
@@ -202,6 +206,7 @@ export function getSlashCommands(t: TFunction): SlashCommand[] {
 
     {
       id: "table",
+      node: "tableWrapper",
       type: "command",
       title: t("slash.items.table.title"),
       description: t("slash.items.table.description"),
@@ -210,6 +215,7 @@ export function getSlashCommands(t: TFunction): SlashCommand[] {
     },
     {
       id: "toc",
+      node: "tocNode",
       type: "command",
       title: t("slash.items.toc.title"),
       description: t("slash.items.toc.description"),
@@ -218,6 +224,7 @@ export function getSlashCommands(t: TFunction): SlashCommand[] {
     },
     {
       id: "column2",
+      node: "columnBlock",
       type: "command",
       title: t("slash.items.column2.title"),
       description: t("slash.items.column2.description"),
@@ -226,6 +233,7 @@ export function getSlashCommands(t: TFunction): SlashCommand[] {
     },
     {
       id: "column3",
+      node: "columnBlock",
       type: "command",
       title: t("slash.items.column3.title"),
       description: t("slash.items.column3.description"),
@@ -234,6 +242,7 @@ export function getSlashCommands(t: TFunction): SlashCommand[] {
     },
     {
       id: "column4",
+      node: "columnBlock",
       type: "command",
       title: t("slash.items.column4.title"),
       description: t("slash.items.column4.description"),
@@ -242,6 +251,7 @@ export function getSlashCommands(t: TFunction): SlashCommand[] {
     },
     {
       id: "tabs",
+      node: "tabs",
       type: "command",
       title: t("slash.items.tabs.title"),
       description: t("slash.items.tabs.description"),
@@ -250,6 +260,7 @@ export function getSlashCommands(t: TFunction): SlashCommand[] {
     },
     {
       id: "codeGroup",
+      node: "codeGroup",
       type: "command",
       title: t("slash.items.codeGroup.title"),
       description: t("slash.items.codeGroup.description"),
@@ -407,6 +418,7 @@ export function getSlashCommands(t: TFunction): SlashCommand[] {
     // ───Container ─────────────────────────────────────────────
     {
       id: "container",
+      node: "container",
       type: "command",
       title: t("slash.items.container.title"),
       description: t("slash.items.container.description"),
@@ -416,6 +428,7 @@ export function getSlashCommands(t: TFunction): SlashCommand[] {
     //  ─── Database ─────────────────────────────────────────────
     {
       id: "database-view",
+      node: "database",
       type: "command",
       title: t("slash.items.database.title"),
       description: t("slash.items.database.description"),
