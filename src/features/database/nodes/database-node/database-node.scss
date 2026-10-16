@@ -765,6 +765,20 @@ body.db-row-dragselect {
   }
 }
 
+// Flush with the blocks around it: a column pads every .react-renderer in it
+// (12px each side, the database's own wrapper included), and the title /
+// toolbar strip keeps 20px on its right for the page-wide layout (inline
+// style, hence !important). Nested, the database lines up with the text
+// above and below it, edge to edge.
+.react-renderer.react-renderer.node-database[data-contained-in] {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+[data-contained-in] .db-sticky-left {
+  padding-right: 0 !important;
+}
+
 [data-contained-in] {
   --db-editor-width: 100%;
 
