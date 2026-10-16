@@ -34,8 +34,8 @@ export function TeamspaceBadge({ teamspaceId }: { teamspaceId: ID }) {
         name={cover.iconName!}
         size={9}
         style={{
-          width: 9,
-          height: 9,
+          width: 16,
+          height: 16,
           color:
             !cover.color || cover.color === "var(--tt-text-color)"
               ? "currentColor"

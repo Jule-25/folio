@@ -10,6 +10,7 @@ import {
 import { TbX } from "src/components/tiptap-icons/tabler-icons";
 import { useNotificationState } from "src/features/inbox/notification/notification-context";
 import { useMyWorkspaceInvites } from "src/hooks/use-workspace-members";
+import { useMyInvites } from "src/hooks/use-teamspace-members";
 import { useUnreadCounts } from "src/hooks/use-chat";
 import { spaceHomePath, useCurrentSpace } from "src/hooks/use-current-space";
 import { useIsMobile } from "src/hooks/use-breakpoint";
@@ -90,8 +91,10 @@ export const SidebarTabs = memo(() => {
   const { sidebarView, setSidebarView, onCollapsedChange } = useEditorLayout();
 
   const { unreadCount } = useNotificationState();
-  // Workspace invitations count as something waiting in the inbox.
+  // Workspace and teamspace invitations count as something waiting in the
+  // inbox.
   const { data: invites = [] } = useMyWorkspaceInvites();
+  const { invites: teamspaceInvites } = useMyInvites();
   const { data: chatUnread = {} } = useUnreadCounts();
   const chatTotal = useMemo(
     () => Object.values(chatUnread).reduce((a, b) => a + b, 0),
@@ -149,7 +152,7 @@ export const SidebarTabs = memo(() => {
             icon={<SbInboxIcon {...TAB_ICON} />}
             label={t("sidebar.inbox", "Inbox")}
             active={!isSearching && active === "inbox"}
-            count={unreadCount + invites.length}
+            count={unreadCount + invites.length + teamspaceInvites.length}
             tabIndex={hiddenTab}
             onClick={() => selectTab("inbox")}
           />

@@ -13,11 +13,13 @@ import { useNotifications } from "src/features/inbox/notification/notification-c
 import type { Notification, NotificationType } from "src/types";
 import { useOpenNotification } from "./use-open-notification";
 import { WorkspaceInvites } from "./workspace-invites";
+import { TeamspaceInvites } from "./teamspace-invites";
 import { NotificationCard } from "./notification-card";
 import { DevTestNotifications } from "./dev-test-notifications";
 import { NavigableMenuItem } from "src/features/database/components/navigable-menu-item";
 import { formatRelativeTime } from "src/utils/format-relative";
 import { useMyWorkspaceInvites } from "src/hooks/use-workspace-members";
+import { useMyInvites } from "src/hooks/use-teamspace-members";
 import "./inbox-panel.scss";
 
 export function InboxPanel({ onOpened }: { onOpened?: () => void } = {}) {
@@ -32,6 +34,7 @@ export function InboxPanel({ onOpened }: { onOpened?: () => void } = {}) {
   } = useNotifications();
   const open = useOpenNotification(onOpened);
   const { data: invites = [] } = useMyWorkspaceInvites();
+  const { invites: teamspaceInvites } = useMyInvites();
   const [showElsewhere, setShowElsewhere] = useState(false);
 
   // How the last press on a notification was made: a tap opens its card
@@ -116,9 +119,11 @@ export function InboxPanel({ onOpened }: { onOpened?: () => void } = {}) {
 
       <div className="inbox-panel__body">
         <WorkspaceInvites onDone={onOpened} />
+        <TeamspaceInvites onDone={onOpened} />
         {notifications.length === 0 &&
         elsewhere.length === 0 &&
-        invites.length === 0 ? (
+        invites.length === 0 &&
+        teamspaceInvites.length === 0 ? (
           <div className="inbox-panel__empty">
             <InboxIcon size={26} strokeWidth={1.5} />
             <p>{t("inbox.empty", "No notifications")}</p>
