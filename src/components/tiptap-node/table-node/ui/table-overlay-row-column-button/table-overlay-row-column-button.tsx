@@ -1,5 +1,5 @@
 import { Button, ButtonGroup } from "src/components/tiptap-ui-primitive/button";
-import { EllipsisIcon, EllipsisVerticalIcon } from "lucide-react";
+import { GripHorizontal, GripVertical } from "lucide-react";
 import { useTableOverlays } from "../table-overlays";
 import {
   DropdownMenu,
@@ -70,23 +70,18 @@ export function ColumnDropdown({ tablePos }: { tablePos: number }) {
     >
       <DropdownMenuTrigger asChild>
         <Button
-          style={{
-            width: "100%",
-            height: "0.8rem",
-            minWidth: "100%",
-            minHeight: "0.6rem",
-            padding: "4px",
-            marginLeft: "-20px",
-          }}
+          className="table-grip"
+          data-orientation="col"
+          data-open={open || undefined}
+          aria-label="Column options"
           onPointerDown={() => {
             if (colIndex === undefined || !tablePos) return;
             editor?.commands.selectColumn(colIndex, tablePos);
             editor?.commands.lockTableHandle();
             setOpen(true);
           }}
-          data-active-state={open ? "on" : "off"}
         >
-          <EllipsisIcon className="tiptap-button-icon" />
+          <GripHorizontal className="tiptap-button-icon" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuPortal container={document.body}>
@@ -279,23 +274,18 @@ export function RowDropdown({ tablePos }: { tablePos: number }) {
     >
       <DropdownMenuTrigger asChild>
         <Button
-          style={{
-            width: "0.8rem",
-            height: "100%",
-            minWidth: "0.8rem",
-            minHeight: "100%",
-            padding: "4px",
-            marginLeft: "-20px",
-          }}
+          className="table-grip"
+          data-orientation="row"
+          data-open={open || undefined}
+          aria-label="Row options"
           onPointerDown={() => {
             if (rowIndex === undefined || !tablePos) return;
             editor?.commands.selectRow(rowIndex, tablePos);
             editor?.commands.lockTableHandle();
             setOpen(true);
           }}
-          data-state-active={open ? "on" : "off"}
         >
-          <EllipsisVerticalIcon className="tiptap-button-icon" />
+          <GripVertical className="tiptap-button-icon" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuPortal container={document.body}>

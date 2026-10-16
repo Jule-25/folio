@@ -1,0 +1,61 @@
+// ── Table grips (board 56) ──────────────────────────────────────────────────
+// Small grips sitting on the table's border, Notion-style: the row and
+// column handles (centred on the hovered row / column) and the + for a new
+// row / column (centred on the bottom / right border, near those edges).
+// Only the grip takes the pointer: the strip it's centred in is click-through.
+
+.table-grip-track {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 30;
+
+  > * {
+    pointer-events: auto;
+  }
+}
+
+.table-grip.table-grip.tiptap-button {
+  flex: none;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  gap: 0;
+  border-radius: 5px;
+  background: var(--tt-bg-color);
+  color: var(--tt-text-secondary);
+  box-shadow:
+    0 0 0 1px var(--tt-border-color),
+    0 2px 6px rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+
+  // Lying on a top/bottom border: wide; standing on a left/right one: tall.
+  &[data-orientation="col"] {
+    width: 24px;
+    height: 16px;
+  }
+
+  &[data-orientation="row"] {
+    width: 16px;
+    height: 24px;
+  }
+
+  .tiptap-button-icon {
+    width: 12px;
+    height: 12px;
+    color: inherit;
+  }
+
+  &:hover {
+    background: color-mix(in srgb, var(--tt-text-primary) 6%, var(--tt-bg-color));
+    color: var(--tt-text-primary);
+  }
+
+  // Its menu is open: the row / column it acts on is selected.
+  &[data-open] {
+    background: var(--tt-brand-color-500);
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+  }
+}

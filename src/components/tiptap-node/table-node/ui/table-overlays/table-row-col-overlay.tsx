@@ -1,6 +1,11 @@
 import { type ReactNode, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTableOverlays } from "./use-table-overlays";
+import clsx from "clsx";
+import "./table-grip.scss";
+
+/** The grip's short side (px); it's centred on the border. */
+const GRIP_THICKNESS = 16;
 
 interface TableRowColOverlayProps {
   orientation?: "row" | "column";
@@ -63,14 +68,19 @@ export function TableRowColOverlay({
   // coordinate space (same as before, when they were used with the table-flush
   // .table-overlays as positioning parent). We now add the table's viewport
   // origin (rect.left/rect.top) to place them with position:fixed.
+  // Notion-style: a small grip sitting ON the table's border — the left
+  // border, centred on the hovered row; the top border, centred on the
+  // hovered column. The strip it's centred in lets no clicks through except
+  // on the grip itself.
   const overlay =
     orientation === "row" ? (
       <div
-        className={className}
+        className={clsx("table-grip-track", className)}
         style={{
           position: "fixed",
           top: rect.top + (top ?? 0),
-          left: rect.left + 3,
+          left: rect.left - GRIP_THICKNESS / 2,
+          width: GRIP_THICKNESS,
           height,
         }}
       >
@@ -78,13 +88,13 @@ export function TableRowColOverlay({
       </div>
     ) : (
       <div
-        className={className}
+        className={clsx("table-grip-track", className)}
         style={{
           position: "fixed",
           left: rect.left + (left ?? 0),
-          top: rect.top - 16,
+          top: rect.top - GRIP_THICKNESS / 2,
           width,
-          marginLeft: "20px",
+          height: GRIP_THICKNESS,
         }}
       >
         {children}

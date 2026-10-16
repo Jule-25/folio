@@ -13,13 +13,11 @@ export function TableAddRowColButton({
 
   return (
     <Button
-      style={{
-        width: orientation === "col" ? "0.6rem" : "100%",
-        height: orientation === "row" ? "0.6rem" : "100%",
-        minWidth: orientation === "col" ? "0.6rem" : "100%",
-        minHeight: orientation === "row" ? "0.6rem" : "100%",
-        padding: "4px",
-      }}
+      className="table-grip"
+      // A row is added below: the grip lies flat on the bottom border; a
+      // column to the right: it stands on the right border.
+      data-orientation={orientation === "row" ? "col" : "row"}
+      aria-label={orientation === "row" ? "Add a row" : "Add a column"}
       onClick={() => {
         if (orientation === "col") {
           editor.commands.addColumnAtEnd();

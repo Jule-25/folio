@@ -1,5 +1,6 @@
 import { type ReactNode } from "react";
 import { useTableOverlays } from "./use-table-overlays";
+import clsx from "clsx";
 
 interface TableAddRowColOverlayProps {
   orientation?: "row" | "column";
@@ -21,12 +22,14 @@ export function TableAddRowColOverlay({
   return (
     <>
       {orientation === "row" && isLastRow && (
+        // A + grip on the bottom border, centred under the table.
         <div
-          className={className}
+          className={clsx("table-grip-track", className)}
           style={{
             position: "absolute",
             width: `${tableWidth}px`,
-            bottom: "-12px",
+            height: 16,
+            bottom: "-8px",
             marginLeft: "-20px",
           }}
         >
@@ -34,12 +37,14 @@ export function TableAddRowColOverlay({
         </div>
       )}
       {orientation === "column" && isLastCol && (
+        // A + grip on the right border, centred beside the table.
         <div
-          className={className}
+          className={clsx("table-grip-track", className)}
           style={{
             position: "absolute",
             height: `${tableHeight}px`,
-            right: "-12px",
+            width: 16,
+            right: "-8px",
           }}
         >
           {children}
