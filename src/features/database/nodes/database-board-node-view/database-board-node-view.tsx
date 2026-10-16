@@ -104,38 +104,51 @@ export function DatabaseBoardNodeViewImpl() {
   const EDGE = 60;
   const SPEED = 14;
   const scrollRAF = useRef<number | null>(null);
+  const gridRef = useRef<HTMLDivElement | null>(null);
 
-  const autoScroll = useCallback((x: number, y: number) => {
-    const scroller = document.querySelector<HTMLElement>(".db-node");
-    if (!scroller) return;
-
-    let dx = 0;
-
-    if (x < EDGE) {
-      dx = -SPEED;
-    } else if (x > window.innerWidth - EDGE) {
-      dx = SPEED;
-    }
-    let dy = 0;
-    if (y < EDGE) dy = -SPEED;
-    else if (y > window.innerHeight - EDGE) dy = SPEED;
-
-    if (dx === 0 && dy === 0) {
-      if (scrollRAF.current) {
-        cancelAnimationFrame(scrollRAF.current);
-        scrollRAF.current = null;
-      }
-      return;
-    }
-    if (scrollRAF.current) return;
-
-    const step = () => {
-      scroller.scrollLeft += dx;
-      if (dy !== 0) window.scrollBy(0, dy);
-      scrollRAF.current = requestAnimationFrame(step);
-    };
-    scrollRAF.current = requestAnimationFrame(step);
+  // What scrolls this board sideways: the board itself when it's nested in a
+  // block (it scrolls inside it), else its database (.db-node).
+  const boardScroller = useCallback((): HTMLElement | null => {
+    const grid = gridRef.current;
+    if (!grid) return null;
+    if (grid.scrollWidth > grid.clientWidth) return grid;
+    return grid.closest<HTMLElement>(".db-node");
   }, []);
+
+  const autoScroll = useCallback(
+    (x: number, y: number) => {
+      const scroller = boardScroller();
+      if (!scroller) return;
+
+      let dx = 0;
+
+      if (x < EDGE) {
+        dx = -SPEED;
+      } else if (x > window.innerWidth - EDGE) {
+        dx = SPEED;
+      }
+      let dy = 0;
+      if (y < EDGE) dy = -SPEED;
+      else if (y > window.innerHeight - EDGE) dy = SPEED;
+
+      if (dx === 0 && dy === 0) {
+        if (scrollRAF.current) {
+          cancelAnimationFrame(scrollRAF.current);
+          scrollRAF.current = null;
+        }
+        return;
+      }
+      if (scrollRAF.current) return;
+
+      const step = () => {
+        scroller.scrollLeft += dx;
+        if (dy !== 0) window.scrollBy(0, dy);
+        scrollRAF.current = requestAnimationFrame(step);
+      };
+      scrollRAF.current = requestAnimationFrame(step);
+    },
+    [boardScroller],
+  );
 
   const stopAutoScroll = useCallback(() => {
     if (scrollRAF.current) {
@@ -145,7 +158,7 @@ export function DatabaseBoardNodeViewImpl() {
   }, []);
 
   useEffect(() => {
-    const scroller = document.querySelector<HTMLElement>(".db-node");
+    const scroller = gridRef.current?.closest<HTMLElement>(".db-node");
     if (!scroller) return;
     const onOver = (e: DragEvent) => {
       const storage = editor?.storage.boardDrag as DragStorage;
@@ -163,6 +176,7 @@ export function DatabaseBoardNodeViewImpl() {
 
   return (
     <div
+      ref={gridRef}
       className="db-board-grid"
       data-card-size={cardSize}
       data-database-id={attrs.id}

@@ -691,58 +691,93 @@ body.db-row-dragselect {
   }
 }
 
-// ── Databases nested in blocks (#177) ───────────────────────────────────────
-// Gallery, list, calendar and timeline size to --db-editor-width, the page's
-// content width. Inside a callout, list item, quote or appendix there is less
-// room than that (padding, the bullet, the icon), so they ran past the block.
-// Inside those, the database sizes to the block instead — the same thing
-// columns do (column-view.scss).
-// (blockquote > *: the quote is itself a top-level block sized by the var.)
-// Columns get the offset resets too (they already had the width).
-:is(
-    [data-type="column"],
-    .callout-content,
-    li,
-    blockquote > *,
-    .appendix__body
-  ) {
-  --db-editor-width: 100%;
+// ── Databases nested in a block ─────────────────────────────────────────────
+// A database inside a callout, list item, quote, column or appendix carries
+// data-contained-in (the Containment extension, containment-extension.ts),
+// so these rules hold for any container, present or future.
+//
+// The page-level sizing is for databases at the top of the page: views size
+// to --db-editor-width (the page's text width), .db-node steps in by the
+// sidebar's width and spans the editor so wide tables can scroll, and the
+// source picker / cover (.top-level-block) shift right by the page's block
+// indent. Nested, the block is narrower and already indented, so they ran
+// past it (#177) or landed far to the right — the picker out of view.
+// Nested, the database takes the block's width instead.
+//
+// Tables and boards (board 55): at the top of the page the whole database
+// scrolls sideways (.db-node), title and toolbar stuck to its left. Nested,
+// the view itself scrolls inside the block and nothing above it moves:
+//   · a soft fade on an edge with more past it (both edges on a board; the
+//     right one on a table, whose Name column stays pinned)
+//   · the table's Name column pinned, with a shadow once the rest has
+//     scrolled under it
+// Both are scroll-driven animations (no JS); without them the view still
+// scrolls, just without the fade and the shadow.
+@property --db-fade-l {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
 
-  // The page-level offsets are for databases at the top of the page, which
-  // span the editor's full width: .db-node steps in by the sidebar's width,
-  // and the source picker / cover (.top-level-block) shift right by the
-  // page's block indent. Nested, the block they're in is already indented,
-  // so they landed that far to the right again — the picker out of view,
-  // the database half outside the callout.
-  .db-node {
-    margin-left: 0;
-    padding-right: 0;
+@property --db-fade-r {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+// Left fade grows as soon as you leave the start, right fade shrinks just
+// before the end. A view that doesn't scroll has no timeline: no fade.
+@keyframes db-scroll-fade {
+  from {
+    --db-fade-l: 0px;
+    --db-fade-r: 36px;
   }
-
-  .db-container {
-    margin-right: 0;
+  6% {
+    --db-fade-l: 36px;
   }
-
-  .top-level-block {
-    width: 100%;
-    transform: none;
+  94% {
+    --db-fade-r: 36px;
+  }
+  to {
+    --db-fade-l: 36px;
+    --db-fade-r: 0px;
   }
 }
 
-// ── Nested: the database keeps the block's width ────────────────────────────
-// .db-container is max-content wide (so wide tables can scroll), and nested
-// views are 100% of it (--db-editor-width: 100%). With the toolbar collapsed
-// the max-content shrank to the narrow toolbar, and the gallery, board or
-// list shrank with it. Nested, they take the block's width instead.
-:is(
-    [data-type="column"],
-    .callout-content,
-    li,
-    blockquote > *,
-    .appendix__body
-  ) {
-  // The wrapper around it is a card group, which is max-content wide by
-  // default too (min-width: max-content), so it needs the same.
+@keyframes db-scroll-fade-right {
+  from {
+    --db-fade-r: 36px;
+  }
+  94% {
+    --db-fade-r: 36px;
+  }
+  to {
+    --db-fade-r: 0px;
+  }
+}
+
+@keyframes db-pin-shadow {
+  from {
+    box-shadow: none;
+  }
+  to {
+    box-shadow: 6px 0 8px -6px rgba(0, 0, 0, 0.35);
+  }
+}
+
+[data-contained-in] {
+  --db-editor-width: 100%;
+
+  // The database no longer scrolls or spans the editor; its views do.
+  .db-node {
+    margin-left: 0;
+    padding-right: 0;
+    overflow-x: clip;
+  }
+
+  // Block-wide, not max-content: collapsing the toolbar (the widest thing)
+  // shrank the gallery, board or list with it. The card group around the
+  // container is max-content by default too.
   .db-node > .tiptap-card-item-group {
     width: 100%;
     min-width: 0;
@@ -750,5 +785,75 @@ body.db-row-dragselect {
 
   .db-container {
     width: 100%;
+    margin-right: 0;
+  }
+
+  .top-level-block {
+    width: 100%;
+    transform: none;
+  }
+
+  // A column pads every .react-renderer in it by 12px but the first — meant
+  // for its blocks, it also shifted every row and card but the first.
+  .db-node .react-renderer.react-renderer {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  // (A column gives every node view wrapper — the table is one — display:
+  // inherit and flex: 1 1 0, which laid the table's header beside its rows
+  // and squashed it to no height; display and flex are reset below.)
+  .db-node .db-table.db-table,
+  .db-node .db-board-grid {
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 var(--db-fade-l),
+      #000 calc(100% - var(--db-fade-r)),
+      transparent 100%
+    );
+  }
+
+  .db-node .db-table.db-table {
+    display: block;
+    flex: none;
+    scroll-timeline: --db-table-x inline;
+    animation: db-scroll-fade-right linear both;
+    animation-timeline: scroll(self inline);
+  }
+
+  .db-node .db-board-grid {
+    animation: db-scroll-fade linear both;
+    animation-timeline: scroll(self inline);
+  }
+
+  // Group labels and their "New page" stay at the left edge too, instead
+  // of scrolling out of view with the columns.
+  .db-table .db-group-header {
+    position: sticky;
+    left: 0;
+    z-index: 4;
+    justify-self: start;
+  }
+
+  .db-table .db-group-new > .tiptap-button {
+    position: sticky;
+    left: 0;
+  }
+
+  // The Name column (the first one) stays put while the rest scrolls under
+  // it. !important: the header sets position and background inline.
+  .db-table .db-header-row > .db-th:first-child,
+  .db-table .react-renderer.node-databaseCell:first-child > .db-node-cell {
+    position: sticky !important;
+    left: 0 !important;
+    z-index: 4;
+    background: var(--tt-bg-color) !important;
+    animation: db-pin-shadow linear both;
+    animation-timeline: --db-table-x;
+    animation-range: 0px 24px;
   }
 }

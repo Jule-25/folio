@@ -26,6 +26,7 @@ import {
   NodeColor,
   NodeFit,
   TopLevelClassExtension,
+  Containment,
   MarkdownPaste,
   BlockSelection,
 } from "src/components/tiptap-extension";
@@ -222,5 +223,6 @@ export function makeLandingExtensions({
     AppendixSummary,
     AppendixContent,
     TopLevelClassExtension,
+    Containment,
   ];
 }

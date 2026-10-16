@@ -30,6 +30,7 @@ import {
   NodeColor,
   NodeFit,
   TopLevelClassExtension,
+  Containment,
   MarkdownPaste,
   BlockSelection,
 } from "src/components/tiptap-extension";
@@ -263,6 +264,7 @@ export function useEditorExtensions(
       AppendixSummary,
       AppendixContent,
       TopLevelClassExtension,
+      Containment,
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],

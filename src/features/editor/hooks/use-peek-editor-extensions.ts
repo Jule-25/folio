@@ -41,6 +41,7 @@ import { AudioExtension } from "src/components/tiptap-node/audio-node";
 import { RecordPropertyPanelNode } from "../../database/record-property-panel/record-property-panel-node";
 import type { ID } from "src/types";
 import { PageComment } from "src/features/comments/page-comment-node";
+import { Containment } from "src/components/tiptap-extension/containment-extension";
 
 export function usePeekEditorExtensions(onNavigate?: (pageId: ID) => void) {
   const extensions = useMemo(
@@ -106,6 +107,7 @@ export function usePeekEditorExtensions(onNavigate?: (pageId: ID) => void) {
       DatabaseCellNode,
       DatabaseRecordNode,
       DatabaseNode,
+      Containment,
       CalloutExtension,
       AudioExtension,
       RecordPropertyPanelNode,
