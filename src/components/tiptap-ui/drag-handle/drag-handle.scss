@@ -32,6 +32,24 @@
   &.adjust-pos{
     transform: translateX(28px);
   }
+
+  // On a block inside a table cell: a solid chip, 12px further out than
+  // usual, so it stands clear of the row's grip on the table's left border
+  // (table-grip.scss) and is the obvious thing to grab.
+  &.in-cell {
+    transform: translateX(-27px);
+    padding: 0 2px;
+    border-radius: 6px;
+    background: var(--tt-bg-color);
+    box-shadow:
+      0 0 0 1px var(--tt-border-color),
+      0 2px 6px rgba(0, 0, 0, 0.12);
+
+    .plus-button,
+    .grip-button {
+      opacity: 0.9;
+    }
+  }
 }
 
 .column-drag-handle{

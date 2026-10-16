@@ -105,20 +105,70 @@ const makeNestedOptions = (editor: Editor | null) => ({
     strength: 500,
   },
 
+  // The innermost block under the pointer gets the handle (a list item, a
+  // block in a callout or a table cell), Notion-style: every candidate scores
+  // the same and the deepest wins, except the cases below. Scores are
+  // penalties (1000 = never the handle's; negative = preferred).
   rules: [
     {
       id: "preferNodeLabels",
       evaluate: ({
         node,
-        // parent,
-        // depth,
+        parent,
+        isFirst,
       }: {
         node: Node;
         parent: Node | null;
-        depth: number;
+        isFirst: boolean;
       }) => {
         const name = node.type.name;
+        const parentName = parent?.type.name;
         if (name === "column" || name === "columnBlock" || name === "title") {
+          return 1000;
+        }
+
+        // Parts of a block, never moved on their own: a table's rows and
+        // cells (they have their own grips), a toggle's title and body, a
+        // tab, a code group's file.
+        if (
+          name === "tableRow" ||
+          name === "tableCell" ||
+          name === "tableHeader" ||
+          name === "appendixSummary" ||
+          name === "appendixContent" ||
+          name === "tab" ||
+          name === "codeGroupItem"
+        ) {
+          return 1000;
+        }
+
+        // A plain cell (just its text): the table is what's dragged. A cell
+        // with blocks (a list, a callout, code…) gives each its own handle.
+        if (
+          (parentName === "tableCell" || parentName === "tableHeader") &&
+          parent?.childCount === 1 &&
+          name === "paragraph"
+        ) {
+          return 1000;
+        }
+
+        // A list item's first line is the item; a callout's first line is
+        // the callout.
+        if (
+          isFirst &&
+          (parentName === "listItem" ||
+            parentName === "taskItem" ||
+            (parentName === "callout" && name === "paragraph"))
+        ) {
+          return 1000;
+        }
+
+        // Items are dragged, not their whole list.
+        if (
+          name === "bulletList" ||
+          name === "orderedList" ||
+          name === "taskList"
+        ) {
           return 1000;
         }
 
@@ -133,26 +183,13 @@ const makeNestedOptions = (editor: Editor | null) => ({
           return -300;
         }
 
-        // A database inside a callout, quote, list or appendix gets its own
-        // handle: the containers below otherwise win over everything in
-        // them, so the handle grabbed the whole callout and the database
-        // couldn't be dragged on its own.
+        // A database over whatever it sits in.
         if (name === "database") return -250;
 
-        if (
-          name === "bulletList" ||
-          name === "orderedList" ||
-          name === "taskList" ||
-          name === "blockquote" ||
-          name === "databaseRecord" ||
-          name === "table" ||
-          name === "callout" ||
-          name === "container"
-          // name === "column"
-        ) {
-          return -200;
-        }
-        return 500; // Small penalty for other nodes
+        // A quote moves as one block, its lines with it.
+        if (name === "blockquote") return -200;
+
+        return 500;
       },
     },
   ],
@@ -163,6 +200,10 @@ export function DragHandle({ editor }: { editor: Editor | null }) {
   const [open, setOpen] = useState(false);
   const [target, setTarget] = useState("paragraph");
   const [hideHandle, setHideHandle] = useState(false);
+  // The handle's block sits in a table cell: it's drawn as a solid chip a
+  // little further out, clear of the row's grip on the table's border.
+  const [inCell, setInCell] = useState(false);
+  const inCellRef = useRef(false);
   const nestedOptions = useMemo(() => makeNestedOptions(editor), [editor]);
   const isDraggingRef = useRef(false);
   const targetRef = useRef(target);
@@ -290,6 +331,62 @@ export function DragHandle({ editor }: { editor: Editor | null }) {
   // checkbox visible after the handle goes away.
   useEffect(() => () => recordSelection.setHovered(null), []);
 
+  // On the way from a block in a table cell to its handle, the pointer
+  // crosses the cell's padding, the table's border and the margin — over
+  // each, the table is the block under it, and the handle used to jump to
+  // the table before it could be reached. Inside that corridor (from the
+  // handle to the block's left edge, over the block's height) the handle
+  // stays where it is.
+  // The menu holds its own lock; the corridor below leaves it alone.
+  const openRef = useRef(open);
+  useEffect(() => {
+    openRef.current = open;
+  }, [open]);
+
+  useEffect(() => {
+    if (!editor) return;
+    let corridorLocked = false;
+    const release = () => {
+      if (!corridorLocked) return;
+      corridorLocked = false;
+      editor.commands.unlockDragHandle();
+    };
+    const onMove = (e: MouseEvent) => {
+      if (
+        openRef.current ||
+        lockedForSelectionRef.current ||
+        isDraggingRef.current
+      ) {
+        corridorLocked = false; // someone else holds the lock now
+        return;
+      }
+      if (!inCellRef.current) return release();
+      const handle = editor.view.dom.parentElement?.querySelector<HTMLElement>(
+        ".drag-handle.in-cell",
+      );
+      const block = editor.view.nodeDOM(posRef.current);
+      if (!handle || !(block instanceof HTMLElement)) return release();
+      const h = handle.getBoundingClientRect();
+      const b = block.getBoundingClientRect();
+      const inCorridor =
+        e.clientX >= h.left - 4 &&
+        e.clientX <= b.left + 8 &&
+        e.clientY >= Math.min(h.top, b.top) - 4 &&
+        e.clientY <= Math.max(h.bottom, b.bottom) + 4;
+      if (inCorridor && !corridorLocked) {
+        corridorLocked = true;
+        editor.commands.lockDragHandle();
+      } else if (!inCorridor) {
+        release();
+      }
+    };
+    document.addEventListener("mousemove", onMove, true);
+    return () => {
+      document.removeEventListener("mousemove", onMove, true);
+      release();
+    };
+  }, [editor]);
+
   const onAction = useCallback(() => {
     setOpen(false);
     editor?.commands.unlockDragHandle();
@@ -344,7 +441,7 @@ export function DragHandle({ editor }: { editor: Editor | null }) {
     <TiptapDragHandle
       className={`drag-handle ${isColumnResizing ? "hide" : "show"} ${
         target === "Record" ? "is-record" : ""
-      } ${hideHandle ? "hide" : ""}`}
+      } ${hideHandle ? "hide" : ""} ${inCell ? "in-cell" : ""}`}
       editor={editor}
       computePositionConfig={computePositionConfig}
       onNodeChange={({ node, pos: newPos }) => {
@@ -355,6 +452,18 @@ export function DragHandle({ editor }: { editor: Editor | null }) {
         }
 
         const newTarget = NODE_LABELS[node.type.name] ?? "paragraph";
+
+        const $node = editor.state.doc.resolve(newPos);
+        let nowInCell = false;
+        for (let d = $node.depth; d > 0; d--) {
+          const n = $node.node(d).type.name;
+          if (n === "tableCell" || n === "tableHeader") {
+            nowInCell = true;
+            break;
+          }
+        }
+        inCellRef.current = nowInCell;
+        setInCell(nowInCell);
 
         if (newTarget === "Record") {
           const hideHandle = node.attrs.hideHandle as boolean;

@@ -9,6 +9,7 @@ import {
   getTableContext,
 } from "../utils";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
+import type { ResolvedPos } from "@tiptap/pm/model";
 
 type Col = {
   index: number;
@@ -19,6 +20,15 @@ type Row = {
   index: number;
   height: number;
 };
+
+/** The position of the table cell around `$pos`, at any depth, or -1. */
+function cellPosAround($pos: ResolvedPos): number {
+  for (let d = $pos.depth; d >= 1; d--) {
+    const name = $pos.node(d).type.name;
+    if (name === "tableCell" || name === "tableHeader") return $pos.before(d);
+  }
+  return -1;
+}
 
 export const tableContextPluginKey = new PluginKey<{
   currentCol: Col | null;
@@ -99,7 +109,13 @@ export const TableContextPlugin = () => {
       return {
         update(view, prevState) {
           if (locked) return;
-          if (view.state.selection.eq(prevState.selection)) return;
+          // Also when the document changed: the cell grows as it's typed in
+          // (a new list item), and its rect must follow.
+          if (
+            view.state.selection.eq(prevState.selection) &&
+            view.state.doc.eq(prevState.doc)
+          )
+            return;
 
           const { selection } = view.state;
           const meta = tableContextPluginKey.getState(view.state);
@@ -109,18 +125,13 @@ export const TableContextPlugin = () => {
               ? selection.$anchorCell
               : selection.$anchor;
 
-          const { $anchor } = selection;
-          // Walk up the depth to find a cell — don't assume -1 is always the cell
-          let isInTable = false;
-          for (let d = $anchor.depth; d >= 1; d--) {
-            const node = $anchor.node(d);
-            if (["tableCell", "tableHeader"].includes(node.type.name)) {
-              isInTable = true;
-              break;
-            }
-          }
+          // The cell around the selection, at whatever depth: the cursor can
+          // be deep inside it now (a list item, a callout). Assuming the
+          // cell was the cursor's grandparent left the dot on the previous
+          // cell as soon as the cell held anything but plain text.
+          const cellPos = cellPosAround($cell);
 
-          if (!isInTable) {
+          if (cellPos === -1) {
             view.dispatch(
               view.state.tr.setMeta(tableContextPluginKey, {
                 ...meta,
@@ -130,17 +141,6 @@ export const TableContextPlugin = () => {
             );
             return;
           }
-
-          if ($cell.depth < 2) return;
-
-          const cellNode = $cell.node(-1);
-          if (
-            !cellNode ||
-            !["tableCell", "tableHeader"].includes(cellNode.type.name)
-          )
-            return;
-
-          const cellPos = $cell.before(-1);
 
           // Defer rect calculation until after browser paint
           requestAnimationFrame(() => {
@@ -188,17 +188,8 @@ export const TableContextPlugin = () => {
               });
               if (!pos) return false;
 
-              const $pos = view.state.doc.resolve(pos.pos);
-              if ($pos.depth < 2) return false;
-
-              const cellNode = $pos.node(-1);
-              if (
-                !cellNode ||
-                !["tableCell", "tableHeader"].includes(cellNode.type.name)
-              )
-                return false;
-
-              const cellPos = $pos.before(-1);
+              const cellPos = cellPosAround(view.state.doc.resolve(pos.pos));
+              if (cellPos === -1) return false;
               if (cellPos === meta?.cellPos) return false; // no change
 
               const cellDOM = view.nodeDOM(cellPos) as HTMLElement | null;
