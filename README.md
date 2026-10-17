@@ -1,8 +1,25 @@
 # Folio
 
-A collaborative workspace for teams, schools and communities: a block editor, nested pages, inline databases, comments and chat, with real-time collaboration built in. Interface in English and French.
+A collaborative workspace for teams, schools and communities: a block editor, nested pages, inline databases, comments and chat, with real-time collaboration built in. Folio speaks English and French today, and more languages are coming: [help translate it](#translating-folio).
 
-![Folio screenshot](./demo.png)
+<table>
+  <tr>
+    <td width="50%"><img src="./docs/screenshots/home.png" alt="Home: a teamspace's banner, notifications and recent pages" /></td>
+    <td width="50%"><img src="./docs/screenshots/editor.png" alt="A page in the block editor, with columns, callouts and math" /></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Home: your teamspace, what's new for you, recent pages</sub></td>
+    <td align="center"><sub>The editor: blocks, columns, callouts, math, code</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="./docs/screenshots/database.png" alt="An inline database in board view" /></td>
+    <td width="50%"><img src="./docs/screenshots/together.png" alt="Comments and a chat room next to a page" /></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Databases: table, board, gallery, list, calendar, timeline</sub></td>
+    <td align="center"><sub>Together: live editing, comments and chat rooms</sub></td>
+  </tr>
+</table>
 
 ## Why I'm building this
 
@@ -17,7 +34,7 @@ I wanted a tool where collaboration and notes actually stick around instead of g
 - Code blocks with a searchable language picker, line numbers and wrap; code groups with one tab per language
 - Math with KaTeX: `$…$` inline, `$$` for a block
 - Images (upload, paste or drop, captions, alt text, lightbox), video (uploads, YouTube, Vimeo, Loom), audio, files with previews, web bookmarks, buttons, containers
-- `/` menu with recently used blocks and search in English and French; `@` mentions for people, pages and dates (`@today`, `@friday`, `@in 3 days`); `:` emoji with recents
+- `/` menu with recently used blocks and search in the interface's language; `@` mentions for people, pages and dates (`@today`, `@friday`, `@in 3 days`); `:` emoji with recents
 - Drag handle with a block menu: turn into, colours, move to another page, duplicate, delete
 - Drag-box selection from the margin, multi-block drag, the `+` button to insert below (Alt: above)
 - Paste Markdown and get blocks; export a page to Markdown, PDF or Word
@@ -57,7 +74,7 @@ I wanted a tool where collaboration and notes actually stick around instead of g
 | Data                    | React Query (persisted for offline), Supabase JS                      |
 | Backend                 | Supabase: Postgres, Auth, Row Level Security, Storage, Edge Functions |
 | Real-time collaboration | Yjs, Hocuspocus                                                       |
-| Languages               | i18next (English, French)                                             |
+| Languages               | i18next (English and French so far; more welcome)                     |
 | Deployment              | Vercel                                                                |
 
 ## Getting started
@@ -165,6 +182,18 @@ The folder layout and where new code goes are in [`docs/STRUCTURE.md`](docs/STRU
 ## Where things stand
 
 The editor is in good shape. The next steps are the databases (closing gaps in properties and views), templates, publishing pages to the web, and the community gallery.
+
+## Translating Folio
+
+Folio is available in English and French so far. It's meant for people everywhere, so every new language helps, and you don't need to be a developer to add one: a translation is a single JSON file.
+
+1. Copy `src/i18n/locales/en/common.json` to `src/i18n/locales/<code>/common.json`, where `<code>` is the language's code (`wo` for Wolof, `ar` for Arabic, `pt` for Portuguese…).
+2. Translate the values, never the keys. Keep `{{placeholders}}` as they are. Plurals use key endings like `_one` and `_other`; some languages need more forms (`_two`, `_few`, `_many`), see [i18next plurals](https://www.i18next.com/translation-function/plurals).
+3. Register the language in `src/i18n/config.ts`: import the file, add it to `resources`, and add it to `SUPPORTED_LANGUAGES` with its name in that language.
+4. Add its code to `LOCALES` in `scripts/check-i18n.mjs`, then run `node scripts/check-i18n.mjs` to find keys you missed.
+5. Open a pull request. A partial translation is welcome too: missing strings fall back to English, and someone else can finish it.
+
+Improving an existing translation (a clumsy sentence, a wrong term) is just as useful: edit the file and open a pull request.
 
 ## Contributing
 
