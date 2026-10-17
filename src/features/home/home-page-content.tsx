@@ -32,6 +32,13 @@ import "./home-page-content.scss";
 import { FileText } from "src/components/tiptap-icons";
 import { usePeopleById } from "src/hooks/use-people";
 import { Avatar } from "src/components/tiptap-ui-primitive/avatar";
+import {
+  getSortMode,
+  scopeKeyForChildren,
+  sortSiblings,
+  useCustomOrder,
+  useSectionSortModes,
+} from "../shell/hooks/use-sidebar-order";
 
 // Home: the greeting, "For you" (the latest notifications and unread rooms,
 // in a card), then your pages in a table — Recent, Favorites (Pinned in a
@@ -93,6 +100,23 @@ export function HomePageContent({ userName }: { userName?: string }) {
     return pages.filter((p) => p.category === "Favorites").slice(0, PINNED_MAX);
   }, [teamspaceId, pinnedIds, allPages, pages]);
 
+  const [sortModes] = useSectionSortModes();
+  const [customOrder] = useCustomOrder();
+
+  // The teamspace's own pages, in the sidebar's order.
+  const subpages = useMemo(() => {
+    if (!teamspaceId) return [];
+    const nodes = allPages
+      .filter((p) => p.parentId === teamspaceId && !p.sourceId && !p.deletedAt)
+      .map((page) => ({ page, children: [] }));
+    return sortSiblings(
+      nodes,
+      scopeKeyForChildren(teamspaceId),
+      getSortMode(sortModes, "Teamspaces"),
+      customOrder,
+    ).map((n) => n.page);
+  }, [teamspaceId, allPages, sortModes, customOrder]);
+
   const mine = useMemo(
     () =>
       pages
@@ -150,6 +174,7 @@ export function HomePageContent({ userName }: { userName?: string }) {
               teamspaceId={teamspaceId}
               page={space.kind === "teamspace" ? space.page : null}
               pinned={pinned}
+              subpages={subpages}
             />
           )}
 

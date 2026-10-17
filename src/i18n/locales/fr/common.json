@@ -864,6 +864,7 @@
       "open": "Ouvrir la page",
       "invite": "Inviter",
       "pinned": "Épinglées pour l’équipe",
+      "pages": "Pages",
       "members_one": "{{count}} membre",
       "members_other": "{{count}} membres"
     }

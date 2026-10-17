@@ -7,8 +7,7 @@ import { useActivePageActions } from "../pages/context/active-page-context";
 import { useTeamspaceMemberList } from "src/hooks/use-teamspace-members";
 import { TeamspaceMembersModal } from "../workspace/teamspaces/teamspace-members/teamspace-members-modal";
 import { colorForPersonId } from "src/lib/person-color";
-import { homeWhen } from "./home-time";
-import { FileText, UserPlus } from "lucide-react";
+import { ChevronRight, FileText, UserPlus } from "lucide-react";
 import "./teamspace-hero.scss";
 
 const MAX_FACES = 5;
@@ -49,14 +48,16 @@ export function TeamspaceHero({
   teamspaceId,
   page,
   pinned,
+  subpages,
 }: {
   teamspaceId: ID;
   /** The teamspace's root page (name, icon, content). */
   page: Page | null;
   /** The team's pinned pages, in pin order. */
   pinned: Page[];
+  subpages: Page[];
 }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { setActivePageId } = useActivePageActions();
   const { members } = useTeamspaceMemberList(teamspaceId);
   const [membersOpen, setMembersOpen] = useState(false);
@@ -67,13 +68,25 @@ export function TeamspaceHero({
   );
   const name = page?.title || t("teamspaces.untitled");
   const pins = pinned.slice(0, MAX_PINS);
+  const cover = page?.cover;
+  const coverBg = cover?.coverImage
+    ? `center / cover no-repeat url("${cover.coverImage}")`
+    : (cover?.gradient ?? null);
+  const list = pins.length > 0 ? pins : subpages.slice(0, MAX_PINS);
 
   return (
     <section
       className="ts-hero"
       aria-label={name}
-      data-has-pins={pins.length > 0 || undefined}
+      data-has-side={list.length > 0 || undefined}
     >
+      {coverBg && (
+        <div
+          className="ts-hero__cover"
+          style={{ background: coverBg }}
+          aria-hidden
+        />
+      )}
       <div className="ts-hero__main">
         <span className="ts-hero__icon" aria-hidden>
           {page ? (
@@ -134,13 +147,15 @@ export function TeamspaceHero({
         </div>
       </div>
 
-      {pins.length > 0 && (
+      {list.length > 0 && (
         <div className="ts-hero__pins">
           <span className="ts-hero__pins-label">
-            {t("home.teamspaceHero.pinned")}
+            {list.length > 0
+              ? t("home.teamspaceHero.pinned")
+              : t("home.teamspaceHero.pages")}
           </span>
           <div className="ts-hero__pins-grid">
-            {pins.map((p) => (
+            {list.map((p) => (
               <button
                 key={p.id}
                 type="button"
@@ -155,7 +170,7 @@ export function TeamspaceHero({
                   {p.title || t("page.untitled")}
                 </span>
                 <span className="ts-hero__pin-when">
-                  {homeWhen(p.updatedAt ?? p.createdAt, t, i18n.language)}
+                  <ChevronRight size={14} />
                 </span>
               </button>
             ))}
