@@ -6,7 +6,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "src/components/tiptap-ui-primitive/popover";
-import { Plus, PencilIcon, Trash2 } from "lucide-react";
+import { Plus, PencilIcon, Trash2, ImageIcon } from "lucide-react";
 import { TbDots } from "src/components/tiptap-icons/tabler-icons";
 import { SB_ICON_SM } from "../../shell/sidebar/sidebar-icon";
 import type { Page } from "src/types";
@@ -17,7 +17,12 @@ import { makeChildPage } from "src/utils/make-page";
 //import { usePageCapabilities } from "src/hooks/use-page-role";
 import { useTrashPage } from "src/hooks/use-trash-page";
 import { useState } from "react";
-import { useCurrentWorkspace } from "src/hooks/use-workspaces";
+import {
+  useCurrentWorkspace,
+  useManageWorkspace,
+} from "src/hooks/use-workspaces";
+import { useCurrentPerson } from "src/hooks/use-session";
+import { canBeWorkspaceBanner } from "src/lib/banner-page";
 
 interface PageItemOptionsProps {
   page: Page;
@@ -42,7 +47,22 @@ export function PageItemOptions({
   const { data: recentPages } = useRecentPages();
 
   const { mutate: trashPage } = useTrashPage();
-  const { workspaceId } = useCurrentWorkspace();
+  const { workspaceId, workspace } = useCurrentWorkspace();
+  const { person } = useCurrentPerson();
+  const { setSettingAsync } = useManageWorkspace();
+
+  const isBanner = workspace?.settings.bannerPageId === page.id;
+  const canSetBanner =
+    person?.role === "owner" && canBeWorkspaceBanner(page, workspaceId);
+
+  const toggleBanner = () => {
+    if (!workspaceId) return;
+    void setSettingAsync(
+      workspaceId,
+      "bannerPageId",
+      isBanner ? null : page.id,
+    );
+  };
 
   const handleDeletePage = () => {
     // Deleting the page we're on: navigate away FIRST so the editor never
@@ -149,6 +169,29 @@ export function PageItemOptions({
                   {t("ui.addPageInside")}
                 </span>
               </Button>
+
+              {(canSetBanner || isBanner) && (
+                <Button
+                  variant="ghost"
+                  style={{
+                    width: "100%",
+                    justifyContent: "flex-start",
+                    gap: 10,
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleBanner();
+                    close();
+                  }}
+                >
+                  <ImageIcon className="tiptap-button-icon" />
+                  <span className="tiptap-button-text">
+                    {isBanner
+                      ? t("ui.removeHomeBanner")
+                      : t("ui.useAsHomeBanner")}
+                  </span>
+                </Button>
+              )}
 
               <Button
                 variant="ghost"

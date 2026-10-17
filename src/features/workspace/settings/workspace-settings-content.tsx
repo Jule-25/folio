@@ -20,6 +20,7 @@ import { DynamicIcon } from "src/features/pages/cover/dynamic-icon";
 import { IconPickerPopover } from "src/features/pages/cover";
 import { useRecentPages } from "src/hooks/use-pages";
 import { AccentSwatches } from "src/components/accent-swatches/accent-swatches";
+import { canBeWorkspaceBanner } from "src/lib/banner-page";
 
 function SettingRow({
   label,
@@ -172,15 +173,7 @@ export function WorkspaceSettingsContent() {
   const { data } = useRecentPages();
   const allPages = useMemo(() => data ?? [], [data]);
   const bannerOptions = useMemo(
-    () =>
-      allPages.filter(
-        (p) =>
-          p.workspaceId === workspace?.id &&
-          !p.teamspaceId &&
-          !p.sourceId &&
-          !p.deletedAt &&
-          (p.generalAccess === "workspace" || p.generalAccess === "public"),
-      ),
+    () => allPages.filter((p) => canBeWorkspaceBanner(p, workspace?.id)),
     [allPages, workspace?.id],
   );
 

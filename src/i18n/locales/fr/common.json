@@ -636,6 +636,8 @@
     "addIcon": "Ajouter une icône",
     "addCover": "Ajouter une couverture",
     "addPageInside": "Ajouter une page à l’intérieur",
+    "useAsHomeBanner": "Utiliser comme bannière d’accueil",
+    "removeHomeBanner": "Retirer de la bannière d’accueil",
     "moveToTrash": "Mettre à la corbeille",
     "you": "Toi",
     "orderBy": "Trier par",

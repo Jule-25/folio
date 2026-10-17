@@ -729,6 +729,8 @@
     "addIcon": "Add icon",
     "addCover": "Add cover",
     "addPageInside": "Add page inside",
+    "useAsHomeBanner": "Use as Home banner", 
+    "removeHomeBanner": "Remove from Home banner",
     "moveToTrash": "Move to trash",
     "you": "You",
     "orderBy": "Order by",
