@@ -1,7 +1,14 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import type { Page } from "src/types";
 import { useTranslation } from "react-i18next";
-import { BookOpen, Check, ChevronDown } from "lucide-react";
+import {
+  BookOpen,
+  Check,
+  ChevronDown,
+  Clock,
+  Layers,
+  UserRound,
+} from "lucide-react";
 import { useRecentPages } from "src/hooks/use-pages";
 import { useActivePageActions } from "../pages/context/active-page-context";
 import { PageItemIcon } from "../pages/page-item/page-item-icon";
@@ -22,6 +29,9 @@ import { homeWhen } from "./home-time";
 import { TeamspaceHero } from "./teamspace-hero";
 import { useSpaceAccent } from "../shell/space-accent/space-accent";
 import "./home-page-content.scss";
+import { FileText } from "src/components/tiptap-icons";
+import { usePeopleById } from "src/hooks/use-people";
+import { Avatar } from "src/components/tiptap-ui-primitive/avatar";
 
 // Home: the greeting, "For you" (the latest notifications and unread rooms,
 // in a card), then your pages in a table — Recent, Favorites (Pinned in a
@@ -220,24 +230,67 @@ function PagesTable({
   inTeamspace: boolean;
   onOpen: (page: Page) => void;
 }) {
+  const ids = pages.map((p) => p.editedBy ?? p.ownerId);
+  const people = usePeopleById(ids);
   const { t, i18n } = useTranslation();
   const { person } = useCurrentPerson();
   const nameOf = usePersonNames(true);
 
-  const placeOf = (p: Page): string => {
+  const placeCell = (p: Page): { title: string; icon?: ReactNode } => {
     if (p.teamspaceId) {
       const root = allPages.find((x) => x.id === p.teamspaceId);
-      return root?.title || t("teamspaces.untitled");
+
+      return {
+        icon: root ? (
+          <PageItemIcon
+            cover={root?.cover}
+            styles={{ width: 16, height: 16, fontSize: 14 }}
+          />
+        ) : undefined,
+        title: root?.title || t("teamspaces.untitled"),
+      };
     }
     return p.category === "Shared"
-      ? t("home.place.shared")
-      : t("home.place.private");
+      ? {
+          icon: (
+            <PageItemIcon
+              cover={p.cover}
+              styles={{ width: 16, height: 16, fontSize: 14 }}
+            />
+          ),
+          title: t("home.place.shared"),
+        }
+      : {
+          icon: (
+            <PageItemIcon
+              cover={p.cover}
+              styles={{ width: 16, height: 16, fontSize: 14 }}
+            />
+          ),
+          title: t("home.place.private"),
+        };
   };
 
-  const editorOf = (p: Page): string => {
+  const editorOf = (p: Page): { name: string; avatar?: ReactNode } => {
     const id = p.editedBy ?? p.ownerId;
-    if (!id) return "—";
-    return id === person?.id ? t("home.you") : nameOf(id);
+    if (!id) return { name: "—" };
+    return id === person?.id
+      ? {
+          name: t("home.you"),
+          avatar: (
+            <Avatar size="xs" src={person.avatarUrl} name={t("home.you")} />
+          ),
+        }
+      : {
+          name: nameOf(id),
+          avatar: (
+            <Avatar
+              size="xs"
+              src={people.get(id)?.avatarUrl}
+              name={nameOf(id)}
+            />
+          ),
+        };
   };
 
   return (
@@ -245,17 +298,31 @@ function PagesTable({
       <table className="home-table">
         <thead>
           <tr>
-            <th scope="col">{t("home.table.page")}</th>
+            <th scope="col">
+              <span className="home-table__th">
+                <FileText size={13} aria-hidden />
+                {t("home.table.page")}
+              </span>
+            </th>
             {!inTeamspace && (
               <th scope="col" className="home-table__in">
-                {t("home.table.in")}
+                <span className="home-table__th">
+                  <Layers size={13} aria-hidden />
+                  {t("home.table.in")}
+                </span>
               </th>
             )}
             <th scope="col" className="home-table__by">
-              {t("home.table.editedBy")}
+              <span className="home-table__th">
+                <UserRound size={13} aria-hidden />
+                {t("home.table.editedBy")}
+              </span>
             </th>
             <th scope="col" className="home-table__when">
-              {t("home.table.when")}
+              <span className="home-table__th">
+                <Clock size={13} aria-hidden />
+                {t("home.table.when")}
+              </span>
             </th>
           </tr>
         </thead>
@@ -278,8 +345,20 @@ function PagesTable({
                   <span>{p.title || t("page.untitled")}</span>
                 </button>
               </td>
-              {!inTeamspace && <td className="home-table__in">{placeOf(p)}</td>}
-              <td className="home-table__by">{editorOf(p)}</td>
+              {!inTeamspace && (
+                <td className="home-table__in">
+                  <span className="home-table__place">
+                    {placeCell(p).icon}
+                    {placeCell(p).title}
+                  </span>
+                </td>
+              )}
+              <td className="home-table__by">
+                <span className="home-table__place">
+                  {editorOf(p).avatar}
+                  {editorOf(p).name}
+                </span>
+              </td>
               <td className="home-table__when">
                 {homeWhen(editedAt(p), t, i18n.language)}
               </td>
