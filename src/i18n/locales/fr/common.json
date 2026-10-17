@@ -728,7 +728,10 @@
     "workspace": {
       "banner": "Bannière d’accueil",
       "bannerDesc": "Une page affichée en haut de l’accueil de tout le monde : sa couverture, ses premières lignes et ses pages.",
-      "noBanner": "Aucune bannière"
+      "noBanner": "Aucune bannière",
+      "accent": "Couleur d’accent",
+      "accentDesc": "Utilisée pour la bannière, Nouvelle page, les onglets et les liens de cet espace de travail.",
+      "accentAuto": "Violet Folio"
     },
     "nav": {
       "account": "Compte",

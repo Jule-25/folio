@@ -858,6 +858,7 @@ export interface Teamspace {
   ownerIds: ID[];
   createdAt: CreatedAt;
   pinnedPageIds?: ID[];
+  accentColor?: string | null;
 }
 
 // ── Derived helpers (pure) ───────────────────────────────────────────────

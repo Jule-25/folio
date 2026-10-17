@@ -1,0 +1,98 @@
+// Colour swatches (workspace / teamspace accent). Each swatch's colour is
+// --swatch; the selected one gets a double ring: an inner gap in the
+// background colour, then the colour itself.
+.accent-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+
+  &[aria-disabled] {
+    opacity: 0.55;
+  }
+}
+
+.accent-swatch {
+  --swatch: transparent;
+
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--swatch);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+  transition:
+    transform 0.1s ease,
+    box-shadow 0.1s ease;
+
+  &:hover:not(:disabled):not([aria-disabled]) {
+    transform: scale(1.1);
+  }
+
+  &[aria-checked="true"] {
+    box-shadow:
+      0 0 0 2px var(--tt-bg-color),
+      0 0 0 4px var(--swatch);
+  }
+
+  &:focus-visible,
+  &:focus-within:has(:focus-visible) {
+    outline: 2px solid var(--tt-brand-color-400);
+    outline-offset: 4px;
+  }
+
+  &:disabled,
+  &[aria-disabled] {
+    cursor: default;
+  }
+
+  // "Automatic": an outlined circle with an A.
+  &--auto {
+    background: transparent;
+    box-shadow: inset 0 0 0 1.5px var(--tt-text-secondary);
+    color: var(--tt-text-primary);
+    font-size: 10.5px;
+    font-weight: 600;
+
+    &[aria-checked="true"] {
+      box-shadow:
+        inset 0 0 0 1.5px var(--tt-text-primary),
+        0 0 0 2px var(--tt-bg-color),
+        0 0 0 4px var(--tt-text-primary);
+    }
+  }
+
+  // Custom: a dashed "+" until a custom colour is chosen, then that colour.
+  &--custom {
+    background: transparent;
+    box-shadow: inset 0 0 0 1px var(--tt-text-secondary);
+    border: 1px dashed transparent;
+    color: var(--tt-text-secondary);
+
+    &.is-set {
+      background: var(--swatch);
+      color: #fff;
+    }
+  }
+
+  // The real colour input fills the label, invisible, so a click anywhere
+  // on the swatch opens the browser's picker.
+  &__input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    opacity: 0;
+    cursor: inherit;
+  }
+}

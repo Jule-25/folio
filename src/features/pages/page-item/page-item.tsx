@@ -36,6 +36,7 @@ import { CloudDownload } from "lucide-react";
 import { useAvailableOffline } from "../available-offline";
 import { SbChevronRightIcon } from "src/components/tiptap-icons/sidebar-icons";
 import { teamspaceTint } from "src/lib/teamspace-color";
+import { useTeamspaceAccentColor } from "src/hooks/use-teamspaces";
 
 function initialOf(title: string): string {
   return Array.from(title.trim())[0]?.toUpperCase() ?? "T";
@@ -130,6 +131,7 @@ function PageItemView({
   // A teamspace's root page carries its own id as teamspace_id — that's how
   // this row knows it IS a teamspace, and offers to enter it.
   const isTeamspaceRoot = page.teamspaceId === page.id;
+  const chosenTint = useTeamspaceAccentColor(isTeamspaceRoot ? page.id : null);
 
   // A page inside a teamspace (not the teamspace itself) gets a badge; the
   // badge hides itself while you're in that teamspace.
@@ -229,7 +231,11 @@ function PageItemView({
             {isTeamspaceRoot ? (
               <span
                 className="page-item-ts-tile"
-                style={{ "--ts-tint": teamspaceTint(page) } as CSSProperties}
+                style={
+                  {
+                    "--ts-tint": teamspaceTint(page, chosenTint),
+                  } as CSSProperties
+                }
                 aria-hidden="true"
               >
                 {page.cover.iconName ? (

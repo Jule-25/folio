@@ -7,6 +7,7 @@ import {
   ChevronLeft,
   ChevronRight,
   MoreHorizontal,
+  Palette,
   Plus,
   Search,
   Trash2,
@@ -44,6 +45,9 @@ import {
   useCurrentWorkspace,
   useOwnedWorkspaces,
 } from "src/hooks/use-workspaces";
+import { useCurrentPerson } from "src/hooks/use-session";
+import { AccentSwatches } from "src/components/accent-swatches/accent-swatches";
+import { teamspaceTint } from "src/lib/teamspace-color";
 import "./teamspace-settings-content.scss";
 
 // Popovers here open inside the workspace settings modal (z-index 701) —
@@ -251,6 +255,7 @@ function TeamspaceRow({
   groups,
   onRename,
   onSetAccess,
+  onSetColor,
   onDelete,
   moveTargets,
   onMove,
@@ -262,6 +267,8 @@ function TeamspaceRow({
   groups: Group[];
   onRename: (id: string, name: string) => void;
   onSetAccess: (id: string, a: TeamspaceAccess) => void;
+  /** null = automatic (the icon's colour). */
+  onSetColor: (id: string, color: string | null) => void;
   onDelete: (id: string) => void | Promise<void>;
   /** Other workspaces you own — where this teamspace can be moved. */
   moveTargets: Workspace[];
@@ -272,8 +279,11 @@ function TeamspaceRow({
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  // The ••• menu's second page: the workspaces to move to.
-  const [menuView, setMenuView] = useState<"main" | "move">("main");
+  // The ••• menu's other pages: the workspaces to move to, the colour.
+  const [menuView, setMenuView] = useState<"main" | "move" | "color">("main");
+  const { person } = useCurrentPerson();
+  // Only the teamspace's owners can change it (teamspaces_update policy).
+  const isTsOwner = !!person && ts.ownerIds.includes(person.id);
   const [renaming, setRenaming] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const closeConfirm = useCallback(() => setConfirmDelete(false), []);
@@ -371,7 +381,27 @@ function TeamspaceRow({
             style={{ zIndex: POPOVER_Z }}
           >
             <Card style={{ padding: 4, minWidth: 200 }}>
-              {menuView === "move" ? (
+              {menuView === "color" ? (
+                <>
+                  <Button
+                    variant="ghost"
+                    style={{ justifyContent: "flex-start", width: "100%" }}
+                    onClick={() => setMenuView("main")}
+                  >
+                    <ChevronLeft className="tiptap-button-icon" size={14} />
+                    <span className="tiptap-button-text">
+                      {t("teamspaces.color", "Colour")}
+                    </span>
+                  </Button>
+                  <div style={{ padding: "8px 10px 10px", maxWidth: 220 }}>
+                    <AccentSwatches
+                      value={ts.accentColor ?? null}
+                      onChange={(c) => onSetColor(ts.id, c)}
+                      autoLabel={t("teamspaces.colorAuto", "Match icon")}
+                    />
+                  </div>
+                </>
+              ) : menuView === "move" ? (
                 <>
                   <Button
                     variant="ghost"
@@ -429,6 +459,35 @@ function TeamspaceRow({
                       {t("actions.rename")}
                     </span>
                   </Button>
+                  {isTsOwner && (
+                    <Button
+                      variant="ghost"
+                      style={{ justifyContent: "flex-start", width: "100%" }}
+                      onClick={() => setMenuView("color")}
+                    >
+                      <Palette className="tiptap-button-icon" size={14} />
+                      <span className="tiptap-button-text">
+                        {t("teamspaces.color", "Colour")}
+                      </span>
+                      {page && (
+                        <span
+                          aria-hidden
+                          style={{
+                            marginLeft: "auto",
+                            width: 10,
+                            height: 10,
+                            borderRadius: "50%",
+                            background: teamspaceTint(page, ts.accentColor),
+                          }}
+                        />
+                      )}
+                      <ChevronRight
+                        className="tiptap-button-icon"
+                        size={14}
+                        style={page ? undefined : { marginLeft: "auto" }}
+                      />
+                    </Button>
+                  )}
                   <Button
                     variant="ghost"
                     style={{ justifyContent: "flex-start", width: "100%" }}
@@ -545,6 +604,7 @@ export function TeamspacesSettingsContent() {
     moveTeamspaceAsync,
     attachGroupAsync,
     detachGroupAsync,
+    setAccentColorAsync,
   } = useManageTeamspaces();
 
   const [createOpen, setCreateOpen] = useState(false);
@@ -647,6 +707,7 @@ export function TeamspacesSettingsContent() {
               groups={groups as Group[]}
               onRename={renameTeamspaceAsync}
               onSetAccess={setAccessAsync}
+              onSetColor={setAccentColorAsync}
               onDelete={handleDelete}
               moveTargets={moveTargets}
               onMove={handleMove}

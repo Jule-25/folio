@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Input } from "src/components/tiptap-ui-primitive/input";
 import { Separator } from "src/components/tiptap-ui-primitive/separator";
@@ -18,18 +18,25 @@ import "./workspace-settings-content.scss";
 import { Button } from "src/components/tiptap-ui-primitive/button";
 import { DynamicIcon } from "src/features/pages/cover/dynamic-icon";
 import { IconPickerPopover } from "src/features/pages/cover";
+import { useRecentPages } from "src/hooks/use-pages";
+import { AccentSwatches } from "src/components/accent-swatches/accent-swatches";
 
 function SettingRow({
   label,
   description,
+  stacked = false,
   children,
 }: {
   label: string;
   description?: string;
+  /** Control below the text instead of beside it (wide controls). */
+  stacked?: boolean;
   children: React.ReactNode;
 }) {
   return (
-    <div className="ws-setting-row">
+    <div
+      className={`ws-setting-row${stacked ? " ws-setting-row--stacked" : ""}`}
+    >
       <div className="ws-setting-row__text">
         <span className="ws-setting-row__label">{label}</span>
         {description && (
@@ -162,6 +169,21 @@ export function WorkspaceSettingsContent() {
 
   const { workspace } = useCurrentWorkspace();
 
+  const { data } = useRecentPages();
+  const allPages = useMemo(() => data ?? [], [data]);
+  const bannerOptions = useMemo(
+    () =>
+      allPages.filter(
+        (p) =>
+          p.workspaceId === workspace?.id &&
+          !p.teamspaceId &&
+          !p.sourceId &&
+          !p.deletedAt &&
+          (p.generalAccess === "workspace" || p.generalAccess === "public"),
+      ),
+    [allPages, workspace?.id],
+  );
+
   if (!workspace) {
     return (
       <div className="ws-settings-content__empty">
@@ -230,6 +252,42 @@ export function WorkspaceSettingsContent() {
           onKeyDown={(e) => {
             if (e.key === "Enter") e.currentTarget.blur();
           }}
+        />
+      </SettingRow>
+
+      <SettingRow
+        label={t("settings.workspace.banner", "Home Banner")}
+        description={t(
+          "settings.workspace.bannerDesc",
+          "A page shown at the top of everyone's Home: its cover, first lines and pages.",
+        )}
+      >
+        <Select<string>
+          value={s.bannerPageId ?? ""}
+          disabled={!isOwner}
+          onChange={(v) => set("bannerPageId", v || null)}
+          options={[
+            { value: "", label: t("settings.workspace.noBanner", "No banner") },
+            ...bannerOptions.map((p) => ({
+              value: p.id,
+              label: p.title || t("page.untitled"),
+            })),
+          ]}
+        />
+      </SettingRow>
+      <SettingRow
+        stacked
+        label={t("settings.workspace.accent", "Accent colour")}
+        description={t(
+          "settings.workspace.accentDesc",
+          "Used for the banner, New page, tabs and links in this workspace.",
+        )}
+      >
+        <AccentSwatches
+          value={s.accentColor ?? null}
+          onChange={(c) => set("accentColor", c)}
+          autoLabel={t("settings.workspace.accentAuto", "Folio purple")}
+          disabled={!isOwner}
         />
       </SettingRow>
 

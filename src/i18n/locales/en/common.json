@@ -798,7 +798,10 @@
     "workspace": {
       "banner": "Home banner",
       "bannerDesc": "A page shown at the top of everyone's Home: its cover, first lines and pages.",
-      "noBanner": "No banner"
+      "noBanner": "No banner",
+      "accent": "Accent colour",
+      "accentDesc": "Used for the banner, New page, tabs and links in this workspace.",
+      "accentAuto": "Folio purple"
     },
     "notifications": {
       "loading": "Loading…",

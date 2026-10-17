@@ -12,6 +12,7 @@ import { useHiddenSections } from "../hooks/use-hidden-sections";
 import { createPortal } from "react-dom";
 import "./sidebar.scss";
 import { SidebarResizeHandle } from "./sidebar-resize-handle";
+import { useSpaceAccent } from "../space-accent/space-accent";
 
 export const Sidebar = memo(() => {
   const {
@@ -38,11 +39,15 @@ export const Sidebar = memo(() => {
   const [order] = useSectionOrder();
   const [hidden, toggleHidden] = useHiddenSections();
 
+  const accent = useSpaceAccent();
+
   const sidebarCard = (
     <Card
       className={`sidebar ${collapsed ? "sidebar--collapsed" : ""} ${
         isMobile ? "sidebar-mobile" : ""
-      } ${floatingActive ? "sidebar--floating" : ""}`}
+      } ${floatingActive ? "sidebar--floating" : ""} ${
+        accent ? "sidebar--accent" : ""
+      }`}
       onMouseEnter={() => {
         if (!isMobile && collapsed) openPeek();
       }}
@@ -50,6 +55,7 @@ export const Sidebar = memo(() => {
         if (!isMobile) closePeek();
       }}
       style={{
+        ...accent?.style,
         zIndex: isMobile ? 950 : floatingActive ? 900 : 120,
         position: "fixed",
         left: 0,

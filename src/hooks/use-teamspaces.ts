@@ -163,6 +163,9 @@ export function useManageTeamspaces() {
     setAccessAsync: (id: ID, access: TeamspaceAccess) =>
       patch.mutateAsync({ id, patch: { access } }),
 
+    setAccentColorAsync: (id: ID, accentColor: string | null) =>
+      patch.mutateAsync({ id, patch: { accentColor } }),
+
     setDescriptionAsync: (id: ID, description: string | null) =>
       patch.mutateAsync({ id, patch: { description } }),
 
@@ -202,4 +205,12 @@ export function useManageTeamspaces() {
       });
     },
   };
+}
+
+/** A teamspace's chosen accent colour; null = none chosen (automatic). */
+export function useTeamspaceAccentColor(id: ID | null): string | null {
+  const { data } = useTeamspacesBase((teamspaces) =>
+    id ? (teamspaces.find((t) => t.id === id)?.accentColor ?? null) : null,
+  );
+  return data ?? null;
 }
