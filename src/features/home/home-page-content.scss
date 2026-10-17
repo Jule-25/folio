@@ -124,8 +124,9 @@
         color: var(--tt-theme-text);
         font-weight: 600;
 
+        // The space's colour when it has one, else the text colour.
         &::after {
-          background: var(--tt-theme-text);
+          background: var(--space-accent, var(--tt-theme-text));
         }
       }
 

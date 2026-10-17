@@ -11,6 +11,7 @@ import { useSearch } from "./search/search-context";
 import { useTemplates } from "../pages/templates/templates-context";
 import { useTemplates as useTemplatesApi } from "src/hooks/use-templates";
 import { WorkspaceSettings } from "../workspace/settings";
+import { SpaceAccentRoot } from "./space-accent/space-accent-root";
 import { SignOutHost } from "../auth/sign-out";
 import { takePendingInvite } from "../workspace/join/pending-invite";
 import { useEffect } from "react";
@@ -97,6 +98,7 @@ function AppOverlaysImpl() {
         />
       )}
 
+      <SpaceAccentRoot />
       <WorkspaceSettings />
       <SignOutHost />
       <PendingInviteRedirect />

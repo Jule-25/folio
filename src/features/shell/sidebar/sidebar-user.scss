@@ -69,6 +69,17 @@
       box-shadow: 0 0 0 1px var(--tt-border-color);
     }
 
+    // In a space with a colour, the tile wears a wash of it.
+    :root.space-accent &--glyph {
+      background: color-mix(
+        in srgb,
+        var(--space-accent) 18%,
+        var(--tt-card-bg-color, #fff)
+      );
+      box-shadow: 0 0 0 1px
+        color-mix(in srgb, var(--space-accent) 40%, transparent);
+    }
+
     .workspace-notification-badge {
       top: -3px;
       right: -3px;

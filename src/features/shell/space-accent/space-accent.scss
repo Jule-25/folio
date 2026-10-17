@@ -1,9 +1,11 @@
-// A teamspace's colour, worn by its space. `--space-accent` is set on the
-// element (useSpaceAccent); everything inside that uses the brand tokens —
-// primary buttons, active tabs, links — takes the teamspace's colour instead
-// of Folio's purple. Shades are mixed from the one colour; the button shades
-// are darkened a little so white text stays readable on light colours.
-.space-accent {
+// A space's colour (a teamspace's, or the workspace's chosen accent).
+// `--space-accent` is set on <html> by SpaceAccentRoot while you're in that
+// space, so everything that uses the brand tokens — primary buttons, active
+// tabs, links, focus rings, the editor's cursor and selection, menus in
+// portals — takes the space's colour instead of Folio's purple. Shades are
+// mixed from the one colour; the button shades are darkened a little so
+// white text stays readable on light colours.
+@mixin brand-from-accent {
   --tt-brand-color-50: color-mix(in srgb, var(--space-accent) 8%, #fff);
   --tt-brand-color-100: color-mix(in srgb, var(--space-accent) 16%, #fff);
   --tt-brand-color-200: color-mix(in srgb, var(--space-accent) 32%, #fff);
@@ -14,6 +16,19 @@
   --tt-brand-color-700: color-mix(in srgb, var(--space-accent) 60%, #000);
   --tt-brand-color-800: color-mix(in srgb, var(--space-accent) 48%, #000);
   --tt-brand-color-900: color-mix(in srgb, var(--space-accent) 36%, #000);
+  --tt-brand-color-950: color-mix(in srgb, var(--space-accent) 22%, #000);
+}
+
+// The whole app (on <html>). `:root.space-accent` outranks the `:root`
+// block that defines Folio's purple in styles/_variables.scss.
+:root.space-accent {
+  @include brand-from-accent;
+}
+
+// Kept for elements that set their own accent (useSpaceAccent's class and
+// style); inside the app they now match the <html> one.
+.space-accent {
+  @include brand-from-accent;
 }
 
 // The dock (foot of the sidebar) wears the colour; the rest of the sidebar

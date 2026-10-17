@@ -9,14 +9,17 @@ import { useTeamspaceAccentColor } from "src/hooks/use-teamspaces";
 export const SPACE_ACCENT_CLASS = "space-accent";
 
 /**
- * Inside a teamspace, the space wears the teamspace's colour: the dock at
- * the foot of the sidebar, and on Home its hero, New page, tabs and links.
- * Returns the class and the `--space-accent` variable to put on such an
- * element, or nothing in your own workspace (which keeps Folio's purple).
+ * The current space's colour: inside a teamspace, the teamspace's (chosen,
+ * else its icon's, else one from its id); in your workspace, its chosen
+ * accent, or nothing (Folio's purple). Returns the class and the
+ * `--space-accent` variable to put on an element, and the colour.
+ * SpaceAccentRoot puts them on <html> for the whole app.
  */
 export function useSpaceAccent(): {
   className: string;
   style: CSSProperties;
+  /** The space's colour itself. */
+  color: string;
 } | null {
   const space = useCurrentSpace();
   const page = space.kind === "teamspace" ? space.page : null;
@@ -31,6 +34,7 @@ export function useSpaceAccent(): {
         ? {
             className: SPACE_ACCENT_CLASS,
             style: { "--space-accent": color } as CSSProperties,
+            color,
           }
         : null,
     [color],
