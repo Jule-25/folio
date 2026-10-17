@@ -1,125 +1,26 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { ChevronLeft, X } from "lucide-react";
+import { ChevronLeft, Sparkles, X } from "lucide-react";
 import {
-  Bell,
-  CreditCard,
-  Download,
-  Fingerprint,
-  LayoutGrid,
-  Link2,
-  Monitor,
-  Settings,
-  Shield,
-  SlidersHorizontal,
-  Sparkles,
-  UserCircle,
-  Users,
-} from "lucide-react";
+  DEFAULT_SETTINGS_NAV,
+  type SettingsNavItem,
+  type SettingsNavSection,
+} from "./workspace-settings-nav";
 import { Button } from "src/components/tiptap-ui-primitive/button";
 import { Separator } from "src/components/tiptap-ui-primitive/separator";
 import "./workspace-settings-modal.scss";
 import { Avatar } from "src/components/tiptap-ui-primitive/avatar";
 import { useIsMobile } from "src/hooks/use-breakpoint";
 
-export interface SettingsNavItem {
-  id: string;
-  /** i18n key — resolved with t() at render, not a literal label. */
-  labelKey: string;
-  icon: ReactNode;
-}
-
-export interface SettingsNavSection {
-  /** i18n key for the section heading; undefined = no label (e.g. account block) */
-  labelKey?: string;
-  items: SettingsNavItem[];
-}
-
-// Static data (module-level) holds KEYS, not labels — t() can't run here.
-const NAV: SettingsNavSection[] = [
-  {
-    labelKey: "settings.nav.account",
-    items: [
-      {
-        id: "my-account",
-        labelKey: "settings.items.myAccount",
-        icon: <UserCircle size={16} />,
-      },
-      {
-        id: "my-settings",
-        labelKey: "settings.items.mySettings",
-        icon: <SlidersHorizontal size={16} />,
-      },
-      {
-        id: "my-notifications",
-        labelKey: "settings.items.myNotifications",
-        icon: <Bell size={16} />,
-      },
-      {
-        id: "my-connections",
-        labelKey: "settings.items.myConnections",
-        icon: <Link2 size={16} />,
-      },
-    ],
-  },
-  {
-    labelKey: "settings.nav.workspace",
-    items: [
-      {
-        id: "settings",
-        labelKey: "settings.items.settings",
-        icon: <Settings size={16} />,
-      },
-      {
-        id: "teamspaces",
-        labelKey: "settings.items.teamspaces",
-        icon: <LayoutGrid size={16} />,
-      },
-      {
-        id: "people",
-        labelKey: "settings.items.people",
-        icon: <Users size={16} />,
-      },
-      {
-        id: "sites",
-        labelKey: "settings.items.sites",
-        icon: <Monitor size={16} />,
-      },
-      {
-        id: "security",
-        labelKey: "settings.items.security",
-        icon: <Shield size={16} />,
-      },
-      {
-        id: "identity",
-        labelKey: "settings.items.identity",
-        icon: <Fingerprint size={16} />,
-      },
-      {
-        id: "connections",
-        labelKey: "settings.items.connections",
-        icon: <Link2 size={16} />,
-      },
-      {
-        id: "import",
-        labelKey: "settings.items.import",
-        icon: <Download size={16} />,
-      },
-      {
-        id: "billing",
-        labelKey: "settings.items.billing",
-        icon: <CreditCard size={16} />,
-      },
-    ],
-  },
-];
-
-function findLabelKey(id: string): string {
-  for (const s of NAV) {
+function findItem(
+  nav: SettingsNavSection[],
+  id: string,
+): SettingsNavItem | undefined {
+  for (const s of nav) {
     const it = s.items.find((i) => i.id === id);
-    if (it) return it.labelKey;
+    if (it) return it;
   }
-  return "";
+  return undefined;
 }
 
 export interface WorkspaceSettingsModalProps {
@@ -136,6 +37,8 @@ export interface WorkspaceSettingsModalProps {
   children?: ReactNode;
   /** Account identity shown at the top of the nav. */
   account?: { name: string; email: string; avatarUrl?: string };
+  /** The nav sections. Default: your account, then the workspace. */
+  nav?: SettingsNavSection[];
   /**
    * Whether the current user is present on some live collaborative
    * connection (a page's HocuspocusProvider) — this modal has no provider
@@ -156,6 +59,7 @@ export function WorkspaceSettingsModal({
   children,
   account = { name: "Workspace", email: "" },
   online,
+  nav = DEFAULT_SETTINGS_NAV,
 }: WorkspaceSettingsModalProps) {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
@@ -195,7 +99,10 @@ export function WorkspaceSettingsModal({
 
   if (!open) return null;
 
-  const activeLabelKey = findLabelKey(active);
+  const activeItem = findItem(nav, active);
+  const activeLabel = activeItem
+    ? (activeItem.label ?? t(activeItem.labelKey))
+    : "";
 
   // On mobile, each pane is shown/hidden via a class rather than unmounted —
   // keeps content state (scroll position, form drafts) alive when flipping
@@ -254,14 +161,14 @@ export function WorkspaceSettingsModal({
           </div>
 
           <div className="ws-settings__nav-scroll">
-            {NAV.map((section, i) => (
+            {nav.map((section, i) => (
               <div
                 className="ws-settings__nav-section"
-                key={section.labelKey ?? i}
+                key={section.label ?? section.labelKey ?? i}
               >
-                {section.labelKey && (
+                {(section.label || section.labelKey) && (
                   <span className="ws-settings__nav-label">
-                    {t(section.labelKey)}
+                    {section.label ?? t(section.labelKey!)}
                   </span>
                 )}
                 {section.items.map((item) => (
@@ -273,7 +180,7 @@ export function WorkspaceSettingsModal({
                   >
                     <span className="ws-nav-item__icon">{item.icon}</span>
                     <span className="ws-nav-item__label">
-                      {t(item.labelKey)}
+                      {item.label ?? t(item.labelKey)}
                     </span>
                   </button>
                 ))}
@@ -308,9 +215,7 @@ export function WorkspaceSettingsModal({
                 <ChevronLeft size={18} />
               </button>
             )}
-            <h1 className="ws-settings__title">
-              {title ?? (activeLabelKey ? t(activeLabelKey) : "")}
-            </h1>
+            <h1 className="ws-settings__title">{title ?? activeLabel}</h1>
             <div className="ws-settings__header-action">{headerAction}</div>
           </header>
 

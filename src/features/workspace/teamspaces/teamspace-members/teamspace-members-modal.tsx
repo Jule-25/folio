@@ -27,13 +27,17 @@ const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
 // Members of one teamspace: add from the host workspace, invite anyone by
 // email, change roles, remove, leave, and (owners) see pending invites.
-// Every change goes through the owner-checked membership RPCs.
-export function TeamspaceMembersModal({
+// Every change goes through the owner-checked membership RPCs. Shown in its
+// own modal (TeamspaceMembersModal) and in the teamspace's settings.
+export function TeamspaceMembersPanel({
   teamspaceId,
-  onClose,
+  onLeft,
+  autoFocus = false,
 }: {
   teamspaceId: string;
-  onClose: () => void;
+  /** Called after you left the teamspace. */
+  onLeft?: () => void;
+  autoFocus?: boolean;
 }) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -57,17 +61,6 @@ export function TeamspaceMembersModal({
 
   const [query, setQuery] = useState("");
   const [notice, setNotice] = useState<string | null>(null);
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.stopPropagation();
-        onClose();
-      }
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [onClose]);
 
   const memberIds = useMemo(
     () => new Set(members.map((m) => m.person.id)),
@@ -136,7 +129,7 @@ export function TeamspaceMembersModal({
       { teamspaceId, personId: person.id },
       {
         onSuccess: () => {
-          onClose();
+          onLeft?.();
           if (space.kind === "teamspace" && space.id === teamspaceId) {
             navigate({ to: "/" });
           }
@@ -144,6 +137,235 @@ export function TeamspaceMembersModal({
       },
     );
   };
+
+  return (
+    <div className="tmm-panel">
+      {/* ── Add / invite (owners) ───────────────────────────────── */}
+      {isOwner && (
+        <div className="tmm-add">
+          <input
+            autoFocus={autoFocus}
+            className="chm-input"
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setNotice(null);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && isEmail) sendInvite();
+            }}
+            placeholder={
+              canAddFromWorkspace
+                ? t("members.addPlaceholder", "Add people or invite by email")
+                : t("members.invitePlaceholder", "Invite by email")
+            }
+          />
+
+          {(suggestions.length > 0 || isEmail) && (
+            <div className="tmm-suggest">
+              {suggestions.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  className="tmm-suggest__row"
+                  disabled={add.isPending}
+                  onClick={() => addPerson(p.id)}
+                >
+                  <Avatar
+                    size="sm"
+                    src={p.avatarUrl ?? undefined}
+                    name={p.name}
+                  />
+                  <span className="tmm-suggest__text">
+                    <span className="tmm-suggest__name">{p.name}</span>
+                    <span className="tmm-suggest__sub">{p.email}</span>
+                  </span>
+                  <UserPlus size={14} className="tmm-suggest__icon" />
+                </button>
+              ))}
+              {isEmail && (
+                <button
+                  type="button"
+                  className="tmm-suggest__row"
+                  disabled={invite.isPending}
+                  onClick={sendInvite}
+                >
+                  <span className="tmm-suggest__mail">
+                    <Mail size={14} />
+                  </span>
+                  <span className="tmm-suggest__text">
+                    <span className="tmm-suggest__name">
+                      {t("members.inviteEmail", {
+                        email: query.trim(),
+                        defaultValue: "Invite {{email}}",
+                      })}
+                    </span>
+                    <span className="tmm-suggest__sub">
+                      {t(
+                        "members.inviteHint",
+                        "They'll see the invitation when they sign in.",
+                      )}
+                    </span>
+                  </span>
+                </button>
+              )}
+            </div>
+          )}
+
+          {notice && <div className="tmm-notice">{notice}</div>}
+        </div>
+      )}
+
+      {error && <div className="tmm-error">{error}</div>}
+
+      {/* ── Members ─────────────────────────────────────────────── */}
+      <div className="tmm-label">{t("members.members", "Members")}</div>
+      {isLoading ? (
+        <div className="tmm-empty">{t("chat.loading", "Loading…")}</div>
+      ) : (
+        members.map(({ person: m, isOwner: memberIsOwner }) => {
+          const isMe = m.id === person?.id;
+          const lastOwner = memberIsOwner && ownerCount <= 1;
+          return (
+            <div key={m.id} className="tmm-member">
+              <Avatar size="sm" src={m.avatarUrl ?? undefined} name={m.name} />
+              <span className="tmm-member__name">
+                {m.name}
+                {isMe && (
+                  <span className="tmm-member__you">
+                    {" "}
+                    {t("members.you", "(you)")}
+                  </span>
+                )}
+              </span>
+              <span className={`tmm-role${memberIsOwner ? " is-owner" : ""}`}>
+                {memberIsOwner
+                  ? t("members.owner", "Owner")
+                  : t("members.member", "Member")}
+              </span>
+
+              <div className="tmm-member__actions">
+                {isOwner && !isMe && (
+                  <>
+                    <button
+                      type="button"
+                      className="tmm-action"
+                      disabled={lastOwner || setOwner.isPending}
+                      title={
+                        lastOwner
+                          ? t(
+                              "members.lastOwner",
+                              "A teamspace needs at least one owner",
+                            )
+                          : undefined
+                      }
+                      onClick={() =>
+                        setOwner.mutate({
+                          teamspaceId,
+                          personId: m.id,
+                          owner: !memberIsOwner,
+                        })
+                      }
+                    >
+                      {memberIsOwner
+                        ? t("members.removeOwner", "Remove owner")
+                        : t("members.makeOwner", "Make owner")}
+                    </button>
+                    <button
+                      type="button"
+                      className="tmm-action tmm-action--danger"
+                      disabled={lastOwner || remove.isPending}
+                      onClick={() =>
+                        remove.mutate({ teamspaceId, personId: m.id })
+                      }
+                    >
+                      {t("members.remove", "Remove")}
+                    </button>
+                  </>
+                )}
+                {isMe && (
+                  <button
+                    type="button"
+                    className="tmm-action tmm-action--danger"
+                    disabled={lastOwner || remove.isPending}
+                    title={
+                      lastOwner
+                        ? t(
+                            "members.lastOwnerLeave",
+                            "Make someone else an owner before leaving",
+                          )
+                        : undefined
+                    }
+                    onClick={leave}
+                  >
+                    {t("members.leave", "Leave")}
+                  </button>
+                )}
+              </div>
+            </div>
+          );
+        })
+      )}
+
+      {/* ── Pending invites (owners) ────────────────────────────── */}
+      {isOwner && invites.length > 0 && (
+        <>
+          <div className="tmm-label">
+            {t("members.pending", "Pending invitations")}
+          </div>
+          {invites.map((inv) => (
+            <div key={inv.id} className="tmm-member">
+              <span className="tmm-suggest__mail">
+                <Mail size={14} />
+              </span>
+              <span className="tmm-member__name">
+                {inv.email}
+                <span className="tmm-member__meta">
+                  {formatRelativeTime(inv.createdAt, t, i18n.language)}
+                </span>
+              </span>
+              <div className="tmm-member__actions tmm-member__actions--always">
+                <button
+                  type="button"
+                  className="tmm-action"
+                  disabled={revoke.isPending}
+                  onClick={() => revoke.mutate(inv.id)}
+                >
+                  {t("members.revoke", "Revoke")}
+                </button>
+              </div>
+            </div>
+          ))}
+        </>
+      )}
+    </div>
+  );
+}
+
+// The members panel in its own modal (opened from the teamspace banner's
+// Invite button and from the Teamspaces settings list).
+export function TeamspaceMembersModal({
+  teamspaceId,
+  onClose,
+}: {
+  teamspaceId: string;
+  onClose: () => void;
+}) {
+  const { t } = useTranslation();
+  const enterable = useEnterableTeamspaces();
+  const entry = enterable.find((e) => e.page.id === teamspaceId);
+  const { members } = useTeamspaceMemberList(teamspaceId);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        onClose();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
 
   const title = entry?.page.title || t("teamspaces.untitled");
 
@@ -172,215 +394,12 @@ export function TeamspaceMembersModal({
             <X size={17} />
           </button>
         </div>
-
         <div className="chm__body">
-          {/* ── Add / invite (owners) ───────────────────────────────── */}
-          {isOwner && (
-            <div className="tmm-add">
-              <input
-                autoFocus
-                className="chm-input"
-                value={query}
-                onChange={(e) => {
-                  setQuery(e.target.value);
-                  setNotice(null);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && isEmail) sendInvite();
-                }}
-                placeholder={
-                  canAddFromWorkspace
-                    ? t(
-                        "members.addPlaceholder",
-                        "Add people or invite by email",
-                      )
-                    : t("members.invitePlaceholder", "Invite by email")
-                }
-              />
-
-              {(suggestions.length > 0 || isEmail) && (
-                <div className="tmm-suggest">
-                  {suggestions.map((p) => (
-                    <button
-                      key={p.id}
-                      type="button"
-                      className="tmm-suggest__row"
-                      disabled={add.isPending}
-                      onClick={() => addPerson(p.id)}
-                    >
-                      <Avatar
-                        size="sm"
-                        src={p.avatarUrl ?? undefined}
-                        name={p.name}
-                      />
-                      <span className="tmm-suggest__text">
-                        <span className="tmm-suggest__name">{p.name}</span>
-                        <span className="tmm-suggest__sub">{p.email}</span>
-                      </span>
-                      <UserPlus size={14} className="tmm-suggest__icon" />
-                    </button>
-                  ))}
-                  {isEmail && (
-                    <button
-                      type="button"
-                      className="tmm-suggest__row"
-                      disabled={invite.isPending}
-                      onClick={sendInvite}
-                    >
-                      <span className="tmm-suggest__mail">
-                        <Mail size={14} />
-                      </span>
-                      <span className="tmm-suggest__text">
-                        <span className="tmm-suggest__name">
-                          {t("members.inviteEmail", {
-                            email: query.trim(),
-                            defaultValue: "Invite {{email}}",
-                          })}
-                        </span>
-                        <span className="tmm-suggest__sub">
-                          {t(
-                            "members.inviteHint",
-                            "They'll see the invitation when they sign in.",
-                          )}
-                        </span>
-                      </span>
-                    </button>
-                  )}
-                </div>
-              )}
-
-              {notice && <div className="tmm-notice">{notice}</div>}
-            </div>
-          )}
-
-          {error && <div className="tmm-error">{error}</div>}
-
-          {/* ── Members ─────────────────────────────────────────────── */}
-          <div className="tmm-label">{t("members.members", "Members")}</div>
-          {isLoading ? (
-            <div className="tmm-empty">{t("chat.loading", "Loading…")}</div>
-          ) : (
-            members.map(({ person: m, isOwner: memberIsOwner }) => {
-              const isMe = m.id === person?.id;
-              const lastOwner = memberIsOwner && ownerCount <= 1;
-              return (
-                <div key={m.id} className="tmm-member">
-                  <Avatar
-                    size="sm"
-                    src={m.avatarUrl ?? undefined}
-                    name={m.name}
-                  />
-                  <span className="tmm-member__name">
-                    {m.name}
-                    {isMe && (
-                      <span className="tmm-member__you">
-                        {" "}
-                        {t("members.you", "(you)")}
-                      </span>
-                    )}
-                  </span>
-                  <span
-                    className={`tmm-role${memberIsOwner ? " is-owner" : ""}`}
-                  >
-                    {memberIsOwner
-                      ? t("members.owner", "Owner")
-                      : t("members.member", "Member")}
-                  </span>
-
-                  <div className="tmm-member__actions">
-                    {isOwner && !isMe && (
-                      <>
-                        <button
-                          type="button"
-                          className="tmm-action"
-                          disabled={lastOwner || setOwner.isPending}
-                          title={
-                            lastOwner
-                              ? t(
-                                  "members.lastOwner",
-                                  "A teamspace needs at least one owner",
-                                )
-                              : undefined
-                          }
-                          onClick={() =>
-                            setOwner.mutate({
-                              teamspaceId,
-                              personId: m.id,
-                              owner: !memberIsOwner,
-                            })
-                          }
-                        >
-                          {memberIsOwner
-                            ? t("members.removeOwner", "Remove owner")
-                            : t("members.makeOwner", "Make owner")}
-                        </button>
-                        <button
-                          type="button"
-                          className="tmm-action tmm-action--danger"
-                          disabled={lastOwner || remove.isPending}
-                          onClick={() =>
-                            remove.mutate({ teamspaceId, personId: m.id })
-                          }
-                        >
-                          {t("members.remove", "Remove")}
-                        </button>
-                      </>
-                    )}
-                    {isMe && (
-                      <button
-                        type="button"
-                        className="tmm-action tmm-action--danger"
-                        disabled={lastOwner || remove.isPending}
-                        title={
-                          lastOwner
-                            ? t(
-                                "members.lastOwnerLeave",
-                                "Make someone else an owner before leaving",
-                              )
-                            : undefined
-                        }
-                        onClick={leave}
-                      >
-                        {t("members.leave", "Leave")}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              );
-            })
-          )}
-
-          {/* ── Pending invites (owners) ────────────────────────────── */}
-          {isOwner && invites.length > 0 && (
-            <>
-              <div className="tmm-label">
-                {t("members.pending", "Pending invitations")}
-              </div>
-              {invites.map((inv) => (
-                <div key={inv.id} className="tmm-member">
-                  <span className="tmm-suggest__mail">
-                    <Mail size={14} />
-                  </span>
-                  <span className="tmm-member__name">
-                    {inv.email}
-                    <span className="tmm-member__meta">
-                      {formatRelativeTime(inv.createdAt, t, i18n.language)}
-                    </span>
-                  </span>
-                  <div className="tmm-member__actions tmm-member__actions--always">
-                    <button
-                      type="button"
-                      className="tmm-action"
-                      disabled={revoke.isPending}
-                      onClick={() => revoke.mutate(inv.id)}
-                    >
-                      {t("members.revoke", "Revoke")}
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </>
-          )}
+          <TeamspaceMembersPanel
+            teamspaceId={teamspaceId}
+            onLeft={onClose}
+            autoFocus
+          />
         </div>
       </div>
     </div>,

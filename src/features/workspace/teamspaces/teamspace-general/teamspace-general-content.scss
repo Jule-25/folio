@@ -1,0 +1,26 @@
+// The description box in a teamspace's settings: the same look as the
+// settings inputs, several lines, resizable only in height.
+.ts-general__textarea {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 64px;
+  padding: 8px 10px;
+  border: 1px solid var(--tt-border-color);
+  border-radius: var(--tt-radius-md);
+  background: transparent;
+  color: var(--tt-text-color);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: vertical;
+
+  &:focus {
+    outline: none;
+    border-color: var(--tt-brand-color-400);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    resize: none;
+  }
+}

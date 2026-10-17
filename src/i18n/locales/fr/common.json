@@ -653,7 +653,26 @@
     "noTeamspaces": "Aucun espace d’équipe pour l’instant",
     "teamspaceRoot": "Ceci est un espace d’équipe. Déplace-le vers un autre espace de travail depuis Paramètres → Espaces d’équipe."
   },
+  "teamspaceSettings": {
+    "readOnly": "Seuls les propriétaires de l’espace d’équipe peuvent modifier ces paramètres.",
+    "icon": "Icône",
+    "iconDesc": "Affichée à côté du nom de l’espace d’équipe dans la barre latérale.",
+    "name": "Nom",
+    "nameDesc": "Le nom de l’espace d’équipe, affiché dans la barre latérale et sur son accueil.",
+    "description": "Description",
+    "descriptionDesc": "À quoi sert l’espace d’équipe. Affichée dans la liste des espaces d’équipe.",
+    "descriptionPlaceholder": "Ajouter une description",
+    "access": "Accès",
+    "accessDesc_open": "Tout le monde dans l’espace de travail peut le trouver et le rejoindre.",
+    "accessDesc_closed": "Tout le monde peut le voir ; on le rejoint sur invitation.",
+    "accessDesc_private": "Seuls ses membres peuvent le voir.",
+    "color": "Couleur",
+    "colorDesc": "Utilisée pour sa tuile dans la barre latérale, la bannière de son accueil, Nouvelle page, les onglets et les liens. Automatique suit la couleur de l’icône.",
+    "delete": "Supprimer l’espace d’équipe"
+  },
   "teamspaces": {
+    "color": "Couleur",
+    "colorAuto": "Comme l’icône",
     "searchPlaceholder": "Rechercher des espaces d’équipe...",
     "createTeamspace": "Créer un espace d’équipe",
     "empty": "Aucun espace d’équipe pour l’instant",
@@ -783,7 +802,11 @@
       "identity": "Identité et provisionnement",
       "connections": "Connexions",
       "import": "Importer",
-      "billing": "Facturation"
+      "billing": "Facturation",
+      "teamspaceSettings": "Paramètres",
+      "teamspaceMembers": "Membres",
+      "workspaceSettings": "Paramètres de l’espace de travail",
+      "teamspaceSettingsBack": "Paramètres de l’espace d’équipe"
     }
   },
   "home": {

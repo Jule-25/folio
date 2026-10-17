@@ -746,7 +746,26 @@
     "noTeamspaces": "No teamspaces yet",
     "teamspaceRoot": "This is a teamspace. Move it to another workspace from Settings → Teamspaces."
   },
+  "teamspaceSettings": {
+    "readOnly": "Only the teamspace's owners can change these settings.",
+    "icon": "Icon",
+    "iconDesc": "Shown next to the teamspace's name in the sidebar.",
+    "name": "Name",
+    "nameDesc": "The teamspace's name, shown in the sidebar and on its Home.",
+    "description": "Description",
+    "descriptionDesc": "What the teamspace is for. Shown in the list of teamspaces.",
+    "descriptionPlaceholder": "Add a description",
+    "access": "Access",
+    "accessDesc_open": "Anyone in the workspace can find and join it.",
+    "accessDesc_closed": "Anyone can see it; members join by invitation.",
+    "accessDesc_private": "Only its members can see it.",
+    "color": "Colour",
+    "colorDesc": "Used for its sidebar tile, its Home banner, New page, tabs and links. Automatic follows the icon's colour.",
+    "delete": "Delete teamspace"
+  },
   "teamspaces": {
+    "color": "Colour",
+    "colorAuto": "Match icon",
     "searchPlaceholder": "Search teamspaces...",
     "createTeamspace": "Create teamspace",
     "empty": "No teamspaces yet",
@@ -876,7 +895,11 @@
       "identity": "Identity & provisioning",
       "connections": "Connections",
       "import": "Import",
-      "billing": "Billing"
+      "billing": "Billing",
+      "teamspaceSettings": "Settings",
+      "teamspaceMembers": "Members",
+      "workspaceSettings": "Workspace settings",
+      "teamspaceSettingsBack": "Teamspace settings"
     }
   },
   "greeting": {

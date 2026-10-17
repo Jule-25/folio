@@ -22,7 +22,7 @@ import { useRecentPages } from "src/hooks/use-pages";
 import { AccentSwatches } from "src/components/accent-swatches/accent-swatches";
 import { canBeWorkspaceBanner } from "src/lib/banner-page";
 
-function SettingRow({
+export function SettingRow({
   label,
   description,
   stacked = false,
@@ -49,7 +49,7 @@ function SettingRow({
   );
 }
 
-function Toggle({
+export function Toggle({
   checked,
   onChange,
   disabled,
@@ -72,7 +72,7 @@ function Toggle({
   );
 }
 
-function Select<T extends string>({
+export function Select<T extends string>({
   value,
   options,
   onChange,
@@ -99,7 +99,7 @@ function Select<T extends string>({
   );
 }
 
-function WorkspaceIconField({
+export function WorkspaceIconField({
   icon,
   iconColor,
   iconTarget,
