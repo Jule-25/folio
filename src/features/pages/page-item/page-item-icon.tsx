@@ -3,6 +3,7 @@ import type { Page } from "src/types";
 import type { CSSProperties } from "react";
 import { FileText } from "src/components/tiptap-icons";
 import { SbPageIcon } from "src/components/tiptap-icons/sidebar-icons";
+import { UploadedIcon } from "src/components/uploaded-icon/uploaded-icon";
 
 interface PageItemIconProps {
   cover: Page["cover"];
@@ -35,6 +36,21 @@ export function PageItemIcon({
           strokeWidth={1.7}
           style={{ color: tint ?? "var(--sb-row-color)" }}
         />
+      </span>
+    );
+  }
+
+  // An uploaded picture: a circle, like a profile picture, at the size the
+  // caller gives the icon (18 px by default, the sidebar's icon size).
+  if (cover.target === "Upload" && hasIcon) {
+    const size = typeof styles?.width === "number" ? styles.width : 18;
+    return (
+      <span
+        className="page-icon page-icon--upload"
+        style={{ ...styles }}
+        aria-hidden="true"
+      >
+        <UploadedIcon src={cover.iconName!} size={size} />
       </span>
     );
   }

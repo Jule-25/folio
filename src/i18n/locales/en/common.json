@@ -729,7 +729,7 @@
     "addIcon": "Add icon",
     "addCover": "Add cover",
     "addPageInside": "Add page inside",
-    "useAsHomeBanner": "Use as Home banner", 
+    "useAsHomeBanner": "Use as Home banner",
     "removeHomeBanner": "Remove from Home banner",
     "moveToTrash": "Move to trash",
     "you": "You",
@@ -1589,5 +1589,12 @@
     "noTemplates": "No templates in this space yet",
     "database": "Database",
     "convertFailed": "Couldn't turn this page into a database. Try again."
+  },
+  "iconCropper": {
+    "frameAria": "Picture frame: arrow keys move it, + and - zoom",
+    "zoom": "Zoom",
+    "hint": "Drag to move, slide to zoom.",
+    "uploading": "Uploading…",
+    "use": "Use as icon"
   }
 }

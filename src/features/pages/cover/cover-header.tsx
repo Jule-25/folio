@@ -14,6 +14,7 @@ import { useActivePageState } from "src/features/pages/context/active-page-conte
 import { usePage } from "src/hooks/use-pages";
 import { CoverImage } from "./cover-image";
 import { GradientCover } from "./gradient-cover";
+import { UploadedIcon } from "src/components/uploaded-icon/uploaded-icon";
 import { Button } from "src/components/tiptap-ui-primitive/button";
 import { usePatchPage } from "src/hooks/use-patch-page";
 import { patchPage } from "src/api/pages";
@@ -119,17 +120,7 @@ const IconButton = memo(function IconButton({
                 />
               )}
               {cover.target === "Upload" && cover.iconName && (
-                <img
-                  src={cover.iconName}
-                  alt="icon"
-                  style={{
-                    width: 85,
-                    height: 85,
-                    objectFit: "contain",
-                    borderRadius: 4,
-                    display: "block",
-                  }}
-                />
+                <UploadedIcon src={cover.iconName} size={85} />
               )}
             </Button>
           </PopoverTrigger>
@@ -169,17 +160,7 @@ const IconButton = memo(function IconButton({
             />
           )}
           {cover.target === "Upload" && cover.iconName && (
-            <img
-              src={cover.iconName}
-              alt="icon"
-              style={{
-                width: 85,
-                height: 85,
-                objectFit: "contain",
-                borderRadius: 4,
-                display: "block",
-              }}
-            />
+            <UploadedIcon src={cover.iconName} size={85} />
           )}
         </Button>
       )}

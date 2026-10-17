@@ -1,3 +1,4 @@
+import { UploadedIcon } from "src/components/uploaded-icon/uploaded-icon";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
@@ -72,6 +73,9 @@ export function WorkspaceGlyph({ ws, size }: { ws: Workspace; size: number }) {
   if (ws.icon) {
     if (ws.iconTarget === "Emoji") {
       return <span style={{ fontSize: size, lineHeight: 1 }}>{ws.icon}</span>;
+    }
+    if (ws.iconTarget === "Upload") {
+      return <UploadedIcon src={ws.icon} size={size} />;
     }
     return (
       <DynamicIcon

@@ -1,4 +1,5 @@
 import { memo, useEffect, useRef, useState, type CSSProperties } from "react";
+import { UploadedIcon } from "src/components/uploaded-icon/uploaded-icon";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "@tanstack/react-location";
 import { CardItemGroup } from "src/components/tiptap-ui-primitive/card";
@@ -228,7 +229,12 @@ function PageItemView({
           </button>
 
           <span className="page-item-icon">
-            {isTeamspaceRoot ? (
+            {isTeamspaceRoot &&
+            page.cover.target === "Upload" &&
+            page.cover.iconName ? (
+              // An uploaded picture is the tile itself: a circle.
+              <UploadedIcon src={page.cover.iconName} size={24} />
+            ) : isTeamspaceRoot ? (
               <span
                 className="page-item-ts-tile"
                 style={

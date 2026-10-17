@@ -1,3 +1,4 @@
+import { UploadedIcon } from "src/components/uploaded-icon/uploaded-icon";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Input } from "src/components/tiptap-ui-primitive/input";
@@ -130,6 +131,8 @@ export function WorkspaceIconField({
       {icon ? (
         iconTarget === "Emoji" ? (
           <span style={{ fontSize: 20, lineHeight: 1 }}>{icon}</span>
+        ) : iconTarget === "Upload" ? (
+          <UploadedIcon src={icon} size={24} />
         ) : (
           <DynamicIcon
             name={icon}

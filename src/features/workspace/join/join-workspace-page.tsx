@@ -1,3 +1,4 @@
+import { UploadedIcon } from "src/components/uploaded-icon/uploaded-icon";
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "@tanstack/react-location";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -80,6 +81,8 @@ export function JoinWorkspacePage() {
               {ws.icon ? (
                 ws.iconTarget === "Emoji" ? (
                   <span style={{ fontSize: 26, lineHeight: 1 }}>{ws.icon}</span>
+                ) : ws.iconTarget === "Upload" ? (
+                  <UploadedIcon src={ws.icon} size={26} />
                 ) : (
                   <DynamicIcon
                     name={ws.icon}

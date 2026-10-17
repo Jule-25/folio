@@ -1,4 +1,5 @@
 import { Button } from "src/components/tiptap-ui-primitive/button";
+import { UploadedIcon } from "src/components/uploaded-icon/uploaded-icon";
 import { DynamicIcon } from "src/features/pages/cover/dynamic-icon";
 import type { Target } from "src/features/pages/cover/types";
 import type { IconRecents, RecentIcon } from "../../../pages/cover/use-icon-recents";
@@ -65,17 +66,7 @@ export function RecentIconRow({
               className="icon-recents__item"
               onClick={() => onSelect(url)}
             >
-              <img
-                src={url}
-                alt=""
-                style={{
-                  width: 18,
-                  height: 18,
-                  objectFit: "contain",
-                  borderRadius: 3,
-                  display: "block",
-                }}
-              />
+              <UploadedIcon src={url} size={18} />
             </Button>
           ))}
       </div>

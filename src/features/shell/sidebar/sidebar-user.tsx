@@ -1,4 +1,5 @@
 import { memo, useRef, useState } from "react";
+import { UploadedIcon } from "src/components/uploaded-icon/uploaded-icon";
 import { useTranslation } from "react-i18next";
 import { SbChevronDownIcon } from "src/components/tiptap-icons/sidebar-icons";
 import { useCurrentPerson } from "src/hooks/use-session";
@@ -51,7 +52,7 @@ export const User = memo(() => {
   let name: string;
   let meta: string;
   let tile: React.ReactNode;
-  let tileKind: "initial" | "glyph";
+  let tileKind: "initial" | "glyph" | "upload";
 
   if (inTeamspace) {
     name = space.page?.title || t("teamspaces.untitled");
@@ -65,21 +66,30 @@ export const User = memo(() => {
     ]
       .filter(Boolean)
       .join(" · ");
-    tileKind = space.page ? "glyph" : "initial";
-    tile = space.page ? (
+    tileKind = !space.page
+      ? "initial"
+      : space.page.cover.target === "Upload" && space.page.cover.iconName
+        ? "upload"
+        : "glyph";
+    tile = !space.page ? (
+      name.charAt(0).toUpperCase()
+    ) : tileKind === "upload" ? (
+      <UploadedIcon src={space.page.cover.iconName!} size={22} />
+    ) : (
       <PageItemIcon
         cover={space.page.cover}
         styles={{ width: 14, height: 14, fontSize: 14 }}
       />
-    ) : (
-      name.charAt(0).toUpperCase()
     );
   } else {
     name = workspace?.name ?? person?.name ?? "";
     meta = t("workspace.memberCount", {
       count: (people as Person[]).length,
     });
-    if (workspace?.icon) {
+    if (workspace?.icon && workspace.iconTarget === "Upload") {
+      tileKind = "upload";
+      tile = <UploadedIcon src={workspace.icon} size={22} />;
+    } else if (workspace?.icon) {
       tileKind = "glyph";
       tile =
         workspace.iconTarget === "Emoji" ? (

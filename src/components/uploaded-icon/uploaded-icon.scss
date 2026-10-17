@@ -1,0 +1,17 @@
+.uploaded-icon {
+  display: block;
+  flex: none;
+  border-radius: 50%;
+  object-fit: cover;
+  // A hairline just inside the edge, drawn over the picture (an outline,
+  // not a border or an inset shadow, which the image would cover or which
+  // would change its size). Outlines follow border-radius.
+  outline: 1px solid rgba(0, 0, 0, 0.1);
+  outline-offset: -1px;
+  background: var(--tt-gray-light-a-100, rgba(0, 0, 0, 0.04));
+
+  .dark & {
+    outline-color: rgba(255, 255, 255, 0.14);
+    background: var(--tt-gray-dark-a-100, rgba(255, 255, 255, 0.06));
+  }
+}

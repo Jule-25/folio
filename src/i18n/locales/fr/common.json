@@ -1589,5 +1589,12 @@
     "noTemplates": "Aucun modèle dans cet espace pour l’instant",
     "database": "Base de données",
     "convertFailed": "Impossible de transformer cette page en base de données. Réessayez."
+  },
+  "iconCropper": {
+    "frameAria": "Cadre de l'image : les flèches la déplacent, + et - zooment",
+    "zoom": "Zoom",
+    "hint": "Glissez pour déplacer, utilisez le curseur pour zoomer.",
+    "uploading": "Envoi…",
+    "use": "Utiliser comme icône"
   }
 }

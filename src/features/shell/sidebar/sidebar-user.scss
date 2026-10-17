@@ -80,6 +80,13 @@
         color-mix(in srgb, var(--space-accent) 40%, transparent);
     }
 
+    // An uploaded picture is the tile itself: a circle, no tile behind it.
+    &--upload {
+      background: none;
+      box-shadow: none;
+      border-radius: 50%;
+    }
+
     .workspace-notification-badge {
       top: -3px;
       right: -3px;

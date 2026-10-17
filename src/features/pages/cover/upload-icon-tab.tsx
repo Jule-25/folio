@@ -1,5 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { listUploads, uploadFile } from "src/api/uploads";
+import { UploadedIcon } from "src/components/uploaded-icon/uploaded-icon";
+import { IconCropper } from "./icon-cropper";
 
 interface UploadIconTabProps {
   onSelect: (url: string) => void;
@@ -7,7 +9,8 @@ interface UploadIconTabProps {
 
 export function UploadIconTab({ onSelect }: UploadIconTabProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [preview, setPreview] = useState<string | null>(null);
+  // The chosen file, waiting to be framed (an object URL).
+  const [crop, setCrop] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [previous, setPrevious] = useState<string[]>([]);
@@ -18,27 +21,62 @@ export function UploadIconTab({ onSelect }: UploadIconTabProps) {
       .catch(() => {});
   }, []);
 
-  const processFile = async (file: File) => {
+  // Choosing a file opens the framing step; nothing is uploaded yet.
+  const processFile = (file: File) => {
     setError(null);
     if (!file.type.startsWith("image/")) {
       setError("File must be an image.");
       return;
     }
+    setCrop(URL.createObjectURL(file));
+  };
 
-    setPreview(URL.createObjectURL(file));
+  const closeCrop = () => {
+    if (crop) URL.revokeObjectURL(crop);
+    setCrop(null);
+  };
+
+  // The framed square is what gets uploaded and becomes the icon.
+  const uploadFramed = async (blob: Blob) => {
     setUploading(true);
-
+    setError(null);
     try {
+      const ext = blob.type === "image/webp" ? "webp" : "png";
+      const file = new File([blob], `icon.${ext}`, { type: blob.type });
       const url = await uploadFile(file, "icons");
       setPrevious((prev) => [url, ...prev]);
+      closeCrop();
       onSelect(url);
     } catch {
       setError("Upload failed. Please try again.");
-      setPreview(null);
     } finally {
       setUploading(false);
     }
   };
+
+  if (crop) {
+    return (
+      <div style={{ padding: "4px 0px" }}>
+        <IconCropper
+          src={crop}
+          busy={uploading}
+          onCancel={closeCrop}
+          onConfirm={(blob) => void uploadFramed(blob)}
+        />
+        {error && (
+          <p
+            style={{
+              fontSize: 12,
+              color: "var(--tt-danger-color, #ef4444)",
+              margin: "8px 4px 0",
+            }}
+          >
+            {error}
+          </p>
+        )}
+      </div>
+    );
+  }
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
@@ -64,7 +102,7 @@ export function UploadIconTab({ onSelect }: UploadIconTabProps) {
           border: "1.5px dashed var(--tt-border-color)",
           borderRadius: "var(--tt-radius-lg)",
           background: "var(--tt-card-bg-color)",
-          padding: preview ? 0 : "20px 16px",
+          padding: "20px 16px",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -72,72 +110,40 @@ export function UploadIconTab({ onSelect }: UploadIconTabProps) {
           gap: 6,
           cursor: uploading ? "wait" : "pointer",
           overflow: "hidden",
-          minHeight: preview ? 0 : 90,
+          minHeight: 90,
           transition: "border-color 0.15s",
           margin: 4,
         }}
       >
-        {preview ? (
-          <img
-            src={preview}
-            alt="preview"
+        <>
+          <svg
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="var(--tt-theme-muted)"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="17 8 12 3 7 8" />
+            <line x1="12" y1="3" x2="12" y2="15" />
+          </svg>
+          <span
             style={{
-              width: "100%",
-              height: 80,
-              objectFit: "contain",
-              display: "block",
-              padding: 8,
+              fontSize: 13,
+              color: "var(--tt-text-color)",
+              fontWeight: 500,
             }}
-          />
-        ) : (
-          <>
-            <svg
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="var(--tt-theme-muted)"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="17 8 12 3 7 8" />
-              <line x1="12" y1="3" x2="12" y2="15" />
-            </svg>
-            <span
-              style={{
-                fontSize: 13,
-                color: "var(--tt-text-color)",
-                fontWeight: 500,
-              }}
-            >
-              {uploading ? "Uploading…" : "Click or drag image here"}
-            </span>
-            <span style={{ fontSize: 11, color: "var(--tt-theme-muted)" }}>
-              PNG, JPG, SVG, WEBP
-            </span>
-          </>
-        )}
+          >
+            {uploading ? "Uploading…" : "Click or drag image here"}
+          </span>
+          <span style={{ fontSize: 11, color: "var(--tt-theme-muted)" }}>
+            PNG, JPG, WEBP · you frame it next
+          </span>
+        </>
       </div>
-
-      {preview && !uploading && (
-        <button
-          onClick={() => inputRef.current?.click()}
-          style={{
-            padding: "5px 12px",
-            borderRadius: 6,
-            fontSize: 12,
-            cursor: "pointer",
-            border: "1px solid var(--tt-border-color)",
-            background: "var(--tt-card-bg-color)",
-            color: "var(--tt-text-color)",
-            alignSelf: "flex-start",
-          }}
-        >
-          Replace
-        </button>
-      )}
 
       {error && (
         <p
@@ -180,14 +186,15 @@ export function UploadIconTab({ onSelect }: UploadIconTabProps) {
                 key={url}
                 onClick={() => onSelect(url)}
                 style={{
-                  padding: 0,
+                  padding: 2,
                   border: "2px solid transparent",
-                  borderRadius: 6,
-                  overflow: "hidden",
+                  borderRadius: "50%",
                   cursor: "pointer",
-                  background: "var(--tt-card-bg-color)",
+                  background: "transparent",
                   transition: "border-color 0.15s",
                   aspectRatio: "1",
+                  display: "grid",
+                  placeItems: "center",
                 }}
                 onMouseEnter={(e) =>
                   (e.currentTarget.style.borderColor =
@@ -197,16 +204,7 @@ export function UploadIconTab({ onSelect }: UploadIconTabProps) {
                   (e.currentTarget.style.borderColor = "transparent")
                 }
               >
-                <img
-                  src={url}
-                  alt=""
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "contain",
-                    display: "block",
-                  }}
-                />
+                <UploadedIcon src={url} size={40} />
               </button>
             ))}
           </div>
