@@ -39,6 +39,7 @@ import {
   useCustomOrder,
   useSectionSortModes,
 } from "../shell/hooks/use-sidebar-order";
+import { useCurrentWorkspace } from "src/hooks/use-workspaces";
 
 // Home: the greeting, "For you" (the latest notifications and unread rooms,
 // in a card), then your pages in a table — Recent, Favorites (Pinned in a
@@ -103,19 +104,34 @@ export function HomePageContent({ userName }: { userName?: string }) {
   const [sortModes] = useSectionSortModes();
   const [customOrder] = useCustomOrder();
 
-  // The teamspace's own pages, in the sidebar's order.
+  const { workspace } = useCurrentWorkspace();
+  const workspaceBanner = !teamspaceId
+    ? (allPages.find(
+        (p) => p.id === workspace?.settings.bannerPageId && !p.deletedAt,
+      ) ?? null)
+    : null;
+  const bannerPage = teamspaceId
+    ? space.kind === "teamspace"
+      ? space.page
+      : null
+    : workspaceBanner;
+
+  const bannerId = bannerPage?.id ?? null;
+  const bannerCategory = bannerPage?.category ?? null;
+
+  // The banner page's own pages, in the sidebar's order.
   const subpages = useMemo(() => {
-    if (!teamspaceId) return [];
+    if (!bannerId || !bannerCategory) return [];
     const nodes = allPages
-      .filter((p) => p.parentId === teamspaceId && !p.sourceId && !p.deletedAt)
+      .filter((p) => p.parentId === bannerId && !p.sourceId && !p.deletedAt)
       .map((page) => ({ page, children: [] }));
     return sortSiblings(
       nodes,
-      scopeKeyForChildren(teamspaceId),
-      getSortMode(sortModes, "Teamspaces"),
+      scopeKeyForChildren(bannerId),
+      getSortMode(sortModes, bannerCategory),
       customOrder,
     ).map((n) => n.page);
-  }, [teamspaceId, allPages, sortModes, customOrder]);
+  }, [bannerId, bannerCategory, allPages, sortModes, customOrder]);
 
   const mine = useMemo(
     () =>
@@ -169,10 +185,10 @@ export function HomePageContent({ userName }: { userName?: string }) {
     >
       <div className="home-dense">
         <div className="home-dense__body">
-          {teamspaceId && (
+          {bannerPage && (
             <TeamspaceHero
               teamspaceId={teamspaceId}
-              page={space.kind === "teamspace" ? space.page : null}
+              page={bannerPage}
               pinned={pinned}
               subpages={subpages}
             />

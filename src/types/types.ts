@@ -758,6 +758,11 @@ export interface WorkspaceSettings {
 
   /** Invite link — folded in from the former standalone settings singleton. */
   inviteLink: InviteLink;
+
+  /** The page shown as the banner on this workspace's Home; null = none. */
+  bannerPageId?: ID | null;
+  /** The workspace's accent colour (commit 2); null = Folio purple. */
+  accentColor?: string | null;
 }
 
 export interface Workspace {

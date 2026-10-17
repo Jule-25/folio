@@ -725,6 +725,11 @@
     "modalAria": "Paramètres de l’espace de travail",
     "closeAria": "Fermer",
     "getUnlimitedAi": "Passer à l’IA illimitée",
+    "workspace": {
+      "banner": "Bannière d’accueil",
+      "bannerDesc": "Une page affichée en haut de l’accueil de tout le monde : sa couverture, ses premières lignes et ses pages.",
+      "noBanner": "Aucune bannière"
+    },
     "nav": {
       "account": "Compte",
       "workspace": "Espace de travail"

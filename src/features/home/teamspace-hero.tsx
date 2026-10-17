@@ -50,7 +50,7 @@ export function TeamspaceHero({
   pinned,
   subpages,
 }: {
-  teamspaceId: ID;
+  teamspaceId: ID | null;
   /** The teamspace's root page (name, icon, content). */
   page: Page | null;
   /** The team's pinned pages, in pin order. */
@@ -131,19 +131,21 @@ export function TeamspaceHero({
           <button
             type="button"
             className="ts-hero__btn ts-hero__btn--primary"
-            onClick={() => setActivePageId(teamspaceId)}
+            onClick={() => page?.id && setActivePageId(page?.id)}
           >
             <FileText size={14} aria-hidden />
             {t("home.teamspaceHero.open")}
           </button>
-          <button
-            type="button"
-            className="ts-hero__btn"
-            onClick={() => setMembersOpen(true)}
-          >
-            <UserPlus size={14} aria-hidden />
-            {t("home.teamspaceHero.invite")}
-          </button>
+          {teamspaceId && (
+            <button
+              type="button"
+              className="ts-hero__btn"
+              onClick={() => setMembersOpen(true)}
+            >
+              <UserPlus size={14} aria-hidden />
+              {t("home.teamspaceHero.invite")}
+            </button>
+          )}
         </div>
       </div>
 
@@ -178,7 +180,7 @@ export function TeamspaceHero({
         </div>
       )}
 
-      {membersOpen && (
+      {membersOpen && teamspaceId && (
         <TeamspaceMembersModal
           teamspaceId={teamspaceId}
           onClose={() => setMembersOpen(false)}

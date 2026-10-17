@@ -795,6 +795,11 @@
     "modalAria": "Workspace settings",
     "closeAria": "Close",
     "getUnlimitedAi": "Get unlimited AI",
+    "workspace": {
+      "banner": "Home banner",
+      "bannerDesc": "A page shown at the top of everyone's Home: its cover, first lines and pages.",
+      "noBanner": "No banner"
+    },
     "notifications": {
       "loading": "Loading…",
       "intro": "Choose which notifications show up in your inbox. Turning a type off hides it from your inbox and unread count — it doesn't stop others from mentioning you or linking your pages.",
