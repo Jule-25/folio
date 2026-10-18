@@ -87,7 +87,16 @@ export function BoardCardBody({
     >
       {cardPreview === "cover" && (
         <>
-          <BoardCardCover page={record} recordId={recordId} height={120} />
+          <BoardCardCover
+            page={record}
+            recordId={recordId}
+            height={120}
+            fit={
+              view.type === "gallery" || view.type === "board"
+                ? view.coverFit
+                : "cover"
+            }
+          />
           <BoardCardControls
             record={record}
             onOpenRecord={() => onOpenRecord(recordId)}

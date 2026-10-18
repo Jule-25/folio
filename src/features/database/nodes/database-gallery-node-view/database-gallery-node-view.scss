@@ -1,112 +1,14 @@
+// The gallery: a wrapping grid of cards. The column minimum comes from the
+// card size (--db-gallery-min, set in database-gallery-node-view.tsx).
 .db-gallery {
-  width: 100%;
-  max-width: var(--db-editor-width);
-
-  .select-badge,
-  .status-badge{
-    margin: 0 !important;
-  }
-
-  // Gallery is a wrapping grid — unlike the board it does NOT scroll
-  // horizontally; it reflows into fewer columns as it narrows. Declaring the
-  // container here is what makes the @container query below actually resolve.
-  container-type: inline-size;
-
-  .db-cell-title{
-    margin: 5px;
-  }
-
-
-  &__body {
-    display: grid;
-    // Fixed columns-per-row by card size (large=3, medium=4, small=5), cards
-    // share the row evenly. minmax(0, 1fr) — NOT 1fr — is the fix: 1fr floors a
-    // track at its content's min-content, so a long unbreakable URL/email would
-    // force the track (and the whole grid) wider than the editor and turn it
-    // into a sideways scroller. minmax(0, …) lets the track shrink instead.
-    grid-template-columns: repeat(var(--db-gallery-cols, 4), minmax(0, 1fr));
-    gap: 14px;
-    padding: 4px 10px;
-    width: 100%;
-    align-items: stretch;
-
-    // Narrow width → drop to 2 columns so cards don't get too thin.
-    @container (max-width: 640px) {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-
-  &__card {
-    border-radius: var(--tt-radius-lg);
-    min-width: 0; // shrink within the track
-    overflow: hidden; // clip long unbroken content (and round the bled cover)
-   
-    height: 100%;              // fill the grid cell (which is stretched to row height)
-
-    // Notion's gallery card: light — the page colour with a hairline ring and
-    // a soft drop; dark — the page lifted 5% toward white with a faint ring.
-    // The ring sits on this slot, not the card: overflow: hidden would clip it.
-    box-shadow:
-      0 0 0 1px rgba(15, 15, 15, 0.1),
-      0 2px 4px rgba(15, 15, 15, 0.06);
-    .dark & {
-      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.075);
-    }
-
-    // Doubled class: beats board-card-body's [data-view-type] colours.
-    .db-board-card.db-board-card{
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      border-radius: var(--tt-radius-lg) !important;
-      box-shadow: none;
-
-      background-color: var(--tt-bg-color);
-      .dark & {
-        background-color: color-mix(in srgb, #fff 5%, var(--tt-bg-color));
-      }
-
-      // Hover: a faint shade (light) / a light wash (dark), like board cards.
-      &:hover {
-        background-image: linear-gradient(
-          rgba(55, 53, 47, 0.035),
-          rgba(55, 53, 47, 0.035)
-        );
-        .dark & {
-          background-image: linear-gradient(
-            rgba(255, 255, 255, 0.055),
-            rgba(255, 255, 255, 0.055)
-          );
-        }
-      }
-    }
-
-    .db-card-controls{
-      top: 8px;
-      padding: 2px;
-      border-radius: var(--tt-radius-sm);
-      background: var(--tt-gray-light-50);
-      .dark & {
-        background: var(--tt-gray-dark-100);
-      }
-    }
-   
-   .db-board-card__title{
-    .db-cell{
-      .tiptap-card-item-group{
-        background-color: transparent !important;
-      }
-    }
-   }
-    img {
-      max-width: 100%;
-      display: block;
-    }
-    &__props{
-      padding: 5px;
-    }
-    // BoardCard provides the inner styling; this just sizes the slot.
-  }
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--db-gallery-min, 260px), 1fr));
+  gap: 16px;
+  align-items: stretch; // every card in a row, and New page, as tall as the tallest
+  align-content: start; // rows keep their content height; extra space stays below the grid
+  position: relative;
+  width: var(--db-editor-width);
+  margin-top: 5px;
 }
 
 .db-board-card__props {
@@ -125,11 +27,11 @@
 
 .db-new-card--gallery {
   display: flex;
+  height: auto; // the Button primitive is 2rem tall; the tile fills its cell
   align-items: center !important;
   justify-content: center !important;
   padding: 0 auto;
   border: 1px solid var(--tt-border-color);
-  min-height: 50px;
   border-radius: var(--tt-radius-lg);   // gallery cards use radius-lg
   background: transparent;
   color: var(--tt-text-secondary);

@@ -82,17 +82,9 @@ function DatabaseGalleryNodeViewImpl() {
 
   return (
     <div
-      className="db-board-grid"
+      className="db-board-grid db-gallery"
       data-database-id={attrs.id}
-      style={{
-        display: "grid",
-        width: "var(--db-editor-width)",
-        gridTemplateColumns: `repeat(auto-fill, minmax(${colWidth}px, 1fr))`,
-        alignItems: "start",
-        gap: "8px",
-        position: "relative",
-        marginTop: 5,
-      }}
+      style={{ "--db-gallery-min": `${colWidth}px` } as React.CSSProperties}
       onDragOver={(event) => {
         if (!editor) return;
 
@@ -156,13 +148,12 @@ function DatabaseGalleryNodeViewImpl() {
         className="db-new-card--gallery"
         contentEditable={false}
         style={{
-          margin: "8px 10px",
           order: sortedRecords.length + 1,
         }}
         onClick={onNewRecord}
       >
         <Plus className="tiptap-button-icon" />
-        <span className="tiptap-button-text">New Page</span>
+        <span className="tiptap-button-text">New page</span>
       </Button>
     </div>
   );
