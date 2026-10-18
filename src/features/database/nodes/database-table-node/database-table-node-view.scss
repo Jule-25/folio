@@ -1,5 +1,4 @@
 .db-table {
-   overflow-x: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--tt-scrollbar-color) transparent;
   margin-top: 4px;
@@ -10,7 +9,6 @@
 }
 // database-table-node-view.scss
 .db-table {
-  overflow-x: auto;
   max-width: 100%;   // was var(--db-editor-width) — bound to parent so it scrolls, doesn't overflow/clip
   width: 100%;
   scrollbar-width: thin;

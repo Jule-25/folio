@@ -75,8 +75,12 @@
 .db-table {
   max-width: 100%;
   width: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
+   // Not a scroll container. At the top of a page the whole database scrolls
+  // sideways in .db-node; a table that could scroll (but never does — it's
+  // as wide as its rows) catches position: sticky, so frozen columns slid
+  // away with it. Nested, [data-contained-in] makes the table scroll itself
+  // (database-node.scss).
+  overflow: visible;
   display: block;
   position: relative;
 
