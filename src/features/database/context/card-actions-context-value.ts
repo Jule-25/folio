@@ -35,6 +35,10 @@ export interface CardActionsValue {
   /** Save where a card's cover image sits (0 = top, 100 = bottom). */
   setRecordCoverPosition: (recordId: ID, positionY: number) => void;
 
+  /** Table / list rows: Move up (-1) / Move down (+1) in the row menu. */
+  moveRecordBy: (recordId: ID, delta: -1 | 1) => void;
+  canMoveRecord: (recordId: ID, delta: -1 | 1) => boolean;
+
   // ── Panels (open the view-options popover at a panel) ─────────────────────
   openLayout: () => void;
   openPropertyVisibility: () => void;

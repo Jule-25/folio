@@ -419,6 +419,9 @@ export interface TableView extends BaseView {
   groupByPropertyId?: ID | null;
   collapsedGroups?: string[]; // group value keys that are collapsed
   showEmptyGroups?: boolean;
+  /** Row order set by dragging rows or Move up / down. Used when the view
+   *  has no sort; ids not listed follow in their usual order. */
+  manualOrder?: ID[];
 }
 
 export interface ListView extends BaseView {
@@ -427,6 +430,8 @@ export interface ListView extends BaseView {
   groupByPropertyId?: ID | null;
   collapsedGroups?: string[];
   showEmptyGroups?: boolean;
+  /** Same as TableView.manualOrder. */
+  manualOrder?: ID[];
 }
 
 export interface BoardView extends BaseView {

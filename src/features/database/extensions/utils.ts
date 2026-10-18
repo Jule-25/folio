@@ -1,3 +1,5 @@
+import { rowsAndGroups } from "../utils/manual-order";
+
 export const columnKeyAtPoint = (
   grid: HTMLElement,
   x: number,
@@ -187,4 +189,98 @@ export function hideGalleryDropIndicator(gallery: HTMLElement): void {
   if (indicator) {
     indicator.style.display = "none";
   }
+}
+
+// ── Table / list rows ───────────────────────────────────────────────────────
+
+export interface RowDropTarget {
+  /** The row the dragged one goes before; null = at the very end. */
+  beforeRecordId: string | null;
+  /** Where to draw the drop line, in viewport px. */
+  line: { left: number; width: number; top: number };
+}
+
+/**
+ * Where a row dropped at clientY lands, in the database `dbEl` belongs to.
+ * `rowSlots` is that database's published row layout (sortedRecordIds), so
+ * groups are known: a row only moves within its own group. Returns null when
+ * the dragged row isn't one of this database's rows, or has nowhere to go.
+ */
+export function rowDropTarget(
+  dbEl: HTMLElement,
+  databaseId: string,
+  rowSlots: string[],
+  clientY: number,
+  draggingId: string,
+): RowDropTarget | null {
+  const { order, groupOf } = rowsAndGroups(rowSlots);
+  const group = groupOf.get(draggingId);
+  if (group === undefined) return null;
+
+  // Each record's row box (.db-record is display: contents; the renderer
+  // around it is the box). Only this database's rows: another database can
+  // sit inside a page of this one.
+  const boxes = new Map<string, HTMLElement>();
+  const scope = dbEl.closest<HTMLElement>(".db-node") ?? dbEl;
+  scope
+    .querySelectorAll<HTMLElement>(".db-record[data-record-id]")
+    .forEach((el) => {
+      const owner = el.closest<HTMLElement>("[data-database-id]");
+      if (owner?.dataset.databaseId !== databaseId) return;
+      const box = el.closest<HTMLElement>(
+        ".react-renderer.node-databaseRecord",
+      );
+      if (box && el.dataset.recordId) boxes.set(el.dataset.recordId, box);
+    });
+
+  const rows = order
+    .filter((id) => id !== draggingId && groupOf.get(id) === group)
+    .map((id) => ({ id, rect: boxes.get(id)?.getBoundingClientRect() }))
+    .filter(
+      (r): r is { id: string; rect: DOMRect } => !!r.rect && r.rect.height > 0,
+    );
+  if (rows.length === 0) return null;
+
+  // The line spans the row, but only the part that's on screen.
+  const clip = scope.getBoundingClientRect();
+  const lineAt = (rect: DOMRect, top: number) => {
+    const left = Math.max(rect.left, clip.left);
+    const right = Math.min(rect.right, clip.right);
+    return { left, width: Math.max(0, right - left), top };
+  };
+
+  for (const row of rows) {
+    if (clientY < row.rect.top + row.rect.height / 2) {
+      return { beforeRecordId: row.id, line: lineAt(row.rect, row.rect.top) };
+    }
+  }
+
+  // Below the group's last row: after it, i.e. before whatever record
+  // follows it (the next group's first, or none).
+  const last = rows[rows.length - 1];
+  const after = order.slice(order.indexOf(last.id) + 1);
+  const before = after.find((id) => id !== draggingId) ?? null;
+  return { beforeRecordId: before, line: lineAt(last.rect, last.rect.bottom) };
+}
+
+const ROW_LINE_ID = "db-row-drop-indicator";
+
+/** The drop line between two rows (fixed, so no scroll box clips it). */
+export function showRowDropIndicator(line: RowDropTarget["line"]): void {
+  let el = document.getElementById(ROW_LINE_ID);
+  if (!el) {
+    el = document.createElement("div");
+    el.id = ROW_LINE_ID;
+    el.className = "db-row-drop-indicator";
+    document.body.appendChild(el);
+  }
+  el.style.left = `${line.left}px`;
+  el.style.width = `${line.width}px`;
+  el.style.top = `${line.top - 1.5}px`;
+  el.style.display = "block";
+}
+
+export function hideRowDropIndicator(): void {
+  const el = document.getElementById(ROW_LINE_ID);
+  if (el) el.style.display = "none";
 }

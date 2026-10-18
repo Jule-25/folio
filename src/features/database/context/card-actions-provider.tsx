@@ -25,8 +25,16 @@ import { recordSelection } from "../utils/record-selection-store";
 import { useDeleteRecords } from "../hooks/use-delete-records";
 
 export function CardActionsProvider({ children }: { children: ReactNode }) {
-  const { source, sortedRecords, visibleProperties, db, editor, attrs } =
-    useDatabaseContext();
+  const {
+    source,
+    sortedRecords,
+    visibleProperties,
+    db,
+    editor,
+    attrs,
+    moveRecordBy,
+    canMoveRecord,
+  } = useDatabaseContext();
   const databaseId = attrs.id;
   const { setActivePageId } = useActivePageActions();
   const { setTarget } = usePageViewActions();
@@ -130,6 +138,8 @@ export function CardActionsProvider({ children }: { children: ReactNode }) {
           patch: { cover: { ...r.cover, positionY } },
         });
       },
+      moveRecordBy,
+      canMoveRecord,
       openInRecord: (recordId, mode) => {
         if (mode === "sidePeek") {
           setTarget({ pageId: recordId, view: "Peek" });
@@ -158,13 +168,17 @@ export function CardActionsProvider({ children }: { children: ReactNode }) {
     setTarget,
     editor,
     databaseId,
+    moveRecordBy,
+    canMoveRecord,
   ]);
 
-  // Publish to the store for the portaled drag-handle Menu (outside the tree).
+  // Publish to the store for the portaled drag-handle Menu (outside the tree),
+  // under this database's id: a page can hold several databases.
   useEffect(() => {
-    cardActionsStore.set(value);
-    return () => cardActionsStore.clear();
-  }, [value]);
+    if (!databaseId) return;
+    cardActionsStore.set(databaseId, value);
+    return () => cardActionsStore.clear(databaseId, value);
+  }, [value, databaseId]);
 
   return (
     <CardActionsContext.Provider value={value}>

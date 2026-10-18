@@ -1382,7 +1382,9 @@
       "layout": "Layout",
       "propertyVisibility": "Property visibility",
       "openIn": "Open in",
-      "noResults": "No actions found"
+      "noResults": "No actions found",
+      "moveUp": "Move up",
+      "moveDown": "Move down"
     },
     "person": {
       "me": "Me",
@@ -1508,7 +1510,12 @@
     },
     "emptyList": "No pages yet",
     "rowsDeleted_one": "Deleted {{count}} row",
-    "rowsDeleted_other": "Deleted {{count}} rows"
+    "rowsDeleted_other": "Deleted {{count}} rows",
+    "reorder": {
+      "sortedTitle": "This view is sorted.",
+      "sortedBody": "Remove the sort to put rows in your own order? The rows keep their current order, with your move applied.",
+      "removeSort": "Remove sort"
+    }
   },
   "toolbar": {
     "blockquote": "Blockquote",

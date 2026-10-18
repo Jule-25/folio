@@ -1,5 +1,11 @@
 import "./selection-actions-menu.scss";
-import { ArrowUpRight, ChevronLeft, ListIcon } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpRight,
+  ChevronLeft,
+  ListIcon,
+} from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "src/components/tiptap-ui-primitive/button";
@@ -11,6 +17,7 @@ import { PROPERTY_TYPE_ICONS } from "src/types/property-type-meta";
 import { EditPropertyList } from "../edit-property-list";
 import { NavigableMenuItem } from "../navigable-menu-item";
 import { OpenInFlyout, type OpenInMode } from "../open-in-flyout";
+import { MenuRow } from "../menu-row";
 
 import {
   Card,
@@ -80,6 +87,9 @@ export function SelectionActionsMenu({
   onClose,
   isFavorite,
   onPickProperty,
+  onMoveUp,
+  onMoveDown,
+  showMoveUpDown = false,
   // onOpenEditProperty
 }: {
   recordIds: string[];
@@ -105,6 +115,11 @@ export function SelectionActionsMenu({
   onClose: () => void;
   isFavorite?: boolean;
   onPickProperty?: (id: ID) => void;
+  /** Table / list rows: Move up / Move down. Undefined = can't (already
+   *  first / last): the item shows disabled while showMoveUpDown is on. */
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
+  showMoveUpDown?: boolean;
 }) {
   const { t } = useTranslation();
   const [panel, setPanel] = useState<Panel>({ type: "main" });
@@ -275,9 +290,17 @@ export function SelectionActionsMenu({
     matchesAction,
   );
 
+  const moveLabels = showMoveUpDown
+    ? [
+        t("database.selectionActions.moveUp"),
+        t("database.selectionActions.moveDown"),
+      ]
+    : [];
+
   const showRecordActions = [
     t("people.copyLink"),
     t("actions.duplicate"),
+    ...moveLabels,
     ...(onMoveTo ? [t("moveTo.label")] : []),
     t("ui.moveToTrash"),
   ].some(matchesAction);
@@ -424,6 +447,26 @@ export function SelectionActionsMenu({
                 onDuplicate={() => onDuplicate?.()}
               />
             )}
+
+            {showMoveUpDown &&
+              matchesAction(t("database.selectionActions.moveUp")) && (
+                <MenuRow
+                  Icon={ArrowUp}
+                  label={t("database.selectionActions.moveUp")}
+                  disabled={!onMoveUp}
+                  onClick={() => run(onMoveUp)}
+                />
+              )}
+
+            {showMoveUpDown &&
+              matchesAction(t("database.selectionActions.moveDown")) && (
+                <MenuRow
+                  Icon={ArrowDown}
+                  label={t("database.selectionActions.moveDown")}
+                  disabled={!onMoveDown}
+                  onClick={() => run(onMoveDown)}
+                />
+              )}
 
             {onMoveTo && matchesAction(t("moveTo.label")) && (
               <MoveToItem

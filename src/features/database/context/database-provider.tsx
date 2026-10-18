@@ -16,8 +16,10 @@ import type {
   DataSource,
   GalleryView,
   ID,
+  ListView,
   Page,
   PropertyType,
+  TableView,
 } from "src/types";
 import type { UseDatabaseReturn } from "../hooks/use-database";
 import { DatabaseContext } from "./database-context";
@@ -34,6 +36,15 @@ import { groupValueForColumn } from "../utils/group-value-for-column";
 import { canWriteGroupValue } from "../utils/group-key";
 import { useWorkspacePeople } from "../hooks/use-workspace-people";
 import { CalendarViewProvider } from "./calendar-view-provider";
+import { useTranslation } from "react-i18next";
+import { ConfirmDialog } from "src/features/shell/confirm-dialog";
+import { usePageTitles } from "../hooks/use-page-titles";
+import { sortRecords } from "../utils/apply-sorts";
+import {
+  applyManualOrder,
+  moveBefore,
+  neighbourTarget,
+} from "../utils/manual-order";
 
 // ── Provider ───────────────────────────────────────────────────────────────
 
@@ -162,6 +173,66 @@ export function DatabaseProvider({
     [db, activeView],
   );
 
+  // ── Row order (table / list) ─────────────────────────────────────────────
+  // Dragging a row (board-drag.ts) and Move up / Move down (the row's menu)
+  // both end here. The new order is saved on the view (manualOrder) and
+  // covers every record, filtered out or not, so hidden rows keep their place.
+  const { t } = useTranslation();
+  const titleOf = usePageTitles();
+  // A sorted view has no order of its own: the move waits for "Remove sort?".
+  const [pendingOrder, setPendingOrder] = useState<{
+    viewId: ID;
+    order: ID[];
+  } | null>(null);
+
+  const reorderRecord = useCallback(
+    (recordId: ID, beforeRecordId: ID | null) => {
+      const view = db.activeView;
+      if (!view || (view.type !== "table" && view.type !== "list")) return;
+      if (!resolvedRecords.some((r) => r.id === recordId)) return;
+
+      const sorts = view.sorts ?? [];
+      const base = sorts.length
+        ? sortRecords(resolvedRecords, sorts, source?.properties ?? [], {
+            titleOf,
+          })
+        : applyManualOrder(resolvedRecords, view.manualOrder);
+      const order = moveBefore(
+        base.map((r) => r.id),
+        recordId,
+        beforeRecordId,
+      );
+
+      if (sorts.length) {
+        setPendingOrder({ viewId: view.id, order });
+        return;
+      }
+      db.updateView(view.id, {
+        manualOrder: order,
+      } as Partial<TableView | ListView>);
+    },
+    [db, resolvedRecords, source, titleOf],
+  );
+
+  // The rows as shown (groups included), for Move up / Move down.
+  const rowSlots =
+    activeView?.type === "list" ? listLayout.rowSlots : tableLayout.rowSlots;
+
+  const canMoveRecord = useCallback(
+    (recordId: ID, delta: -1 | 1) =>
+      neighbourTarget(rowSlots, recordId, delta) !== undefined,
+    [rowSlots],
+  );
+
+  const moveRecordBy = useCallback(
+    (recordId: ID, delta: -1 | 1) => {
+      const target = neighbourTarget(rowSlots, recordId, delta);
+      if (target === undefined) return;
+      reorderRecord(recordId, target);
+    },
+    [rowSlots, reorderRecord],
+  );
+
   // a stable onDrop via ref so it always sees current db/source:
   useEffect(() => {
     if (!editor) return;
@@ -174,6 +245,15 @@ export function DatabaseProvider({
       beforeRecordId,
     }: DropInfo) => {
       const view = db.activeView;
+
+      // Rows of a table or list: reorder (and ask first if it's sorted).
+      if (view.type === "table" || view.type === "list") {
+        reorderRecord(recordId, beforeRecordId);
+        return;
+      }
+
+      // A card dragged in from another database isn't one of ours.
+      if (!sortedRecords.some((record) => record.id === recordId)) return;
 
       if (view.type === "gallery") {
         // The order on screen (useGalleryLayout): the saved order first,
@@ -319,7 +399,16 @@ export function DatabaseProvider({
         storage.databases.delete(databaseId);
       }
     };
-  }, [editor, db, source, setCellValue, sortedRecords, personName, attrs.id]);
+  }, [
+    editor,
+    db,
+    source,
+    setCellValue,
+    sortedRecords,
+    personName,
+    attrs.id,
+    reorderRecord,
+  ]);
 
   const value = useMemo(
     () => ({
@@ -345,6 +434,9 @@ export function DatabaseProvider({
       selectedRecords,
       onUpdateView,
       visibleProperties,
+      reorderRecord,
+      moveRecordBy,
+      canMoveRecord,
     }),
     [
       attrs,
@@ -369,6 +461,9 @@ export function DatabaseProvider({
       selectedRecords,
       onUpdateView,
       visibleProperties,
+      reorderRecord,
+      moveRecordBy,
+      canMoveRecord,
     ],
   );
 
@@ -379,6 +474,31 @@ export function DatabaseProvider({
           <TimelineViewProvider>{children}</TimelineViewProvider>
         </CalendarViewProvider>
       </CardActionsProvider>
+
+      <ConfirmDialog
+        open={pendingOrder !== null}
+        destructive={false}
+        message={
+          <>
+            {t("database.reorder.sortedTitle")}
+            <br />
+            <span style={{ fontSize: 13, opacity: 0.7 }}>
+              {t("database.reorder.sortedBody")}
+            </span>
+          </>
+        }
+        confirmLabel={t("database.reorder.removeSort")}
+        onCancel={() => setPendingOrder(null)}
+        onConfirm={() => {
+          if (pendingOrder) {
+            db.updateView(pendingOrder.viewId, {
+              sorts: [],
+              manualOrder: pendingOrder.order,
+            } as Partial<TableView | ListView>);
+          }
+          setPendingOrder(null);
+        }}
+      />
     </DatabaseContext.Provider>
   );
 }

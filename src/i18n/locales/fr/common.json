@@ -1382,7 +1382,9 @@
       "layout": "Disposition",
       "propertyVisibility": "Visibilité des propriétés",
       "openIn": "Ouvrir dans",
-      "noResults": "Aucune action trouvée"
+      "noResults": "Aucune action trouvée",
+      "moveUp": "Monter",
+      "moveDown": "Descendre"
     },
     "person": {
       "me": "Moi",
@@ -1508,7 +1510,12 @@
     },
     "emptyList": "Aucune page pour l’instant",
     "rowsDeleted_one": "{{count}} ligne supprimée",
-    "rowsDeleted_other": "{{count}} lignes supprimées"
+    "rowsDeleted_other": "{{count}} lignes supprimées",
+    "reorder": {
+      "sortedTitle": "Cette vue est triée.",
+      "sortedBody": "Retirer le tri pour ranger les lignes à votre façon ? Elles gardent leur ordre actuel, avec votre déplacement.",
+      "removeSort": "Retirer le tri"
+    }
   },
   "toolbar": {
     "blockquote": "Citation",
