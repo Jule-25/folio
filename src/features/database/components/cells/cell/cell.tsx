@@ -31,6 +31,7 @@ import { RollupCell } from "../rollup-cell";
 import { PhoneCell } from "../phone-cell";
 import { memo } from "react";
 import { useWorkspacePeople } from "../../../hooks/use-workspace-people";
+import { useFormulaEngineReady } from "../../formula-editor/formula-engine";
 
 function CellImpl({
   property,
@@ -319,6 +320,8 @@ function ComputedFormulaCell({
   className: string;
 }) {
   const people = useWorkspacePeople();
+  // Re-render once mathjs has loaded (evaluateFormula is null until then).
+  useFormulaEngineReady();
   const computed = evaluateFormula(config.expression, {
     properties,
     cellValues: record.values as Record<string, CellValue>,

@@ -37,6 +37,10 @@ import { pendingRecordDeletes } from "../utils/pending-record-deletes";
 import { useCurrentPerson } from "src/hooks/use-session";
 import { useCurrentWorkspace } from "src/hooks/use-workspaces";
 import { templateValues } from "../utils/row-templates";
+import {
+  loadFormulaEngine,
+  useFormulaEngineReady,
+} from "../components/formula-editor/formula-engine";
 
 // module scope, outside the hook
 const patchDataSourceFn = ({
@@ -489,6 +493,7 @@ export function useDataSource(
   // formulas. Never saved; writes go through the raw rows.
   const { data: allSources } = useDataSources();
   const people = useWorkspacePeople();
+  const formulaReady = useFormulaEngineReady();
   const personName = useMemo(() => {
     const names = new Map(people.map((p) => [p.id, p.name] as const));
     return (id: string) => names.get(id);
@@ -517,8 +522,26 @@ export function useDataSource(
       (allSources as DataSource[] | undefined) ?? [],
       pages,
     );
+    // Formulas wait for mathjs (loaded by the effect below); this re-runs
+    // when it's in.
+    if (!formulaReady) return withRollups;
     return resolveRecordFormulas(withRollups, source.properties, personName);
-  }, [rows, source, allPages, allSources, personName, pendingDeletes]);
+  }, [
+    rows,
+    source,
+    allPages,
+    allSources,
+    personName,
+    pendingDeletes,
+    formulaReady,
+  ]);
+  // Start the mathjs download only when this database has a formula.
+  const hasFormula = !!source?.properties.some(
+    (p) => p.config.type === "formula",
+  );
+  useEffect(() => {
+    if (hasFormula) void loadFormulaEngine();
+  }, [hasFormula]);
 
   return {
     source,
