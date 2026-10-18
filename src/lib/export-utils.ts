@@ -1,5 +1,6 @@
 import type { Editor } from "@tiptap/react";
 import type { Paragraph, TextRun, Table } from "docx";
+import { revealAllRecords } from "src/features/database/utils/record-visibility";
 
 // ---------------------------------------------------------------------------
 // PDF export — the browser's print dialog ("Save as PDF").
@@ -31,6 +32,16 @@ const escapeHtml = (s: string) =>
   );
 
 export function exportToPdf(editor: Editor, title = "document"): void {
+  // Database rows far from the screen are empty placeholders until scrolled
+  // to (record-visibility.ts). Render them all, then copy the page two
+  // frames later, once React has filled them in.
+  revealAllRecords();
+  requestAnimationFrame(() =>
+    requestAnimationFrame(() => printEditorCopy(editor, title)),
+  );
+}
+
+function printEditorCopy(editor: Editor, title: string): void {
   const editorEl =
     (editor.view?.dom as HTMLElement | undefined) ??
     document.querySelector<HTMLElement>(".tiptap.ProseMirror");

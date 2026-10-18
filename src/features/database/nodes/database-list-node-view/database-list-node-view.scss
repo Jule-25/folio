@@ -80,3 +80,10 @@
   color: color-mix(in srgb, var(--tt-text-primary) 45%, transparent);
   user-select: none;
 }
+
+// A row that hasn't come near the screen yet has empty cells
+// (record-visibility.ts). Give them a normal row's height, so the list is as
+// long as it will be and the scrollbar doesn't jump when they fill in.
+.db-list-grid .db-node-cell--pending {
+  min-height: 34px;
+}

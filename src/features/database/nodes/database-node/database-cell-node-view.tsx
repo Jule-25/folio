@@ -7,6 +7,7 @@ import type { CellValue, DatabaseProperty, ID } from "src/types";
 import { CellOverlay } from "../../components/cell-overlay";
 import { isCopiableType } from "../database-board-node-view/utils";
 import { useOpenRecord } from "../../hooks/use-open-record";
+import { useRecordNearScreen } from "../../utils/record-visibility";
 
 const EMPTY_PROPERTIES: DatabaseProperty[] = [];
 const EMPTY_COLUMN_VALUES: CellValue[] = [];
@@ -17,6 +18,7 @@ export default function DatabaseCellNodeView({ node, editor }: NodeViewProps) {
   const databaseId = node.attrs.databaseId as string | null;
 
   const data = useDatabaseBridgeData(editor, databaseId);
+  const nearScreen = useRecordNearScreen(databaseId, recordId);
 
   const properties = data?.properties ?? EMPTY_PROPERTIES;
   const property = useMemo(
@@ -88,12 +90,27 @@ export default function DatabaseCellNodeView({ node, editor }: NodeViewProps) {
     }
   };
 
-  if (!data || !property || !recordId || !propertyId) {
+  // Only a table or a list shows these cells. Board, gallery, calendar and
+  // timeline records draw their own content (BoardCardBody, the bars) and
+  // never mount the cells' DOM, so rendering a Cell there was pure waste.
+  const shownAsCells =
+    data?.view?.type === "table" || data?.view?.type === "list";
+
+  // An empty, row-height cell: no data yet, a view that doesn't show cells,
+  // or a row that hasn't come near the screen (utils/record-visibility.ts).
+  if (
+    !data ||
+    !property ||
+    !recordId ||
+    !propertyId ||
+    !shownAsCells ||
+    !nearScreen
+  ) {
     return (
       <NodeViewWrapper
         as="div"
         data-type="database-cell"
-        className="db-node-cell"
+        className={`db-node-cell${data && property ? " db-node-cell--pending" : ""}`}
         style={viewStyle}
         contentEditable={false}
       />
