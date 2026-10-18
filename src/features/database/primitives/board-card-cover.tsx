@@ -105,6 +105,8 @@ function BoardCardCoverImpl({
           src={coverImage}
           alt="cover"
           draggable={false}
+          loading="lazy"
+          decoding="async"
           className="db-board-card__cover-img"
           style={
             fit === "contain"

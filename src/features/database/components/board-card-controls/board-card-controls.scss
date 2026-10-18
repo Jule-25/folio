@@ -1,35 +1,54 @@
+// Notion's card controls: one pill in the top-right corner, its buttons
+// joined edge to edge with a hairline between them.
 .db-card-controls {
   position: absolute;
-  top: 2px;
-  right: 4px;
+  top: 6px;
+  right: 6px;
   z-index: 2;
   display: flex;
-  align-items: center;
-  gap: 2px;
-  padding: 0px;
-  border-radius: var(--tt-radius-sm);
+  align-items: stretch;
+  height: 28px; // 26px buttons + the 1px border
+  padding: 0;
+  overflow: hidden; // the end buttons take the pill's rounded corners
   border: 1px solid var(--tt-border-color);
-  background: var(--tt-gray-light-50);
+  border-radius: var(--tt-radius-sm);
+  background: var(--tt-bg-color);
+  box-shadow: 0 2px 4px rgba(15, 15, 15, 0.06);
   .dark & {
-    background: var(--tt-gray-dark-100);
+    background: color-mix(in srgb, #fff 5%, var(--tt-bg-color));
+    box-shadow: none;
   }
-  box-shadow: none;
   opacity: 0;
   transition: opacity 125ms ease;
 
-  // Revealed on card hover — and pinned open while its menu is, so the
-  // controls don't vanish out from under an open popover.
+  // Shown on card hover, and kept while its menu is open or the cover is
+  // being repositioned.
   .db-board-card:hover &,
   &[data-open] {
     opacity: 1;
   }
 
-  &__btn {
-    height: 26px;
-    padding: 0 8px;
-    border-radius: var(--tt-radius-xs);
+  &__btn.tiptap-button {
+    height: auto;
+    min-width: 28px;
+    padding: 0 7px;
+    justify-content: center;
+    border-radius: 0;
     font-size: 13px;
     white-space: nowrap;
+    background: transparent;
+
+    & + & {
+      border-left: 1px solid var(--tt-border-color);
+    }
+
+    &:hover,
+    &[data-active-state="on"] {
+      background: rgba(55, 53, 47, 0.06);
+      .dark & {
+        background: rgba(255, 255, 255, 0.055);
+      }
+    }
   }
 }
 

@@ -3,7 +3,6 @@ import { AspectButton } from "./aspect-button";
 import { CardActionsMenu } from "./card-actions-menu";
 import type { Page } from "src/types";
 import "./board-card-controls.scss";
-import { Separator } from "src/components/tiptap-ui-primitive/separator";
 import { EditToggleButton } from "./edit-toggle-button";
 import { useState } from "react";
 
@@ -42,16 +41,15 @@ export function BoardCardControls({
       onPointerDown={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
       onClick={(e) => e.stopPropagation()}
-      data-open={menuOpen || (!menuOpen && preventClose) || undefined}
+      data-open={
+        menuOpen || (!menuOpen && preventClose) || repositioning || undefined
+      }
     >
       {onReposition && (
-        <>
-          <RepositionButton
-            repositioning={repositioning}
-            onReposition={onReposition}
-          />
-          <Separator orientation="vertical" />
-        </>
+        <RepositionButton
+          repositioning={repositioning}
+          onReposition={onReposition}
+        />
       )}
       {onAspect && <AspectButton onAspect={onAspect} />}
 
@@ -60,7 +58,7 @@ export function BoardCardControls({
         onEnableEdit={onEnableEdit}
         onOpen={onOpenRecord}
       />
-      <Separator orientation="vertical" style={{ width: 0.5 }} />
+
       <CardActionsMenu
         record={record}
         open={menuOpen}

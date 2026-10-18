@@ -307,13 +307,14 @@ body,
   padding-top: 0;
   overflow-y: overlay;
   margin-right: 0;
-  &::-webkit-scrollbar { width: 6px; }
-  &::-webkit-scrollbar-thumb {
-    background: var(--tt-border-color);
-    border-radius: 4px;
+  // The same bar as the sidebar (.sidebar-body-content): the browser's own
+  // full-width scrollbar in a quiet grey. Setting the standard properties
+  // turns the app-wide ::-webkit-scrollbar pill off for this element.
+  scrollbar-width: auto;
+  scrollbar-color: rgba(55, 53, 47, 0.25) transparent;
+  .dark & {
+    scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
   }
-  &::-webkit-scrollbar-track { background: transparent; }
- 
 }
 
 .simple-editor{

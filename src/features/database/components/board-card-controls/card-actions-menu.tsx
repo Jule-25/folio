@@ -72,7 +72,7 @@ export function CardActionsMenu({
           variant="ghost"
           size="small"
           className="db-card-controls__btn"
-          tooltip="Actions"
+          tooltip="Rename, delete, move to and more…"
           ref={anchorRef}
           onClick={(e) => {
             e.stopPropagation();
@@ -132,7 +132,7 @@ export function CardActionsMenu({
           variant="ghost"
           size="small"
           className="db-card-controls__btn"
-          tooltip="Actions"
+          tooltip="Rename, delete, move to and more…"
           onClick={(e) => e.stopPropagation()}
         >
           <Ellipsis className="tiptap-button-icon" size={14} />

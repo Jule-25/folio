@@ -122,6 +122,14 @@ export function CardActionsProvider({ children }: { children: ReactNode }) {
           },
         });
       },
+      setRecordCoverPosition: (recordId, positionY) => {
+        const r = getRecord(recordId);
+        if (!r) return;
+        patchPageMutate({
+          id: recordId,
+          patch: { cover: { ...r.cover, positionY } },
+        });
+      },
       openInRecord: (recordId, mode) => {
         if (mode === "sidePeek") {
           setTarget({ pageId: recordId, view: "Peek" });
