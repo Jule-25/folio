@@ -1,8 +1,3 @@
-export interface GalleryDropTarget {
-  card: HTMLElement | null;
-  beforeRecordId: string | null;
-}
-
 export const columnKeyAtPoint = (
   grid: HTMLElement,
   x: number,
@@ -38,53 +33,115 @@ export const beforeCardAtPoint = (
   return null;
 };
 
-export function beforeGalleryCardAtPoint(
+// ── Gallery ─────────────────────────────────────────────────────────────────
+
+/** Only the record wrappers: the card inside (.db-board-card) carries the
+ *  same data-type / data-record-id, and counting both put every card in the
+ *  list twice. */
+const GALLERY_CARD = ".db-record--card[data-record-id]";
+
+/**
+ * A gallery's visible cards, minus the one being dragged, in reading order,
+ * grouped into rows. CSS `order` places the cards, so DOM order isn't the
+ * order on screen.
+ */
+function galleryRows(gallery: HTMLElement, skipId: string): HTMLElement[][] {
+  const cards = Array.from(gallery.querySelectorAll<HTMLElement>(GALLERY_CARD))
+    .filter(
+      (card) =>
+        card.dataset.recordId !== skipId && card.getClientRects().length > 0,
+    )
+    .map((card) => ({ card, rect: card.getBoundingClientRect() }))
+    .sort((a, b) =>
+      Math.abs(a.rect.top - b.rect.top) > 2
+        ? a.rect.top - b.rect.top
+        : a.rect.left - b.rect.left,
+    );
+
+  const rows: { top: number; cards: HTMLElement[] }[] = [];
+  for (const { card, rect } of cards) {
+    const row = rows[rows.length - 1];
+    if (row && Math.abs(row.top - rect.top) <= 2) row.cards.push(card);
+    else rows.push({ top: rect.top, cards: [card] });
+  }
+  return rows.map((r) => r.cards);
+}
+
+export interface GalleryDropTarget {
+  /** The card the dragged one goes before; null = at the very end. */
+  beforeRecordId: string | null;
+  /** Where to draw the drop line: beside this card, on this side. */
+  card: HTMLElement | null;
+  side: "before" | "after";
+}
+
+/**
+ * Where a card dropped at (clientX, clientY) lands. Gaps count too: the
+ * pointer picks the row it's in (or, between two rows, the row below), then
+ * the slot by the cards' horizontal middles. Dropping right of a row's last
+ * card puts it after that card, which is before the next row's first.
+ */
+export function galleryDropTarget(
   gallery: HTMLElement,
   clientX: number,
   clientY: number,
   skipId: string,
-): string | null {
-  const cards = Array.from(
-    gallery.querySelectorAll<HTMLElement>(
-      '[data-type="database-record"][data-record-id]',
-    ),
-  ).filter(
-    (card) =>
-      card.dataset.recordId !== skipId &&
-      card.getClientRects().length > 0 &&
-      getComputedStyle(card).display !== "none",
+): GalleryDropTarget {
+  const rows = galleryRows(gallery, skipId);
+  const rowIndex = rows.findIndex((row) =>
+    row.some((card) => clientY <= card.getBoundingClientRect().bottom),
   );
 
-  // CSS `order` means DOM order is not necessarily visual order.
-  cards.sort((a, b) => {
-    const ar = a.getBoundingClientRect();
-    const br = b.getBoundingClientRect();
+  // Below every row (or no cards at all): at the end, after the last card.
+  if (rowIndex === -1) {
+    const last = rows[rows.length - 1]?.at(-1) ?? null;
+    return { beforeRecordId: null, card: last, side: "after" };
+  }
 
-    if (Math.abs(ar.top - br.top) > 1) {
-      return ar.top - br.top;
-    }
-
-    return ar.left - br.left;
-  });
-
-  for (const card of cards) {
-    const rect = card.getBoundingClientRect();
-
-    if (
-      clientX >= rect.left &&
-      clientX <= rect.right &&
-      clientY >= rect.top &&
-      clientY <= rect.bottom
-    ) {
-      const midpoint = rect.left + rect.width / 2;
-
-      return clientX < midpoint
-        ? (card.dataset.recordId ?? null)
-        : getNextVisualCard(cards, card);
+  const row = rows[rowIndex];
+  for (const card of row) {
+    const r = card.getBoundingClientRect();
+    if (clientX < r.left + r.width / 2) {
+      return {
+        beforeRecordId: card.dataset.recordId ?? null,
+        card,
+        side: "before",
+      };
     }
   }
 
-  return null;
+  const lastInRow = row[row.length - 1];
+  const nextRowFirst = rows[rowIndex + 1]?.[0];
+  return {
+    beforeRecordId: nextRowFirst?.dataset.recordId ?? null,
+    card: lastInRow,
+    side: "after",
+  };
+}
+
+/** The drop line beside `card`, on `side`; hidden when there's no card. */
+export function showGalleryDropIndicator(
+  gallery: HTMLElement,
+  card: HTMLElement | null,
+  side: "before" | "after",
+): void {
+  if (!card) {
+    hideGalleryDropIndicator(gallery);
+    return;
+  }
+  const indicator = getGalleryDropIndicator(gallery);
+  const galleryRect = gallery.getBoundingClientRect();
+  const cardRect = card.getBoundingClientRect();
+
+  // Half the 16px gap: the line sits in the middle of it.
+  const x =
+    side === "before"
+      ? cardRect.left - galleryRect.left - 9
+      : cardRect.right - galleryRect.left + 7;
+
+  indicator.style.height = `${cardRect.height}px`;
+  indicator.style.transform = `translate3d(${x}px, ${cardRect.top - galleryRect.top}px, 0)`;
+  indicator.style.display = "block";
 }
 
 export function beforeRecordAtPoint(
@@ -106,16 +163,6 @@ export function beforeRecordAtPoint(
   }
 
   return null;
-}
-
-function getNextVisualCard(
-  cards: HTMLElement[],
-  current: HTMLElement,
-): string | null {
-  const index = cards.indexOf(current);
-  const next = cards[index + 1];
-
-  return next?.dataset.recordId ?? null;
 }
 
 export function getGalleryDropIndicator(gallery: HTMLElement): HTMLElement {
@@ -140,126 +187,4 @@ export function hideGalleryDropIndicator(gallery: HTMLElement): void {
   if (indicator) {
     indicator.style.display = "none";
   }
-}
-
-export function showGalleryDropIndicator(
-  gallery: HTMLElement,
-  card: HTMLElement,
-): void {
-  const indicator = getGalleryDropIndicator(gallery);
-
-  const galleryRect = gallery.getBoundingClientRect();
-  const cardRect = card.getBoundingClientRect();
-
-  const x = cardRect.left - galleryRect.left - 6;
-
-  indicator.style.height = `${cardRect.height}px`;
-  indicator.style.transform = `translate3d(${x}px, ${
-    cardRect.top - galleryRect.top
-  }px, 0)`;
-
-  indicator.style.display = "block";
-}
-
-export function getGalleryCards(
-  gallery: HTMLElement,
-  skipId: string,
-): HTMLElement[] {
-  return Array.from(
-    gallery.querySelectorAll<HTMLElement>(
-      '[data-type="database-record"][data-record-id]',
-    ),
-  )
-    .filter(
-      (card) =>
-        card.dataset.recordId !== skipId &&
-        card.getClientRects().length > 0 &&
-        getComputedStyle(card).display !== "none",
-    )
-    .sort((a, b) => {
-      const ar = a.getBoundingClientRect();
-      const br = b.getBoundingClientRect();
-
-      if (Math.abs(ar.top - br.top) > 2) {
-        return ar.top - br.top;
-      }
-
-      return ar.left - br.left;
-    });
-}
-export function galleryDropTargetAtPoint(
-  gallery: HTMLElement,
-  clientX: number,
-  clientY: number,
-  skipId: string,
-): GalleryDropTarget {
-  const cards = getGalleryCards(gallery, skipId);
-
-  if (cards.length === 0) {
-    return {
-      card: null,
-      beforeRecordId: null,
-    };
-  }
-
-  for (const card of cards) {
-    const rect = card.getBoundingClientRect();
-
-    if (clientY < rect.bottom && clientX < rect.right) {
-      const midpoint = rect.left + rect.width / 2;
-
-      if (clientX < midpoint) {
-        return {
-          card,
-          beforeRecordId: card.dataset.recordId ?? null,
-        };
-      }
-    }
-  }
-
-  // Dropped after all cards.
-  return {
-    card: null,
-    beforeRecordId: null,
-  };
-}
-
-export function showGalleryEndIndicator(gallery: HTMLElement): void {
-  const indicator = getGalleryDropIndicator(gallery);
-
-  const cards = Array.from(
-    gallery.querySelectorAll<HTMLElement>(
-      '[data-type="database-record"][data-record-id]',
-    ),
-  );
-
-  if (cards.length === 0) {
-    hideGalleryDropIndicator(gallery);
-    return;
-  }
-
-  // CSS `order` controls the visual order, so DOM order
-  // cannot be trusted.
-  cards.sort((a, b) => {
-    const aRect = a.getBoundingClientRect();
-    const bRect = b.getBoundingClientRect();
-
-    if (Math.abs(aRect.top - bRect.top) > 1) {
-      return aRect.top - bRect.top;
-    }
-
-    return aRect.left - bRect.left;
-  });
-
-  const lastCard = cards[cards.length - 1];
-
-  const galleryRect = gallery.getBoundingClientRect();
-  const cardRect = lastCard.getBoundingClientRect();
-
-  const x = cardRect.right - galleryRect.left + 6;
-  const y = cardRect.top - galleryRect.top;
-
-  indicator.style.height = `${cardRect.height}px`;
-  indicator.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-  indicator.style.display = "block";
 }

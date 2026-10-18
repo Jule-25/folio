@@ -162,7 +162,7 @@ export function DatabaseBoardNodeViewImpl() {
     if (!scroller) return;
     const onOver = (e: DragEvent) => {
       const storage = editor?.storage.boardDrag as DragStorage;
-      if (!storage?.isBoardActive() || !storage.draggingId) return;
+      if (!storage.draggingId) return;
       e.preventDefault();
       autoScroll(e.clientX, e.clientY);
     };
@@ -192,7 +192,7 @@ export function DatabaseBoardNodeViewImpl() {
       onDragOver={(event) => {
         if (!editor) return;
         const storage = editor.storage.boardDrag as DragStorage;
-        if (!storage.isBoardActive() || !storage.draggingId) return;
+        if (!storage.draggingId) return;
         event.preventDefault();
         autoScroll(event.clientX, event.clientY);
       }}

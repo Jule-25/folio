@@ -29,7 +29,7 @@ import { useTableLayout } from "../hooks/use-table-layout";
 import { useRecordCreation } from "../hooks/use-record-creation";
 import { CardActionsProvider, TimelineViewProvider } from ".";
 import { useListLayout } from "../hooks";
-import type { DragStorage, DropInfo } from "../extensions";
+import type { DatabaseDropHandler, DragStorage, DropInfo } from "../extensions";
 import { groupValueForColumn } from "../utils/group-value-for-column";
 import { canWriteGroupValue } from "../utils/group-key";
 import { useWorkspacePeople } from "../hooks/use-workspace-people";
@@ -167,10 +167,7 @@ export function DatabaseProvider({
     if (!editor) return;
     const storage = editor.storage.boardDrag as DragStorage;
 
-    // eslint-disable-next-line react-hooks/immutability
-    storage.isBoardActive = () => db.activeView?.type === "board";
-
-    storage.onDrop = ({
+    const onDrop = ({
       recordId,
       targetColumnKey,
       targetDate,
@@ -179,9 +176,17 @@ export function DatabaseProvider({
       const view = db.activeView;
 
       if (view.type === "gallery") {
-        const currentOrder =
-          view.manualOrder ?? sortedRecords.map((record) => record.id);
-
+        // The order on screen (useGalleryLayout): the saved order first,
+        // then every card it doesn't list yet (new ones) in sorted order.
+        // Using manualOrder alone dropped those, so dropping before a new
+        // card sent the dragged one to the end instead.
+        const listed = new Set(sortedRecords.map((record) => record.id));
+        const currentOrder = [
+          ...new Set([
+            ...(view.manualOrder ?? []).filter((id) => listed.has(id)),
+            ...listed,
+          ]),
+        ];
         const order = currentOrder.filter((id) => id !== recordId);
 
         if (beforeRecordId) {
@@ -298,8 +303,23 @@ export function DatabaseProvider({
       } as Partial<BoardView>);
     };
 
-    storage.getActiveView = () => db.activeView.type;
-  }, [editor, db, source, setCellValue, sortedRecords, personName]);
+    // Register under this database's id. A page can hold several databases;
+    // the drop handler (board-drag.ts) picks the one the drop lands in. One
+    // shared onDrop, overwritten by whichever database rendered last, sent
+    // drops to the wrong database — they "sometimes" did nothing.
+    const handler: DatabaseDropHandler = {
+      onDrop,
+      getActiveView: () => db.activeView.type,
+    };
+    const databaseId = attrs.id;
+    if (!databaseId) return;
+    storage.databases.set(databaseId, handler);
+    return () => {
+      if (storage.databases.get(databaseId) === handler) {
+        storage.databases.delete(databaseId);
+      }
+    };
+  }, [editor, db, source, setCellValue, sortedRecords, personName, attrs.id]);
 
   const value = useMemo(
     () => ({

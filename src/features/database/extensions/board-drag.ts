@@ -3,7 +3,7 @@ import { Plugin, PluginKey } from "@tiptap/pm/state";
 import type { DatabaseView } from "src/types";
 import {
   beforeCardAtPoint,
-  beforeGalleryCardAtPoint,
+  galleryDropTarget,
   beforeRecordAtPoint,
   columnKeyAtPoint,
   hideGalleryDropIndicator,
@@ -16,11 +16,17 @@ export interface DropInfo {
   targetDate?: string; // ISO date, calendar drops only
 }
 
-export interface DragStorage {
+/** What one database on the page does with a drop (database-provider.tsx). */
+export interface DatabaseDropHandler {
   onDrop: (info: DropInfo) => void;
-  isBoardActive: () => boolean;
-  draggingId: string | null;
   getActiveView: () => DatabaseView["type"];
+}
+
+export interface DragStorage {
+  /** Every database on the page, by its id (the node's attrs.id). A page can
+   *  hold several; a drop goes to the one it lands in. */
+  databases: Map<string, DatabaseDropHandler>;
+  draggingId: string | null;
 }
 
 declare module "@tiptap/core" {
@@ -35,14 +41,7 @@ export const BoardDrag = Extension.create<unknown, DragStorage>({
   name: "boardDrag",
 
   addStorage() {
-    return {
-      onDrop: () => {},
-      isBoardActive: () => false,
-      draggingId: null,
-      getActiveView() {
-        return "board";
-      },
-    };
+    return { databases: new Map(), draggingId: null };
   },
 
   addProseMirrorPlugins() {
@@ -57,12 +56,27 @@ export const BoardDrag = Extension.create<unknown, DragStorage>({
           handleDOMEvents: {
             drop(_view, event) {
               const storage = ext.storage as DragStorage;
-              const view = storage.getActiveView();
               const draggingId = storage.draggingId;
-
-              if (!view || !draggingId) return false;
+              if (!draggingId) return false;
 
               const target = event.target as HTMLElement;
+
+              // The database the drop landed in. Every database view root
+              // carries data-database-id; its handler knows its own view.
+              const dbEl = target.closest<HTMLElement>("[data-database-id]");
+              const handler = dbEl?.dataset.databaseId
+                ? storage.databases.get(dbEl.dataset.databaseId)
+                : undefined;
+
+              if (!dbEl || !handler) {
+                // Dropped outside any database: cancel the card move, and
+                // keep ProseMirror from inserting the dragged text.
+                event.preventDefault();
+                storage.draggingId = null;
+                return true;
+              }
+
+              const view = handler.getActiveView();
 
               if (view === "board") {
                 const grid = target.closest<HTMLElement>(".db-board-grid");
@@ -90,7 +104,7 @@ export const BoardDrag = Extension.create<unknown, DragStorage>({
 
                 hideGalleryDropIndicator(grid);
 
-                storage.onDrop({
+                handler.onDrop({
                   recordId: draggingId,
                   targetColumnKey,
                   beforeRecordId,
@@ -102,40 +116,29 @@ export const BoardDrag = Extension.create<unknown, DragStorage>({
               }
 
               if (view === "gallery") {
-                let gallery = target.closest<HTMLElement>(".db-board-grid");
-
-                if (!gallery) {
-                  const galleries =
-                    document.querySelectorAll<HTMLElement>(".db-board-grid");
-
-                  gallery =
-                    Array.from(galleries).find((candidate) => {
-                      const rect = candidate.getBoundingClientRect();
-
-                      return (
-                        event.clientX >= rect.left &&
-                        event.clientX <= rect.right &&
-                        event.clientY >= rect.top &&
-                        event.clientY <= rect.bottom
-                      );
-                    }) ?? null;
-                }
+                // The grid itself, or (dropped just outside it, still inside
+                // the database) this database's grid.
+                const gallery =
+                  target.closest<HTMLElement>(".db-board-grid") ??
+                  dbEl.querySelector<HTMLElement>(".db-board-grid");
 
                 if (!gallery) {
                   event.preventDefault();
+                  storage.draggingId = null;
                   return true;
                 }
-
                 event.preventDefault();
 
-                const beforeRecordId = beforeGalleryCardAtPoint(
+                const { beforeRecordId } = galleryDropTarget(
                   gallery,
                   event.clientX,
                   event.clientY,
                   draggingId,
                 );
 
-                storage.onDrop({
+                hideGalleryDropIndicator(gallery);
+
+                handler.onDrop({
                   recordId: draggingId,
                   beforeRecordId,
                 });
@@ -173,7 +176,7 @@ export const BoardDrag = Extension.create<unknown, DragStorage>({
                   draggingId,
                 );
 
-                storage.onDrop({
+                handler.onDrop({
                   recordId: draggingId,
                   targetDate,
                   beforeRecordId,
