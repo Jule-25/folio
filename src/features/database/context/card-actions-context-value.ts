@@ -32,6 +32,8 @@ export interface CardActionsValue {
     color?: string | null,
     target?: string,
   ) => void;
+  /** Save where a card's cover image sits (0 = top, 100 = bottom). */
+  setRecordCoverPosition: (recordId: ID, positionY: number) => void;
 
   // ── Panels (open the view-options popover at a panel) ─────────────────────
   openLayout: () => void;
