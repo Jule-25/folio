@@ -106,15 +106,32 @@ function preprocessExpression(expression: string): string {
     .join("");
 }
 
-// prop("Name") → __prop_Name__
-function sanitizePropName(name: string): string {
-  return `__prop_${name.replace(/[^a-zA-Z0-9_]/g, "_")}__`;
+// prop("Name") → __prop_2__: the variable holding the third property's value.
+// Properties are numbered rather than named, so any name works (accents,
+// quotes, symbols) and "Prix (€)" and "Prix (£)" stay two variables.
+function propVarName(index: number): string {
+  return `__prop_${index}__`;
 }
 
-function substitutePropCalls(expression: string): string {
-  return expression.replace(/prop\(["']([^"']+)["']\)/g, (_, name) =>
-    sanitizePropName(name),
-  );
+// prop("Date d'échéance"), prop('x'), prop( "x" ) and prop("Say \"hi\"") all
+// name a property. A name no property has is left as it is and fails on
+// evaluation like any other unknown call.
+const PROP_CALL = /prop\(\s*("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')\s*\)/g;
+
+function substitutePropCalls(
+  expression: string,
+  properties: DatabaseProperty[],
+): string {
+  return expression.replace(PROP_CALL, (call: string, quoted: string) => {
+    const name = quoted.slice(1, -1).replace(/\\(.)/g, "$1");
+    const index = properties.findIndex((p) => p.name === name);
+    return index === -1 ? call : propVarName(index);
+  });
+}
+
+// The prop("...") call for a property, with " and \ escaped so any name works.
+export function propCall(name: string): string {
+  return `prop("${name.replace(/[\\"]/g, "\\$&")}")`;
 }
 
 // ─── cell value → formula value ───────────────────────────────────────────────
@@ -439,18 +456,19 @@ function evaluateFormulaCore(
   if (!expression?.trim()) return null;
 
   const propScope: Record<string, unknown> = {};
-  for (const prop of ctx.properties) {
-    const varName = sanitizePropName(prop.name);
+  ctx.properties.forEach((prop, index) => {
     const raw = ctx.cellValues[prop.id] ?? null;
-    propScope[varName] = cellToFormulaValue(
+    propScope[propVarName(index)] = cellToFormulaValue(
       prop,
       raw,
       ctx.page,
       ctx.personName,
     );
-  }
+  });
 
-  const substituted = preprocessExpression(substitutePropCalls(expression));
+  const substituted = preprocessExpression(
+    substitutePropCalls(expression, ctx.properties),
+  );
   const scope = { ...buildFunctionScope(), ...propScope };
   const result = math.evaluate(substituted, scope);
   return castResult(result);
@@ -483,15 +501,16 @@ export function evaluateFormula(
 //
 // Note: because it doesn't evaluate, this does NOT catch semantic errors like
 // unknown function names or wrong argument counts — only true syntax errors.
-// ctx is unused but kept for call-site symmetry / future use.
 export function validateFormula(
   expression: string,
-  _ctx: EvaluationContext,
+  ctx: EvaluationContext,
 ): string | null {
   if (!expression?.trim()) return null; // empty is not an error
   try {
     // Mirror the transforms evaluation applies, then parse (no evaluate).
-    const substituted = preprocessExpression(substitutePropCalls(expression));
+    const substituted = preprocessExpression(
+      substitutePropCalls(expression, ctx.properties),
+    );
     math.parse(substituted);
     return null;
   } catch (err) {

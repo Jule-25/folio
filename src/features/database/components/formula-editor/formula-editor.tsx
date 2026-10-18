@@ -4,7 +4,7 @@ import type { DatabaseProperty, ID, ConfigOf } from "src/types";
 import { useDatabaseContext } from "../../context/database-context";
 import { useDataSource } from "../../hooks/use-data-source";
 import { resolveFormulaValues } from "./resolve-formula-values";
-import { validateFormula } from "./formula-evaluator";
+import { propCall, validateFormula } from "./formula-evaluator";
 import FormulaBar, { type FormulaBarHandle } from "./formula-bar";
 import PropertiesPanel from "./properties-panel";
 import PropertyDetail from "./property-detail";
@@ -134,7 +134,7 @@ export default function FormulaEditor({
             selectedPropertyId={selectedProperty?.id}
             onSelectProperty={selectProperty}
             onInsertProperty={(prop) =>
-              handleInsertSnippet(`prop("${prop.name}")`)
+              handleInsertSnippet(propCall(prop.name))
             }
           />
           <FunctionsPanel
