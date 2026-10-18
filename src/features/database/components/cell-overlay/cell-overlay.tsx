@@ -1,14 +1,32 @@
 import { useState } from "react";
-import {
-  Copy,
-  Check,
-  MessageSquareText,
-  PanelRightOpen,
-  Pencil,
-} from "lucide-react";
+import { Copy, Check, MessageSquareText, Pencil } from "lucide-react";
 import "./cell-overlay.scss";
 import { Button } from "src/components/tiptap-ui-primitive/button";
 import type { DatabaseView } from "src/types";
+
+function PeekIcon() {
+  return (
+    <svg
+      className="tiptap-button-icon"
+      width="14"
+      height="14"
+      viewBox="0 0 14 14"
+      fill="none"
+      aria-hidden="true"
+    >
+      <rect
+        x="1.25"
+        y="2.25"
+        width="11.5"
+        height="9.5"
+        rx="2"
+        stroke="currentColor"
+        strokeWidth="1.3"
+      />
+      <rect x="7.25" y="4" width="4" height="6" rx="0.75" fill="currentColor" />
+    </svg>
+  );
+}
 
 export function CellOverlay({
   copiable,
@@ -50,7 +68,7 @@ export function CellOverlay({
         }}
       >
         {editing ? (
-          <PanelRightOpen className="tiptap-button-icon" size={14} />
+          <PeekIcon />
         ) : (
           <Pencil className="tiptap-button-icon" size={14} />
         )}
@@ -71,7 +89,7 @@ export function CellOverlay({
           onOpen();
         }}
       >
-        <PanelRightOpen className="tiptap-button-icon" size={14} />
+        <PeekIcon />
         <span className="tiptap-button-text">Open</span>
       </Button>
     );
