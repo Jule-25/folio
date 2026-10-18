@@ -115,3 +115,37 @@
     }
   }
 }
+
+// List view: the title's Edit / Open toggle sits right after the text, as
+// an icon-only square. Edit has the page's own background (a hole in the
+// hovered row); Open is filled like the table's OPEN pill.
+.db-cell-overlay-open.db-cell-overlay-open--list.tiptap-button {
+  position: static;
+  transform: none;
+  flex: none;
+  width: 30px !important;
+  min-width: 30px;
+  height: 24px;
+  min-height: 24px;
+  margin-left: 12px;
+  padding: 0;
+  justify-content: center;
+  background-color: var(--tt-bg-color);
+  box-shadow: none;
+  .dark & {
+    background-color: var(--tt-bg-color);
+  }
+
+  &.is-editing {
+    background-color: var(--tt-bg-color);
+    .dark & {
+      background-color: color-mix(in srgb, #fff 5%, var(--tt-bg-color));
+    }
+  }
+
+  // Also shown while the title is being edited, not only on hover.
+  .db-node-cell:focus-within & {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { NodeViewWrapper } from "@tiptap/react";
 import type { NodeViewProps } from "@tiptap/core";
 import { useDatabaseBridgeData } from "../../hooks/use-database-bridge-data";
@@ -67,8 +67,16 @@ export default function DatabaseCellNodeView({ node, editor }: NodeViewProps) {
   const isListView = data?.view?.type === "list";
   const isListTitle = isTitle && isListView;
 
+  // `editing`: the title has focus (the button shows Open).
+  // `editRequested`: the Edit button was pressed — the title focuses itself,
+  // caret at the end (TitleCellDisplay's autoEdit). Not set when the title is
+  // clicked directly, so a click keeps its caret where it landed.
   const [editing, setEditing] = useState(false);
-  const titleRef = useRef<HTMLDivElement | null>(null);
+  const [editRequested, setEditRequested] = useState(false);
+  const onTitleEditingChange = useCallback((next: boolean) => {
+    setEditing(next);
+    if (!next) setEditRequested(false);
+  }, []);
 
   const view = data?.view;
   const openRecord = useOpenRecord(view);
@@ -76,18 +84,6 @@ export default function DatabaseCellNodeView({ node, editor }: NodeViewProps) {
   const handleOpen = () => {
     if (!recordId || !view) return;
     openRecord(recordId);
-  };
-
-  const focusTitleEnd = () => {
-    titleRef.current?.focus();
-    const sel = window.getSelection();
-    if (sel && titleRef.current) {
-      const r = document.createRange();
-      r.selectNodeContents(titleRef.current);
-      r.collapse(false);
-      sel.removeAllRanges();
-      sel.addRange(r);
-    }
   };
 
   // Only a table or a list shows these cells. Board, gallery, calendar and
@@ -145,9 +141,8 @@ export default function DatabaseCellNodeView({ node, editor }: NodeViewProps) {
           unwrapped={unwrapped}
           {...(isListTitle
             ? {
-                titleVariant: "inline" as const,
-                onTitleEditingChange: setEditing,
-                titleEditRef: titleRef,
+                autoEdit: editRequested,
+                onEditingChange: onTitleEditingChange,
               }
             : {})}
         />
@@ -160,7 +155,14 @@ export default function DatabaseCellNodeView({ node, editor }: NodeViewProps) {
           getCopyText={() => (value == null ? "" : String(value))}
           onOpen={isTitle ? handleOpen : undefined}
           editing={isListTitle ? editing : undefined}
-          onEdit={isListTitle ? focusTitleEnd : undefined}
+          onEdit={
+            isListTitle
+              ? () => {
+                  setEditing(true); // Open shows at once, focus or not
+                  setEditRequested(true); // the title focuses, caret at the end
+                }
+              : undefined
+          }
         />
       )}
     </NodeViewWrapper>

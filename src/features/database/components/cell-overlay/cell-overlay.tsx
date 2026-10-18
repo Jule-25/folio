@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Copy, Check, MessageSquareText, Pencil } from "lucide-react";
+import { Copy, Check, MessageSquareText, PenLine } from "lucide-react";
 import "./cell-overlay.scss";
 import { Button } from "src/components/tiptap-ui-primitive/button";
 import type { DatabaseView } from "src/types";
@@ -57,8 +57,9 @@ export function CellOverlay({
     return (
       <Button
         type="button"
-        className="db-cell-overlay-open"
+        className={`db-cell-overlay-open db-cell-overlay-open--list${editing ? " is-editing" : ""}`}
         aria-label={editing ? "Open page" : "Edit title"}
+        tooltip={editing ? "Open page" : "Edit title"}
         // pointerdown, not click: while editing, a click blurs the field first.
         onPointerDown={(e) => {
           e.preventDefault();
@@ -66,11 +67,15 @@ export function CellOverlay({
           if (editing) onOpen?.();
           else onEdit?.();
         }}
+        // pointerdown's preventDefault doesn't stop the button taking focus
+        // (that comes from mousedown); without this the title loses focus
+        // straight away and the button flips back to Edit.
+        onMouseDown={(e) => e.preventDefault()}
       >
         {editing ? (
           <PeekIcon />
         ) : (
-          <Pencil className="tiptap-button-icon" size={14} />
+          <PenLine className="tiptap-button-icon" size={14} />
         )}
       </Button>
     );

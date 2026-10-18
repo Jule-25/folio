@@ -95,12 +95,12 @@ export function TitleCellDisplay({
           suppressContentEditableWarning
           spellCheck={false}
           data-empty={!value || undefined}
-          onFocus={() => () => {
+          onDragStart={(e) => e.preventDefault()}
+          onBlur={commitInline}
+          onFocus={() => {
             setEditing(true);
             onEditingChange?.(true);
           }}
-          onDragStart={(e)=>e.preventDefault()}
-          onBlur={commitInline}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
