@@ -251,34 +251,65 @@
     }
   }
 }
+// ── Selected rows (table and list) ──────────────────────────────────────────
+// A row is selected two ways:
+//   • ticked: its checkbox, or drag-selecting rows (data-selected on .db-record);
+//   • picked: its drag handle — the editor marks the row's renderer
+//     .ProseMirror-selectednode (not when the whole database is selected,
+//     which is tinted as a whole).
+// Either way it gets ONE ring around the row box — the renderer; .db-record is
+// display: contents — rather than one per cell, which left the table's outline
+// open and split a list row (its cells have gaps) into separate boxes.
+$row-selected: ".react-renderer.node-databaseRecord:has(> .db-record[data-selected]), .react-renderer.node-database:not(.ProseMirror-selectednode) .react-renderer.node-databaseRecord.ProseMirror-selectednode";
 
-// Selected row — keyed off the row's own data attribute, NOT the checkbox's
-// :checked state. The checkbox is portaled to document.body, so it shares no
-// ancestor with the row and can never be a CSS ancestor of it.
-// .db-record is display:contents (paints nothing), so the cells carry the tint.
-// This is the LAST + highest-specificity selection rule, so it's the one that
-// actually renders — the ring + dot live here.
-.react-renderer.node-databaseRecord:has(> .db-record[data-selected]) {
-  border-bottom: 1px solid var(--tt-bg-color);
+:is(#{$row-selected}) {
+  outline: none;
 
-  .db-node-cell--atom,
-  .db-node-cell {
-    position: relative;
-    background-color: var(--tt-selection-color) !important;
-    box-shadow: inset 0 0 0 0.5px var(--tt-selection-color) !important;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 5; // over frozen (sticky) cells, which are z-index 4
+    border-radius: inherit;
+    box-shadow: inset 0 0 0 1px
+      color-mix(in srgb, var(--tt-brand-color-400) 60%, transparent);
+    pointer-events: none;
   }
 
-
   .db-cell {
-    .db-cell-editor__display {
-      background-color: transparent !important;
-    }
+    .db-cell-editor__display,
     .tiptap-card-item-group {
       background-color: transparent !important;
     }
   }
 }
 
+// Table: the cells paint the row (each has the page colour, which frozen
+// columns need to cover what scrolls under them), so the tint goes on the
+// cells, laid over the page colour so it stays opaque.
+.db-node-grid :is(#{$row-selected}) :is(.db-node-cell, .db-node-cell--atom) {
+  background:
+    linear-gradient(var(--tt-selection-color), var(--tt-selection-color)),
+    var(--tt-bg-color) !important;
+}
+
+// List: the row box is real and rounded, and its cells have gaps between
+// them, so the row itself is tinted and the cells stay see-through — no
+// per-cell rounding or corner dot from the single-cell selection look.
+.db-list-grid :is(#{$row-selected}).node-databaseRecord {
+  background-color: var(--tt-selection-color);
+
+  .db-node-cell,
+  .db-node-cell--atom {
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+
+    &::after {
+      content: none !important;
+    }
+  }
+}
 .db-record__select {
   position: fixed;
   transform: translateY(-50%);
