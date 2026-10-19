@@ -51,6 +51,10 @@ export function BoardCardBody({
   const { editor } = useCurrentEditor();
   const fit =
     view.type === "gallery" || view.type === "board" ? view.coverFit : "cover";
+  const cardLayout =
+    view.type === "gallery" || view.type === "board"
+      ? (view.cardLayout ?? "list")
+      : "list";
   // Notion offers Reposition only for an image that fills the cover.
   const canReposition = !!record.cover?.coverImage && fit !== "contain";
 
@@ -168,6 +172,7 @@ export function BoardCardBody({
       {view.type !== "calendar" && (
         <div
           className="db-board-card__props"
+          data-layout={cardLayout}
           onClick={(e) => e.stopPropagation()}
         >
           {otherProps.map((p) => (

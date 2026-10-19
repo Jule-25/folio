@@ -445,11 +445,17 @@ export interface BoardView extends BaseView {
    *  fall through in sorted order. Flat across columns — per-column order is
    *  derived by filtering this to the column's records. */
   manualOrder?: ID[];
+  /** How cards list their properties; unset = "list". */
+  cardLayout?: CardLayout;
   /** Column/group ids hidden from the board (the "No {group}" column uses the
    *  NONE_COLUMN_ID sentinel). Hidden groups are filtered out of the rendered
    *  columns and surfaced in Edit groups for un-hiding. */
   hiddenGroups?: ID[];
 }
+
+/** A gallery or board card's properties: side by side, wrapping
+ *  ("compact"), or one per line ("list"). */
+export type CardLayout = "compact" | "list";
 
 export interface GalleryView extends BaseView {
   type: "gallery";
@@ -457,6 +463,8 @@ export interface GalleryView extends BaseView {
   cardSize: "small" | "medium" | "large";
   coverFit: "cover" | "contain";
   cardPreview?: "none" | "cover" | "content";
+  /** How cards list their properties; unset = "list". */
+  cardLayout?: CardLayout;
   /** Record ids in user-arranged order. Applied after `sorts`; ids not present
    *  fall through in sorted order. Flat across columns — per-column order is
    *  derived by filtering this to the column's records. */

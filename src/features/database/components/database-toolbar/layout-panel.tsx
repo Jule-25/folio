@@ -26,6 +26,7 @@ import {
 import { MenuRow } from "../menu-row";
 import { NavigableMenuItem } from "../navigable-menu-item";
 import { ViewPalette } from "./view-palette";
+import { CardLayoutPicker } from "./card-layout-picker";
 
 interface LayoutPanelProps {
   view: DatabaseView;
@@ -248,6 +249,14 @@ export function LayoutPanel({
                   (view as GalleryView | BoardView).coverFit === "contain"
                     ? "cover"
                     : "contain",
+              } as Partial<GalleryView | BoardView>)
+            }
+          />
+          <CardLayoutPicker
+            value={(view as GalleryView | BoardView).cardLayout ?? "list"}
+            onChange={(cardLayout) =>
+              db.updateView(view.id, {
+                cardLayout,
               } as Partial<GalleryView | BoardView>)
             }
           />

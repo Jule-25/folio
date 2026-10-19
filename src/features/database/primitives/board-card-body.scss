@@ -112,3 +112,23 @@
     margin-top: 0; 
   }
 }
+
+// Card layout "Compact" (Layout panel): the properties sit side by side and
+// wrap, instead of one per line.
+.db-board-card__props[data-layout="compact"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 8px;
+
+  > * {
+    flex: 0 1 auto;
+    width: auto !important;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .db-cell-board-view {
+    margin: 4px 0;
+  }
+}
