@@ -72,6 +72,7 @@ import { useChatRooms } from "src/hooks/use-chat";
 import { useHiddenSections } from "../hooks/use-hidden-sections";
 import { useEditorLayoutActions } from "../context/editor-layout-context";
 import { RoomsSection } from "../../chat/rooms-section";
+import { SbPlusIcon } from "src/components/tiptap-icons/sidebar-icons";
 
 type DropZone = "before" | "after" | "inside";
 
@@ -79,10 +80,6 @@ type DropTarget =
   | { kind: "page"; pageId: ID; zone: DropZone }
   | { kind: "section"; category: PageCategory }
   | null;
-
-// How far each level of the page tree is set in, as in Notion: a child's
-// icon sits a little right of its parent's, not past it.
-const TREE_INDENT = 10;
 
 const SECTION_DRAG_PREFIX = "section-drag:";
 
@@ -230,14 +227,7 @@ function TreeRow({
       </div>
 
       {isExpanded && (
-        <div
-          className={[
-            "sidebar-tree__children",
-            depth === 0 && "sidebar-tree__children--top-level",
-          ]
-            .filter(Boolean)
-            .join(" ")}
-        >
+        <div className="sidebar-tree__children">
           {hasChildren ? (
             node.children.map((child) => (
               <TreeRow
@@ -271,6 +261,25 @@ function TreeRow({
         </div>
       )}
     </>
+  );
+}
+
+// How far each level of the page tree is set in, as in Notion: a child's icon
+// sits a little right of its parent's, not past it.
+const TREE_INDENT = 10;
+
+// A section with no pages (a new workspace's Private, an empty teamspace):
+// one muted "Add a page" row, shaped like a page row, as in Notion.
+function SidebarTreeEmpty({ onNewPage }: { onNewPage?: () => void }) {
+  const { t } = useTranslation();
+  if (!onNewPage) return null;
+  return (
+    <button type="button" className="sidebar-tree__add-row" onClick={onNewPage}>
+      <span className="sidebar-tree__add-row-icon" aria-hidden>
+        <SbPlusIcon size={16} strokeWidth={1.7} />
+      </span>
+      {t("sidebar.empty.add", "Add a page")}
+    </button>
   );
 }
 
@@ -467,21 +476,10 @@ function TreeSection({
             />
           </div>
         ))
-      ) : flatten && rows.length === 0 ? (
-        <div
-          className="sidebar-tree__empty-leaf"
-          style={{
-            paddingLeft: 6,
-            paddingTop: 3,
-            paddingBottom: 3,
-            fontSize: 12.5,
-            color:
-              "color-mix(in srgb, var(--tt-text-primary) 42%, transparent)",
-            userSelect: "none",
-          }}
-        >
-          {t("sidebar.emptySpace", "No pages yet")}
-        </div>
+      ) : rows.length === 0 ? (
+        <SidebarTreeEmpty
+          onNewPage={category === "Recent" ? undefined : onAddClick}
+        />
       ) : (
         rows.map((node) => (
           <TreeRow
@@ -971,10 +969,19 @@ export const SidebarTree = memo(function SidebarTree({
   const candidateSections: SidebarSectionKey[] = fixedSections
     ? sections
     : sectionOrder.filter((key) => !hidden.has(key));
-  const visibleSections = candidateSections.filter((key) =>
+  const nonEmptySections = candidateSections.filter((key) =>
     key === "Rooms"
       ? joinedRooms.length > 0
       : isLoading || (tree[key]?.length ?? 0) > 0,
+  );
+  // Nothing to list yet (a new workspace): keep Private, which shows the
+  // empty state, so the tree's place isn't blank.
+  const visibleSections = useMemo<SidebarSectionKey[]>(
+    () =>
+      nonEmptySections.length === 0 && !fixedSections
+        ? ["Private"]
+        : nonEmptySections,
+    [nonEmptySections, fixedSections],
   );
 
   const sectionItems = useMemo(

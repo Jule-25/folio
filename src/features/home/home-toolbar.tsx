@@ -1,4 +1,4 @@
-import { useMemo, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { ChevronDown, Home, LayoutTemplate, Plus } from "lucide-react";
 import { Button, ButtonGroup } from "src/components/tiptap-ui-primitive/button";
@@ -11,21 +11,17 @@ import {
 } from "src/components/tiptap-ui-primitive/dropdown-menu";
 import { Spacer } from "src/components/tiptap-ui-primitive/spacer";
 import { ToolbarGroup } from "src/components/tiptap-ui-primitive/toolbar";
-import { useRecentPages } from "src/hooks/use-pages";
 import { useCurrentSpace } from "src/hooks/use-current-space";
-import { useActivePageActions } from "../pages/context/active-page-context";
 import { PageItemIcon } from "../pages/page-item/page-item-icon";
-import { HomeSearch } from "./home-search";
 import { useHomeActions } from "./use-home-actions";
 import { useSpaceAccent } from "../shell/space-accent/space-accent";
 import "./home-toolbar.scss";
 
 // The app toolbar on the home view: Home / teamspace / today's date on the
-// left, search-or-create in the middle, start from a template and New page on
-// the right.
+// left, start from a template and New page on the right. Search is the
+// sidebar's search bar.
 //   • `leading`: what the shell puts first (the sidebar toggle when collapsed).
-//   • tablet: no date, icon-only buttons.
-//   • mobile: no date, no search box (the sidebar's Search is there), icons.
+//   • tablet / mobile: no date, icon-only buttons.
 export function HomeToolbar({
   leading,
   size = "desktop",
@@ -36,21 +32,13 @@ export function HomeToolbar({
   const compact = size !== "desktop";
   // Inside a teamspace, New page wears its colour.
   const accent = useSpaceAccent();
-  // Three columns: crumbs | search | actions. The two sides share the free
-  // space equally, so the search sits in the middle of the toolbar.
   return (
     <>
       <ToolbarGroup className="home-toolbar__side">
         {leading}
         <HomeCrumbs showDate={!compact} />
       </ToolbarGroup>
-      {size !== "mobile" ? (
-        <div className="home-toolbar__center">
-          <HomeToolbarSearch />
-        </div>
-      ) : (
-        <Spacer />
-      )}
+      <Spacer />
       <ToolbarGroup
         className={`home-toolbar__side home-toolbar__actions${accent ? ` ${accent.className}` : ""}`}
         style={accent?.style}
@@ -103,34 +91,6 @@ function HomeCrumbs({ showDate }: { showDate: boolean }) {
         </>
       )}
     </nav>
-  );
-}
-
-// Searches the current space's pages (a teamspace's, or all of yours).
-function HomeToolbarSearch() {
-  const { data } = useRecentPages();
-  const space = useCurrentSpace();
-  const { setActivePageId } = useActivePageActions();
-  const { newPage } = useHomeActions();
-  const teamspaceId = space.kind === "teamspace" ? space.id : null;
-
-  const pages = useMemo(
-    () =>
-      (data ?? []).filter(
-        (p) =>
-          p.category !== "Template" &&
-          (teamspaceId == null ||
-            (p.teamspaceId === teamspaceId && p.id !== teamspaceId)),
-      ),
-    [data, teamspaceId],
-  );
-
-  return (
-    <HomeSearch
-      pages={pages}
-      onOpen={(p) => setActivePageId(p.id)}
-      onCreate={newPage}
-    />
   );
 }
 

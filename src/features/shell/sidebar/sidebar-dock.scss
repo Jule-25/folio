@@ -101,77 +101,56 @@
   }
 }
 
-// ── Find in pages: a row under the top row while searching ─────────────────
+// ── The search bar under the top row (always shown) ─────────────────────────
+// Notion's: the system UI font, a filled field a shade off the sidebar with a
+// hairline, no icon, the shortcut in a small chip.
 .sb-find {
-  display: grid;
-  grid-template-rows: 0fr;
-  opacity: 0;
-  visibility: hidden;
-  transition:
-    grid-template-rows 0.22s cubic-bezier(0.32, 0.72, 0, 1),
-    opacity 0.15s ease,
-    visibility 0s linear 0.22s;
-
-  &.is-open {
-    grid-template-rows: 1fr;
-    opacity: 1;
-    visibility: visible;
-    transition:
-      grid-template-rows 0.22s cubic-bezier(0.32, 0.72, 0, 1),
-      opacity 0.18s ease,
-      visibility 0s linear 0s;
-  }
-
-  &__inner {
-    min-height: 0;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    gap: 2px;
-    padding-top: 6px;
-  }
+  --sb-search-font: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
+  padding-top: 6px;
+  padding-left: 6px;
 
   .sb-search {
-    flex: 1;
-    min-width: 0;
+    width: 100%;
     height: 32px;
     min-height: 0;
-    padding: 0 2px 0 8px;
-    border-radius: 8px;
-    font-family: var(--sb-font);
+    padding: 0 4px 0 10px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    box-shadow: inset 0 0 0 1px
+    color-mix(in srgb, var(--tt-text-primary) 10%, transparent);
+    font-family: var(--sb-search-font);
+
+    &:hover {
+      background: color-mix(in srgb, var(--tt-bg-color) 7%, transparent);
+    }
+
+    &:focus-within,
+    &.is-open {
+      box-shadow: inset 0 0 0 1px
+        color-mix(in srgb, var(--sidebar-accent) 60%, transparent);
+    }
   }
 
   .sb-search__input {
-    font-family: var(--sb-font);
-    font-size: 13px;
+    font-family: var(--sb-search-font);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.4;
   }
 
-  &__close {
-    all: unset;
-    box-sizing: border-box;
-    display: grid;
-    place-items: center;
-    flex: none;
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    color: var(--sb-icon-color);
-    cursor: pointer;
-
-    &:hover {
-      background: var(--sb-hover-bg);
-      color: var(--sb-active-color);
-    }
-
-    &:focus-visible {
-      outline: 2px solid var(--tt-brand-color-500);
-      outline-offset: -2px;
-    }
+  .sb-search__palette {
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--tt-text-primary) 9%, transparent);
+    font-family: var(--sb-search-font);
+    font-size: 11.5px;
+    line-height: 20px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .sb-find,
   .sb-dock__tab {
     transition-duration: 0s !important;
   }

@@ -31,7 +31,8 @@
     "open": "Search in pages",
     "close": "Close search",
     "hint": "Type to search across your pages",
-    "clear": "Clear"
+    "clear": "Clear",
+    "openPalette": "Open the search palette"
   },
   "chat": {
     "outbox": {
@@ -310,12 +311,6 @@
       "databases": "Organize anything with databases",
       "collaborate": "Work together: comments, suggestions and rooms"
     },
-    "search": {
-      "label": "Search or create a page",
-      "short": "Search or create a page",
-      "placeholder": "Search your pages, or type a title to create one",
-      "create": "Create “{{title}}”"
-    },
     "actions": {
       "template": "Use a template",
       "inbox": "Inbox",
@@ -492,7 +487,10 @@
     "personalSpace": "{{name}}'s Space",
     "pinned": "Pinned",
     "pin": "Pin to teamspace",
-    "unpin": "Unpin"
+    "unpin": "Unpin",
+    "empty": {
+      "add": "Add a page"
+    }
   },
   "library": {
     "title": "Library",

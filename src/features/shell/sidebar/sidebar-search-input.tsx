@@ -1,7 +1,9 @@
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { CaseSensitive, Regex, Search, WholeWord, X } from "lucide-react";
+import { CaseSensitive, Regex, WholeWord, X } from "lucide-react";
 import { useEditorLayout } from "../context/editor-layout-context";
+import { useSearch } from "../search/search-context";
+import { isMac } from "src/lib/tiptap-utils";
 import { setFindOption, setFindQuery, useFindState } from "src/lib/find-store";
 import "./sidebar-search-input.scss";
 import { Button } from "src/components/tiptap-ui-primitive/button";
@@ -33,20 +35,23 @@ function Toggle({
   );
 }
 
-// Find-in-pages input. Lives in the sidebar header, stacked behind the
-// workspace switcher; the header's search icon swaps them. Match-case /
-// whole-word / regex toggles sit inside it, VS Code-style. Esc clears the
-// query, then closes.
+// The sidebar's search bar, always shown under the top row. Typing searches
+// inside pages: focusing it swaps the page tree for the results (the find
+// panel), with match-case / whole-word / regex toggles and × to go back. At
+// rest it shows the Ctrl/⌘+P badge, a button that opens the search palette.
+// Esc clears the query, then closes.
 export function SidebarSearchInput() {
   const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
   const { query, options, focusNonce } = useFindState();
   const { sidebarView, setSidebarView } = useEditorLayout();
+  const { onOpenChange: openPalette } = useSearch();
   const isOpen = sidebarView === "search";
+  const paletteKeys = isMac() ? "⌘P" : "Ctrl+P";
+  const paletteLabel = t("find.openPalette", "Open the search palette");
 
-  // Focus only for requests made AFTER mount (icon click, Ctrl/⌘+Shift+F) —
-  // the input stays mounted while hidden, so it must not grab focus just
-  // because the sidebar re-rendered or re-expanded.
+  // Focus only for requests made AFTER mount (Ctrl/⌘+Shift+F) — not because
+  // the sidebar re-rendered or re-expanded.
   const handledNonce = useRef(focusNonce);
   useEffect(() => {
     if (focusNonce === handledNonce.current) return;
@@ -56,20 +61,26 @@ export function SidebarSearchInput() {
   }, [focusNonce]);
 
   const close = () => {
+    setFindQuery("");
     setSidebarView("pages");
     inputRef.current?.blur();
   };
 
   return (
-    <div className={`sb-search${isOpen ? " is-open" : ""}`}>
-      <Search size={15} className="sb-search__icon" />
+    <div
+      className={`sb-search${isOpen ? " is-open" : ""}`}
+      onClick={() => inputRef.current?.focus()}
+    >
       <input
         ref={inputRef}
         className="sb-search__input"
         value={query}
         placeholder={t("find.placeholder", "Search in pages…")}
+        aria-label={t("find.open", "Search in pages")}
         spellCheck={false}
-        tabIndex={isOpen ? 0 : -1}
+        onFocus={() => {
+          if (!isOpen) setSidebarView("search");
+        }}
         onChange={(e) => setFindQuery(e.target.value)}
         onKeyDown={(e) => {
           if (e.key !== "Escape") return;
@@ -79,41 +90,57 @@ export function SidebarSearchInput() {
         }}
       />
 
-      <div className="sb-search__tools">
-        {query && (
+      {isOpen ? (
+        <div className="sb-search__tools">
+          <Toggle
+            active={options.matchCase}
+            label={t("find.matchCase", "Match case")}
+            onClick={() => setFindOption("matchCase", !options.matchCase)}
+          >
+            <CaseSensitive size={14} />
+          </Toggle>
+          <Toggle
+            active={options.wholeWord}
+            label={t("find.wholeWord", "Match whole word")}
+            onClick={() => setFindOption("wholeWord", !options.wholeWord)}
+          >
+            <WholeWord size={14} />
+          </Toggle>
+          <Toggle
+            active={options.regex}
+            label={t("find.regex", "Use regular expression")}
+            onClick={() => setFindOption("regex", !options.regex)}
+          >
+            <Regex size={14} />
+          </Toggle>
           <Button
             type="button"
             className="fip-toggle"
-            aria-label={t("find.clear", "Clear")}
-            title={t("find.clear", "Clear")}
+            aria-label={t("find.close", "Close search")}
+            title={t("find.close", "Close search")}
             onMouseDown={(e) => e.preventDefault()}
-            onClick={() => setFindQuery("")}
+            onClick={(e) => {
+              e.stopPropagation();
+              close();
+            }}
           >
             <X className="tiptap-button-icon" size={13} />
           </Button>
-        )}
-        <Toggle
-          active={options.matchCase}
-          label={t("find.matchCase", "Match case")}
-          onClick={() => setFindOption("matchCase", !options.matchCase)}
+        </div>
+      ) : (
+        <button
+          type="button"
+          className="sb-search__palette"
+          aria-label={`${paletteLabel} (${paletteKeys})`}
+          title={paletteLabel}
+          onClick={(e) => {
+            e.stopPropagation();
+            openPalette?.(true);
+          }}
         >
-          <CaseSensitive size={14} />
-        </Toggle>
-        <Toggle
-          active={options.wholeWord}
-          label={t("find.wholeWord", "Match whole word")}
-          onClick={() => setFindOption("wholeWord", !options.wholeWord)}
-        >
-          <WholeWord size={14} />
-        </Toggle>
-        <Toggle
-          active={options.regex}
-          label={t("find.regex", "Use regular expression")}
-          onClick={() => setFindOption("regex", !options.regex)}
-        >
-          <Regex size={14} />
-        </Toggle>
-      </div>
+          {paletteKeys}
+        </button>
+      )}
     </div>
   );
 }

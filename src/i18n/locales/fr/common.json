@@ -31,7 +31,8 @@
     "open": "Rechercher dans les pages",
     "close": "Fermer la recherche",
     "hint": "Tape pour rechercher dans tes pages",
-    "clear": "Effacer"
+    "clear": "Effacer",
+    "openPalette": "Ouvrir la palette de recherche"
   },
   "chat": {
     "outbox": {
@@ -399,7 +400,10 @@
     "personalSpace": "Espace de {{name}}",
     "pinned": "Épinglés",
     "pin": "Épingler dans l'espace d'équipe",
-    "unpin": "Désépingler"
+    "unpin": "Désépingler",
+    "empty": {
+      "add": "Ajouter une page"
+    }
   },
   "library": {
     "title": "Bibliothèque",
@@ -819,12 +823,6 @@
       "blocks": "Écrire avec des blocs",
       "databases": "Tout organiser avec les bases de données",
       "collaborate": "Travailler ensemble : commentaires, suggestions et salons"
-    },
-    "search": {
-      "label": "Rechercher ou créer une page",
-      "short": "Chercher ou créer une page",
-      "placeholder": "Cherchez une page ou créez-en une",
-      "create": "Créer « {{title}} »"
     },
     "actions": {
       "template": "Utiliser un modèle",
