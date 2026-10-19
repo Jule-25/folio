@@ -81,7 +81,7 @@ function DatabaseToolbarImpl() {
 
   // Collapsed toolbar — the control cluster folds behind the chevron, leaving
   // just New. Local (per-session UI), not synced view attrs.
-    // Collapsed toolbar — the control cluster folds behind the chevron, leaving
+  // Collapsed toolbar — the control cluster folds behind the chevron, leaving
   // just New. Remembered per database block in this browser (your own view
   // of the page — not synced to others, unlike view attrs).
   const [collapsed, setCollapsed] = useLocalStorage<boolean>(
@@ -127,10 +127,7 @@ function DatabaseToolbarImpl() {
       .catch((error) => console.error("Failed to create page", error));
   }, [addRecordAsync, setTarget, source]);
 
-    const onToggle = useCallback(
-    () => setCollapsed((v) => !v),
-    [setCollapsed],
-  );
+  const onToggle = useCallback(() => setCollapsed((v) => !v), [setCollapsed]);
 
   const onCreateTemplate = useCallback(async () => {
     onTemplateOpenChange(false);
@@ -180,10 +177,15 @@ function DatabaseToolbarImpl() {
         position: "sticky",
         top: "0px",
         maxWidth: "var(--db-editor-width)",
+        minWidth: 0, // CardItemGroup is max-content by default: the row
+        width: "100%", // must stay this wide for the tabs to overflow
       }}
       contentEditable={false}
     >
-      <CardItemGroup orientation="horizontal">
+      <CardItemGroup
+        orientation="horizontal"
+        style={{ minWidth: 0, width: "100%" }}
+      >
         {/* Always the view tabs, even with a single view; the database's
             title sits above them (DatabaseNodeView), not in their place. */}
         <DatabaseViewTabs onRename={onViewOptionsOpenChange} />

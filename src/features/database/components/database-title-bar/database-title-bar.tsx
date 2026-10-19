@@ -11,6 +11,8 @@ import { Card, CardItemGroup } from "src/components/tiptap-ui-primitive/card";
 import { ViewIcon } from "../database-toolbar/view-icon";
 import type { DatabaseView } from "src/types";
 import { useDatabaseContext } from "../../context/database-context";
+import { usePage } from "src/hooks/use-pages";
+import { PageItemIcon } from "src/features/pages/page-item/page-item-icon";
 
 const VIEW_TYPES: { type: DatabaseView["type"]; label: string }[] = [
   { type: "table", label: "Table" },
@@ -31,9 +33,11 @@ interface DatabaseTitleBarProps {
 function DatabaseTitleBarImpl({ onAddView }: DatabaseTitleBarProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [addOpen, setAddOpen] = useState(false);
-
-  const { title, onTitleChange, attrs, updateAttributes } =
+  const { title, onTitleChange, attrs, updateAttributes, source } =
     useDatabaseContext();
+  // The database's own page: its icon goes before the title, as in Notion.
+  const { data: dbPage } = usePage(source?.pageId ?? attrs.pageId ?? null);
+
   const locked = !!attrs.locked;
   const hideTitle = attrs.hideTitle;
 
@@ -68,6 +72,11 @@ function DatabaseTitleBarImpl({ onAddView }: DatabaseTitleBarProps) {
       className="db-title-bar"
       style={{ display: hideTitle ? "none" : "flex" }}
     >
+      {dbPage?.cover?.iconName && (
+        <span className="db-title-bar__icon" aria-hidden="true">
+          <PageItemIcon cover={dbPage.cover} styles={{ fontSize: 20 }} />
+        </span>
+      )}
       <input
         ref={inputRef}
         className="db-title-bar__title"

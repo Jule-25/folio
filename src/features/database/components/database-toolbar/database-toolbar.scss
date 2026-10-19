@@ -67,3 +67,20 @@
     color: var(--tt-icon-secondary);
   }
 }
+
+// Toolbar icons: 16px, thin strokes, muted; 28px square ghost buttons —
+// the size and weight of Notion's, which is what makes them feel lighter.
+.db-toolbar-controls .tiptap-button[data-style="ghost"] {
+  min-width: 25px;
+  height: 24px !important;
+  min-height: 24px !important;
+  padding: 0 5px;
+  border-radius: 6px;
+  color: var(--tt-text-secondary);
+
+  .tiptap-button-icon {
+    width: 14px !important;
+    height: 14px !important;
+    stroke-width: 2.8;
+  }
+}

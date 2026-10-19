@@ -1,5 +1,6 @@
 .db-board-card{
   opacity: 1;
+  cursor: pointer;
   &[data-view-type="board"]{
     border: 0.3px solid var(--tt-border-color);
     background-color: var(--tt-bg-color);
@@ -125,7 +126,12 @@
   flex-wrap: wrap;
   align-items: center;
   column-gap: 8px;
-
+  // Pickers (the date's button) set a min-width inline for the table;
+  // side by side they take only their text's width.
+  .tiptap-button {
+    min-width: 0 !important;
+    width: auto !important;
+  }
   > * {
     flex: 0 1 auto;
     width: auto !important;
