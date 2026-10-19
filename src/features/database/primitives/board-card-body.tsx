@@ -16,6 +16,10 @@ import { normalizeColor } from "../utils/pill-colors";
 import "./board-card-body.scss";
 import { useCardActions } from "../context";
 
+// Gallery cover height per card size. A fitted image is as tall as the cover,
+// so a taller cover is also a wider image.
+const GALLERY_COVER_HEIGHT = { small: 150, medium: 190, large: 230 } as const;
+
 export function BoardCardBody({
   record,
   properties,
@@ -107,7 +111,11 @@ export function BoardCardBody({
           <BoardCardCover
             page={record}
             recordId={recordId}
-            height={120}
+            height={
+              view.type === "gallery"
+                ? GALLERY_COVER_HEIGHT[view.cardSize ?? "medium"]
+                : 120
+            }
             fit={fit}
             repositioning={repositioning}
             onPositionChange={(y) => {
