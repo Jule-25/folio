@@ -36,6 +36,15 @@ function makeFilterRule(property: DatabaseProperty): FilterRule {
         operator: operator as never,
         value: 0,
       };
+    case "unique_id":
+      // Filtered as its number.
+      return {
+        id: nanoid(),
+        propertyId: property.id,
+        propertyType: "number",
+        operator: "equals",
+        value: 0,
+      };
     case "checkbox":
       return {
         id: nanoid(),

@@ -22,6 +22,7 @@ const READONLY_TYPES = [
   "edited_time",
   "created_by",
   "edited_by",
+  "unique_id",
 ];
 
 const EMPTY_PROPERTIES: DatabaseProperty[] = [];

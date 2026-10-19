@@ -58,6 +58,7 @@ export function initialCellValue(property: DatabaseProperty): CellValue {
     case "created_by":
     case "edited_time":
     case "edited_by":
+    case "unique_id": // numbered by the database (migration 045)
       return null;
 
     default:

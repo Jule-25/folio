@@ -97,7 +97,8 @@ export type PropertyType =
   | "url"
   | "email"
   | "phone"
-  | "edited_by";
+  | "edited_by"
+  | "unique_id";
 
 export type ViewType =
   | "table"
@@ -231,7 +232,12 @@ export type PropertyConfig =
     }
   | { type: "url"; showFullUrl?: boolean }
   | { type: "phone" }
-  | { type: "email" };
+  | { type: "email" }
+  | {
+      type: "unique_id";
+      /** Shown before the number: "TASK" → TASK-12. */
+      prefix?: string;
+    };
 
 // Extract helper — used throughout cell nodes and views
 export type ConfigOf<T extends PropertyType> = Extract<
@@ -297,6 +303,9 @@ export type CellValueMap = {
   url: string;
   email: string;
   phone: string;
+  /** The row's number, given once by the database (migration 045) and never
+   *  reused; the prefix is the property's, added on display. */
+  unique_id: number | null; // read-only
 };
 
 export type CellValue<T extends PropertyType = PropertyType> = CellValueMap[T];
@@ -565,14 +574,15 @@ export function isReadOnlyProperty(type: PropertyType): boolean {
     type === "created_time" ||
     type === "created_by" ||
     type === "edited_time" ||
-    type === "edited_by"
+    type === "edited_by" ||
+    type === "unique_id"
   );
 }
 
 export function isGroupableProperty(type: PropertyType): boolean {
   // Group by any property except ones where every row is its own group
   // (title = the row name) or that have no stable value to bucket by.
-  return type !== "title";
+  return type !== "title" && type !== "unique_id";
 }
 
 export function isContentBasedCell(

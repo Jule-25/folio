@@ -66,6 +66,7 @@ export const DEFAULT_CONFIGS = {
   url: { type: "url" },
   phone: { type: "phone" },
   email: { type: "email" },
+  unique_id: { type: "unique_id" },
 } satisfies Record<PropertyType, PropertyConfig>;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -242,6 +243,14 @@ export const PROPERTY_TYPE_META: PropertyTypeMeta[] = [
     defaultConfig: DEFAULT_CONFIGS.edited_by,
     readOnly: true,
     filterOperators: EMPTY_OPERATORS,
+  },
+  {
+    type: "unique_id",
+    label: "ID",
+    icon: "Fingerprint",
+    defaultConfig: DEFAULT_CONFIGS.unique_id,
+    readOnly: true,
+    filterOperators: NUMBER_OPERATORS,
   },
 ];
 

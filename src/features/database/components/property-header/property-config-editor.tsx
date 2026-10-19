@@ -17,6 +17,9 @@ import { DateEditDisplay } from "../date-edit-display/date-edit-display";
 import { PersonEditDisplay } from "../person-edit-display";
 import { MenuRow } from "../menu-row";
 import { MoveHorizontal, Smile } from "lucide-react";
+import { useState } from "react";
+import { Input } from "src/components/tiptap-ui-primitive/input";
+import { formatUniqueId } from "src/lib/unique-id";
 
 // the parent header popover.
 export function PropertyConfigEditor({
@@ -193,6 +196,16 @@ export function PropertyConfigEditor({
           toggle
         />
       )}
+      {prop.config.type === "unique_id" && (
+        <UniqueIdPrefixEditor
+          prefix={prop.config.prefix ?? ""}
+          onChange={(prefix) =>
+            void db.updateProperty(prop.id, {
+              config: { type: "unique_id", ...(prefix ? { prefix } : {}) },
+            })
+          }
+        />
+      )}
       {prop.config.type === "title" && (
         <MenuRow
           Icon={Smile}
@@ -211,5 +224,48 @@ export function PropertyConfigEditor({
         />
       )}
     </>
+  );
+}
+
+// The ID property's prefix ("TASK" → TASK-12), saved on Enter or when the
+// field loses focus, with an example of what the IDs will look like.
+function UniqueIdPrefixEditor({
+  prefix,
+  onChange,
+}: {
+  prefix: string;
+  onChange: (prefix: string) => void;
+}) {
+  const [draft, setDraft] = useState(prefix);
+  const commit = () => {
+    const next = draft.trim();
+    if (next !== prefix) onChange(next);
+  };
+
+  return (
+    <div className="db-unique-id-prefix">
+      <label className="db-unique-id-prefix__label">
+        ID prefix
+        <Input
+          value={draft}
+          placeholder="Type a prefix"
+          maxLength={12}
+          onChange={(e) => setDraft(e.target.value)}
+          onBlur={commit}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              commit();
+              e.currentTarget.blur();
+            }
+            if (e.key === "Escape") setDraft(prefix);
+          }}
+        />
+      </label>
+      <span className="db-unique-id-prefix__example">
+        {formatUniqueId(1, { type: "unique_id", prefix: draft })},{" "}
+        {formatUniqueId(2, { type: "unique_id", prefix: draft })}…
+      </span>
+    </div>
   );
 }

@@ -7,6 +7,7 @@ import {
   type RelationValue,
   type StatusGroup,
 } from "../types";
+import { formatUniqueId } from "./unique-id";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Value migration matrix
@@ -71,6 +72,8 @@ function toText(
       return String(value);
     case "number":
       return typeof value === "number" ? String(value) : "";
+    case "unique_id":
+      return formatUniqueId(value, fromConfig);
     case "checkbox":
       return value ? "Yes" : "No";
     case "date":

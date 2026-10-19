@@ -8,6 +8,7 @@ import { CellOverlay } from "../../components/cell-overlay";
 import { isCopiableType } from "../database-board-node-view/utils";
 import { useOpenRecord } from "../../hooks/use-open-record";
 import { useRecordNearScreen } from "../../utils/record-visibility";
+import { formatUniqueId } from "src/lib/unique-id";
 
 const EMPTY_PROPERTIES: DatabaseProperty[] = [];
 const EMPTY_COLUMN_VALUES: CellValue[] = [];
@@ -152,7 +153,13 @@ export default function DatabaseCellNodeView({ node, editor }: NodeViewProps) {
         <CellOverlay
           viewType={data.view?.type}
           copiable={!isTitle && isCopiableType(property.config.type)}
-          getCopyText={() => (value == null ? "" : String(value))}
+          getCopyText={() =>
+            property.config.type === "unique_id"
+              ? formatUniqueId(value, property.config)
+              : value == null
+                ? ""
+                : String(value)
+          }
           onOpen={isTitle ? handleOpen : undefined}
           editing={isListTitle ? editing : undefined}
           onEdit={
