@@ -23,6 +23,7 @@ import { usePageViewActions } from "src/features/pages/context/page-view-context
 import { removeRecordNodes } from "../utils/remove-record-nodes";
 import { recordSelection } from "../utils/record-selection-store";
 import { useDeleteRecords } from "../hooks/use-delete-records";
+import { noteRecordOpener } from "../utils/record-opener";
 
 export function CardActionsProvider({ children }: { children: ReactNode }) {
   const {
@@ -142,6 +143,7 @@ export function CardActionsProvider({ children }: { children: ReactNode }) {
       canMoveRecord,
       openInRecord: (recordId, mode) => {
         if (mode === "sidePeek") {
+          noteRecordOpener(recordId);
           setTarget({ pageId: recordId, view: "Peek" });
         } else {
           // New tab = full page.
