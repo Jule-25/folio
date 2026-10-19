@@ -51,6 +51,8 @@ export function CardActionsMenu({
     isFavorite: isFavoriteFn,
     setRecordIcon,
     openInRecord,
+    copyRecordLink,
+    askToLook,
   } = cardActions;
   const isFavorite = isFavoriteFn(record.id);
 
@@ -177,6 +179,8 @@ export function CardActionsMenu({
               setEditingPropertyId(id);
             }}
             onOpenIn={(mode) => openInRecord(record.id, mode)}
+            onCopyLink={() => copyRecordLink(record.id)}
+            onAskToLook={(personId) => askToLook(record.id, personId)}
           />
         </PopoverContent>
       </PopoverPortal>

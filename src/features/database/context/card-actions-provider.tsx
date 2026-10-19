@@ -24,6 +24,13 @@ import { removeRecordNodes } from "../utils/remove-record-nodes";
 import { recordSelection } from "../utils/record-selection-store";
 import { useDeleteRecords } from "../hooks/use-delete-records";
 import { noteRecordOpener } from "../utils/record-opener";
+import { useRowLinks } from "../hooks/use-row-links";
+import { useToast } from "src/features/shell/toast";
+import { useTranslation } from "react-i18next";
+import { useNotificationActions } from "src/features/inbox/notification/notification-context";
+import { useCurrentPerson } from "src/hooks/use-session";
+import { useWorkspacePeople } from "../hooks/use-workspace-people";
+import { rowIdText } from "../utils/row-summary";
 
 export function CardActionsProvider({ children }: { children: ReactNode }) {
   const {
@@ -38,6 +45,12 @@ export function CardActionsProvider({ children }: { children: ReactNode }) {
   } = useDatabaseContext();
   const databaseId = attrs.id;
   const { setActivePageId } = useActivePageActions();
+  const { rowUrl } = useRowLinks();
+  const toast = useToast();
+  const { t } = useTranslation();
+  const { addNotification } = useNotificationActions();
+  const { person: me } = useCurrentPerson();
+  const people = useWorkspacePeople();
   const { setTarget } = usePageViewActions();
   const { setCellValue, removeRecordAsync, addRecordAsync } = useDataSource(
     source?.id,
@@ -151,6 +164,38 @@ export function CardActionsProvider({ children }: { children: ReactNode }) {
         }
       },
 
+      copyRecordLink: (recordId) => {
+        void navigator.clipboard
+          .writeText(rowUrl(recordId))
+          .then(() => toast.show(t("database.rowLink.copied"), "success"))
+          .catch(() => toast.show(t("database.rowLink.failed"), "error"));
+      },
+
+      askToLook: (recordId, personId) => {
+        const row = sortedRecords.find((r) => r.id === recordId);
+        if (!row) return;
+        const idText = rowIdText(row, source);
+        const title = row.title || t("rowMention.untitled");
+        // "TASK-12 · Fix login" — the ID first, when there is one.
+        const name = idText ? `${idText} · ${title}` : title;
+        addNotification({
+          type: "row-look",
+          recipientId: personId,
+          // A new notification each time: asking again is a new ask.
+          dedupKey: `row-look:${recordId}:${personId}:${Date.now()}`,
+          title: t("database.askToLook.notifTitle", {
+            who: me?.name || t("database.askToLook.someone"),
+          }),
+          message: name,
+          sourcePageId: recordId,
+          sourcePageTitle: name,
+          mentionId: recordId,
+          mentionLabel: idText || title,
+        });
+        const who = people.find((p) => p.id === personId)?.name ?? "";
+        toast.show(t("database.askToLook.sent", { name: who }), "success");
+      },
+
       openLayout: () => dbRef.current.openViewOptionsAt({ type: "layout" }),
       openPropertyVisibility: () =>
         dbRef.current.openViewOptionsAt({ type: "properties" }),
@@ -172,6 +217,13 @@ export function CardActionsProvider({ children }: { children: ReactNode }) {
     databaseId,
     moveRecordBy,
     canMoveRecord,
+    rowUrl,
+    toast,
+    t,
+    addNotification,
+    me?.name,
+    people,
+    source,
   ]);
 
   // Publish to the store for the portaled drag-handle Menu (outside the tree),

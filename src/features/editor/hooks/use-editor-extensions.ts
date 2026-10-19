@@ -1,3 +1,5 @@
+// Before any node view is built: guards a Tiptap crash (see the file).
+import "src/lib/safe-node-view-selection";
 import { TableOfContents } from "@tiptap/extension-table-of-contents";
 import { StarterKit } from "@tiptap/starter-kit";
 import { Image } from "src/components/tiptap-node/image-node/image";

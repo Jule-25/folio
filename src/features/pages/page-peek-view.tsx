@@ -42,6 +42,7 @@ import { Bone } from "src/components/tiptap-ui-primitive/bone/bone";
 import { usePageComment } from "../comments/page-comment-node/use-page-comment";
 import { FavoriteToggle } from "./favorite-toggle";
 import { ShareButton } from "./share/share-button";
+import { useMentionData } from "src/components/tiptap-ui/mention-menu/use-mention-data";
 
 const FloatingMenuMemo = React.memo(function FloatingMenuMemo({
   open,
@@ -322,6 +323,8 @@ function PagePeekEditor({
     extensions,
     autofocus: "start",
   });
+  // What the @ menu offers, ready before its first open.
+  useMentionData(editor);
 
   // Read-only for people who can only view or comment.
   const { canEditContent, isLoading: roleLoading } = usePageCapabilities(

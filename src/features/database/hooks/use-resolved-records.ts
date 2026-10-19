@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { rowMatchesSearch } from "../utils/row-summary";
 import type { DataSource, Page } from "src/types";
 import type { UseDatabaseReturn } from "./use-database";
 import { recordMatchesFilters } from "../utils/apply-filters";
@@ -32,7 +33,7 @@ export function useResolvedRecords(
 
     const q = db.searchQuery.trim().toLowerCase();
     const searched = q
-      ? filtered.filter((r) => (r.title ?? "").toLowerCase().includes(q))
+      ? filtered.filter((r) => rowMatchesSearch(r, q, props))
       : filtered;
 
     const sorts = activeView?.sorts ?? [];

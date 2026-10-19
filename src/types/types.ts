@@ -992,7 +992,9 @@ export type NotificationType =
   | "date-overdue"
   | "backlink"
   | "comment-mention"
-  | "chat-mention";
+  | "chat-mention"
+  /** Someone asked you to look at a database row (its row menu). */
+  | "row-look";
 
 export interface Notification {
   id: string;

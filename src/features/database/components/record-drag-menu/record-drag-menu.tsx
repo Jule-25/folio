@@ -85,6 +85,8 @@ export function RecordDragMenu({
     openInRecord: openRecordIn,
     moveRecordBy,
     canMoveRecord,
+    copyRecordLink,
+    askToLook,
   } = actions;
 
   // Close the whole thing (finished an action): close the menu AND tell the drag
@@ -165,6 +167,14 @@ export function RecordDragMenu({
               onOpenEditProperty={openEditProperty}
               onOpenIn={(mode) => {
                 openRecordIn(recordId, mode);
+                finish();
+              }}
+              onCopyLink={() => {
+                copyRecordLink(recordId);
+                finish();
+              }}
+              onAskToLook={(personId) => {
+                askToLook(recordId, personId);
                 finish();
               }}
               // These open a sub-popover: close ONLY the actions menu (keep this

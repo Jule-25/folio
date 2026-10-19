@@ -84,6 +84,8 @@ import { useNow } from "src/hooks/use-now";
 import { spaceHomePath, useCurrentSpace } from "src/hooks/use-current-space";
 import { useIsMobile } from "src/hooks/use-breakpoint";
 import { useEditorLayout } from "../shell/context/editor-layout-context";
+import { TextWithRowIds } from "src/features/database/components/row-mention/text-with-row-ids";
+import { RowMention } from "src/features/database/components/row-mention/row-mention";
 import { useActivePageActions } from "../pages/context/active-page-context";
 import { PageItemIcon } from "../pages/page-item/page-item-icon";
 import type { ChatMessage, ChatPerson, ChatRoom } from "src/types";
@@ -1501,7 +1503,14 @@ function MessageBody({
   return (
     <>
       {segments.map((seg, i) => {
-        if (seg.kind === "text") return <span key={i}>{seg.text}</span>;
+        if (seg.kind === "text") {
+          // A row's ID ("BUG-42") in a message links to the row.
+          return (
+            <span key={i}>
+              <TextWithRowIds text={seg.text} />
+            </span>
+          );
+        }
         if (seg.kind === "person") {
           const name =
             peopleById.get(seg.id)?.name ?? t("chat.someone", "someone");
@@ -1515,6 +1524,10 @@ function MessageBody({
           );
         }
         const page = pagesById.get(seg.id);
+        // A database row opens where it lives (its database, in the peek).
+        if (page?.sourceId) {
+          return <RowMention key={i} rowId={page.id} label={page.title} />;
+        }
         return page ? (
           <button
             key={i}

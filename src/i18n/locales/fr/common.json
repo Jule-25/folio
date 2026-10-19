@@ -375,6 +375,7 @@
   "inbox.kind.user-mention": "Mention",
   "inbox.kind.comment-mention": "Mention dans un commentaire",
   "inbox.kind.chat-mention": "Mention dans le chat",
+  "inbox.kind.row-look": "Ligne à regarder",
   "inbox.kind.date-due": "Rappel",
   "inbox.kind.date-overdue": "En retard",
   "inbox.kind.backlink": "Lien vers votre page",
@@ -429,6 +430,7 @@
     "templatePlaceholder": "Rechercher des modèles...",
     "noResults": "Aucun résultat pour « {{query}} »",
     "noPages": "Aucune page pour le moment",
+    "byId": "Lignes par ID",
     "today": "Aujourd'hui",
     "past": "Plus tôt",
     "openPage": "Ouvrir la page",
@@ -1221,9 +1223,16 @@
     "sections": {
       "dates": "Dates",
       "pages": "Pages",
-      "people": "Personnes"
+      "people": "Personnes",
+      "rows": "Lignes"
     },
     "noResults": "Aucun résultat"
+  },
+  "rowMention": {
+    "in": "dans {{name}}",
+    "open": "Cliquer pour ouvrir",
+    "unavailable": "Supprimée ou inaccessible",
+    "untitled": "Sans titre"
   },
   "pageLink": {
     "deleted": "Page supprimée",
@@ -1320,6 +1329,23 @@
       "duplicate": "Dupliquer",
       "deleteView": "Supprimer la vue",
       "deleteConfirm": "Supprimer cette vue ?"
+    },
+    "uniqueId": {
+      "prefix": "Préfixe d'ID",
+      "prefixPlaceholder": "Saisir un préfixe",
+      "prefixClash": "« {{name}} » utilise déjà {{prefix}} : un ID comme {{prefix}}-1 désignerait deux lignes."
+    },
+    "askToLook": {
+      "label": "Demander à quelqu'un de regarder",
+      "search": "Rechercher une personne…",
+      "nobody": "Personne à qui demander",
+      "someone": "Quelqu'un",
+      "notifTitle": "{{who}} vous demande de regarder une ligne",
+      "sent": "Envoyé à {{name}}"
+    },
+    "rowLink": {
+      "copied": "Lien vers la ligne copié",
+      "failed": "Impossible de copier le lien"
     },
     "layout": {
       "title": "Dispositions",

@@ -33,4 +33,10 @@
     font-size: 12px;
     color: var(--tt-text-secondary);
   }
+
+  &__clash {
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--tt-color-text-orange, #d9730d);
+  }
 }

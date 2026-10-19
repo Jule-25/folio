@@ -17,6 +17,7 @@ import { usePageView } from "src/features/pages/context/page-view-context";
 import { relationRecordIds } from "src/lib/relation-ids";
 import { usePatchPage } from "src/hooks/use-patch-page";
 import { patchPage as patchPageApi } from "src/api/pages";
+import { rowIdText, rowMatchesSearch } from "../../../utils/row-summary";
 
 // A row IS a page, so its display name is page.title — the single source of
 // truth after the title-cell fix. Reading the title out of
@@ -49,9 +50,8 @@ export function RelationCell({
   recordId,
   className,
 }: CellProps<"relation"> & { recordId?: ID }) {
-  // Called for its side effect: ensures the target source is loaded. Its
-  // schema is no longer read here (titles come off the rows directly).
-  useDataSource(config.targetSourceId || null);
+  // The target database: its ID property, if any, lets rows be found by ID.
+  const { source: targetSource } = useDataSource(config.targetSourceId || null);
   const { setTarget } = usePageView();
   const { data: targetRows } = useRows(config.targetSourceId || "");
   const rows = useMemo(() => targetRows ?? [], [targetRows]);
@@ -90,8 +90,9 @@ export function RelationCell({
   const candidates = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return rows;
-    return rows.filter((r) => rowLabel(r).toLowerCase().includes(q));
-  }, [rows, query]);
+    // By title, or by ID ("TASK-12" or "12").
+    return rows.filter((r) => rowMatchesSearch(r, q, targetSource?.properties));
+  }, [rows, query, targetSource?.properties]);
 
   const commit = (next: string[]) =>
     onChange?.(next as unknown as CellValue<"relation"> | null);
@@ -273,6 +274,11 @@ export function RelationCell({
                         cover={cover}
                         styles={{ width: 16, height: 16 }}
                       />
+                    )}
+                    {rowIdText(row, targetSource) && (
+                      <span className="db-relation-cell__id">
+                        {rowIdText(row, targetSource)}
+                      </span>
                     )}
                     <span className="tiptap-button-text">{label}</span>
                     {selected && (

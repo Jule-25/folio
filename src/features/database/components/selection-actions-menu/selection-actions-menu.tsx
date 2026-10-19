@@ -4,6 +4,7 @@ import {
   ArrowUp,
   ArrowUpRight,
   ChevronLeft,
+  Eye,
   ListIcon,
 } from "lucide-react";
 import { useState } from "react";
@@ -17,6 +18,7 @@ import { PROPERTY_TYPE_ICONS } from "src/types/property-type-meta";
 import { EditPropertyList } from "../edit-property-list";
 import { NavigableMenuItem } from "../navigable-menu-item";
 import { OpenInFlyout, type OpenInMode } from "../open-in-flyout";
+import { AskToLookFlyout } from "../ask-to-look/ask-to-look-flyout";
 import { MenuRow } from "../menu-row";
 
 import {
@@ -75,6 +77,7 @@ export function SelectionActionsMenu({
   onDelete,
   onDuplicate,
   onCopyLink,
+  onAskToLook,
   onAddToFavorites,
   onEditIcon,
   // onComment,
@@ -98,6 +101,8 @@ export function SelectionActionsMenu({
   onDelete: () => void;
   onDuplicate?: () => void;
   onCopyLink?: () => void;
+  /** One row: notify a workspace member to look at it. */
+  onAskToLook?: (personId: ID) => void;
   onAddToFavorites?: () => void;
   onEditIcon?: () => void;
   onComment?: () => void;
@@ -299,6 +304,7 @@ export function SelectionActionsMenu({
 
   const showRecordActions = [
     t("people.copyLink"),
+    ...(onAskToLook ? [t("database.askToLook.label")] : []),
     t("actions.duplicate"),
     ...moveLabels,
     ...(onMoveTo ? [t("moveTo.label")] : []),
@@ -434,11 +440,22 @@ export function SelectionActionsMenu({
 
         {showRecordActions && (
           <CardItemGroup>
-            {matchesAction(t("people.copyLink")) && (
+            {onCopyLink && matchesAction(t("people.copyLink")) && (
               <CopyLinkItem
                 label={t("people.copyLink")}
-                onCopyLink={() => onCopyLink?.()}
+                onCopyLink={() => run(onCopyLink)}
               />
+            )}
+
+            {onAskToLook && matchesAction(t("database.askToLook.label")) && (
+              <NavigableMenuItem
+                Icon={Eye}
+                label={t("database.askToLook.label")}
+              >
+                <AskToLookFlyout
+                  onPick={(personId) => run(() => onAskToLook(personId))}
+                />
+              </NavigableMenuItem>
             )}
 
             {matchesAction(t("actions.duplicate")) && (

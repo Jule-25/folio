@@ -45,4 +45,9 @@ export interface CardActionsValue {
   openEditProperty: (propertyId: ID) => void;
 
   openInRecord: (recordId: ID, mode: OpenInMode) => void;
+  /** Copy the row's link: its database page, with the row open (use-row-links). */
+  copyRecordLink: (recordId: ID) => void;
+  /** Ask a workspace member to look at the row: an Inbox notification that
+   *  opens it in its database. */
+  askToLook: (recordId: ID, personId: ID) => void;
 }

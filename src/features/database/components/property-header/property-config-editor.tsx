@@ -17,9 +17,12 @@ import { DateEditDisplay } from "../date-edit-display/date-edit-display";
 import { PersonEditDisplay } from "../person-edit-display";
 import { MenuRow } from "../menu-row";
 import { MoveHorizontal, Smile } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Input } from "src/components/tiptap-ui-primitive/input";
 import { formatUniqueId } from "src/lib/unique-id";
+import { useDataSources } from "src/hooks/use-data-sources";
+import type { DataSource } from "src/types";
+import { useTranslation } from "react-i18next";
 
 // the parent header popover.
 export function PropertyConfigEditor({
@@ -199,6 +202,7 @@ export function PropertyConfigEditor({
       {prop.config.type === "unique_id" && (
         <UniqueIdPrefixEditor
           prefix={prop.config.prefix ?? ""}
+          sourceId={source?.id ?? null}
           onChange={(prefix) =>
             void db.updateProperty(prop.id, {
               config: { type: "unique_id", ...(prefix ? { prefix } : {}) },
@@ -231,12 +235,34 @@ export function PropertyConfigEditor({
 // field loses focus, with an example of what the IDs will look like.
 function UniqueIdPrefixEditor({
   prefix,
+  sourceId,
   onChange,
 }: {
   prefix: string;
+  /** This database — its own prefix isn't a clash. */
+  sourceId: string | null;
   onChange: (prefix: string) => void;
 }) {
+  const { t } = useTranslation();
   const [draft, setDraft] = useState(prefix);
+
+  // Another database with the same prefix makes "TASK-12" ambiguous: a
+  // mention or a typed ID would match two rows.
+  const { data: sources } = useDataSources();
+  const clash = useMemo(() => {
+    const mine = draft.trim().toLowerCase();
+    if (!mine) return null;
+    for (const s of (sources as DataSource[] | undefined) ?? []) {
+      if (s.id === sourceId) continue;
+      const hit = s.properties.some(
+        (p) =>
+          p.config.type === "unique_id" &&
+          (p.config.prefix ?? "").trim().toLowerCase() === mine,
+      );
+      if (hit) return s.name || t("rowMention.untitled");
+    }
+    return null;
+  }, [draft, sources, sourceId, t]);
   const commit = () => {
     const next = draft.trim();
     if (next !== prefix) onChange(next);
@@ -245,10 +271,10 @@ function UniqueIdPrefixEditor({
   return (
     <div className="db-unique-id-prefix">
       <label className="db-unique-id-prefix__label">
-        ID prefix
+        {t("database.uniqueId.prefix")}
         <Input
           value={draft}
-          placeholder="Type a prefix"
+          placeholder={t("database.uniqueId.prefixPlaceholder")}
           maxLength={12}
           onChange={(e) => setDraft(e.target.value)}
           onBlur={commit}
@@ -262,6 +288,14 @@ function UniqueIdPrefixEditor({
           }}
         />
       </label>
+      {clash && (
+        <span className="db-unique-id-prefix__clash" role="status">
+          {t("database.uniqueId.prefixClash", {
+            prefix: draft.trim(),
+            name: clash,
+          })}
+        </span>
+      )}
       <span className="db-unique-id-prefix__example">
         {formatUniqueId(1, { type: "unique_id", prefix: draft })},{" "}
         {formatUniqueId(2, { type: "unique_id", prefix: draft })}…

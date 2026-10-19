@@ -468,6 +468,7 @@
   "inbox.kind.user-mention": "Mention",
   "inbox.kind.comment-mention": "Comment mention",
   "inbox.kind.chat-mention": "Chat mention",
+  "inbox.kind.row-look": "Row to look at",
   "inbox.kind.date-due": "Reminder",
   "inbox.kind.date-overdue": "Overdue",
   "inbox.kind.backlink": "Link to your page",
@@ -522,6 +523,7 @@
     "templatePlaceholder": "Search templates...",
     "noResults": "No results for \"{{query}}\"",
     "noPages": "No pages yet",
+    "byId": "Rows by ID",
     "today": "Today",
     "past": "Past",
     "openPage": "Open page",
@@ -1221,9 +1223,16 @@
     "sections": {
       "dates": "Dates",
       "pages": "Pages",
-      "people": "People"
+      "people": "People",
+      "rows": "Rows"
     },
     "noResults": "No results"
+  },
+  "rowMention": {
+    "in": "in {{name}}",
+    "open": "Click to open",
+    "unavailable": "Deleted or no access",
+    "untitled": "Untitled"
   },
   "pageLink": {
     "deleted": "Deleted page",
@@ -1320,6 +1329,23 @@
       "duplicate": "Duplicate",
       "deleteView": "Delete view",
       "deleteConfirm": "Delete this view?"
+    },
+    "uniqueId": {
+      "prefix": "ID prefix",
+      "prefixPlaceholder": "Type a prefix",
+      "prefixClash": "“{{name}}” already uses {{prefix}}: IDs like {{prefix}}-1 would point to two rows."
+    },
+    "askToLook": {
+      "label": "Ask someone to look",
+      "search": "Search people…",
+      "nobody": "No one to ask",
+      "someone": "Someone",
+      "notifTitle": "{{who}} asked you to look at a row",
+      "sent": "Sent to {{name}}"
+    },
+    "rowLink": {
+      "copied": "Link to the row copied",
+      "failed": "Couldn't copy the link"
     },
     "layout": {
       "title": "Layouts",
