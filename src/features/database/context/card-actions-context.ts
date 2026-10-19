@@ -13,17 +13,17 @@ import { cardActionsStore } from "./card-actions-store";
 
 export const CardActionsContext = createContext<CardActionsValue | null>(null);
 
-export function useCardActions(): CardActionsValue | null {
+/** `databaseId`: for the portaled menu, which database's actions to read. */
+export function useCardActions(
+  databaseId?: string | null,
+): CardActionsValue | null {
   const ctx = useContext(CardActionsContext);
 
   // Subscribe to the store regardless (hook order must be stable). When used
   // in-tree, ctx wins; when portaled (ctx null), the subscribed store value is
   // returned and updates reactively as the provider republishes.
-  const stored = useSyncExternalStore(
-    cardActionsStore.subscribe,
-    cardActionsStore.get,
-    cardActionsStore.get,
-  );
+  const read = () => cardActionsStore.get(databaseId);
+  const stored = useSyncExternalStore(cardActionsStore.subscribe, read, read);
 
   return ctx ?? stored;
 }

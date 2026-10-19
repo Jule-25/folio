@@ -7,7 +7,11 @@ import {
   beforeRecordAtPoint,
   columnKeyAtPoint,
   hideGalleryDropIndicator,
+  hideRowDropIndicator,
+  rowDropTarget,
+  showRowDropIndicator,
 } from "./utils";
+import { readDatabaseData } from "../utils/database-bridge";
 
 export interface DropInfo {
   recordId: string;
@@ -77,6 +81,32 @@ export const BoardDrag = Extension.create<unknown, DragStorage>({
               }
 
               const view = handler.getActiveView();
+
+              // A table or list row (dragged by its handle, drag-handle.tsx):
+              // reorder within its group.
+              if (view === "table" || view === "list") {
+                event.preventDefault();
+                hideRowDropIndicator();
+                const databaseId = dbEl.dataset.databaseId!;
+                const rowSlots =
+                  readDatabaseData(ext.editor, databaseId)?.sortedRecordIds ??
+                  [];
+                const target = rowDropTarget(
+                  dbEl,
+                  databaseId,
+                  rowSlots,
+                  event.clientY,
+                  draggingId,
+                );
+                if (target) {
+                  handler.onDrop({
+                    recordId: draggingId,
+                    beforeRecordId: target.beforeRecordId,
+                  });
+                }
+                storage.draggingId = null;
+                return true;
+              }
 
               if (view === "board") {
                 const grid = target.closest<HTMLElement>(".db-board-grid");
@@ -192,10 +222,39 @@ export const BoardDrag = Extension.create<unknown, DragStorage>({
             },
             dragover(_view, event) {
               event.preventDefault();
+
+              // While a row is dragged over a table / list, draw the line
+              // where it will land (the same calculation as the drop).
+              const storage = ext.storage as DragStorage;
+              const draggingId = storage.draggingId;
+              if (draggingId) {
+                const dbEl = (event.target as HTMLElement).closest<HTMLElement>(
+                  "[data-database-id]",
+                );
+                const databaseId = dbEl?.dataset.databaseId;
+                const type = databaseId
+                  ? storage.databases.get(databaseId)?.getActiveView()
+                  : undefined;
+                const target =
+                  dbEl && databaseId && (type === "table" || type === "list")
+                    ? rowDropTarget(
+                        dbEl,
+                        databaseId,
+                        readDatabaseData(ext.editor, databaseId)
+                          ?.sortedRecordIds ?? [],
+                        event.clientY,
+                        draggingId,
+                      )
+                    : null;
+                if (target) showRowDropIndicator(target.line);
+                else hideRowDropIndicator();
+              }
               return true;
             },
             dragend() {
               ext.storage.draggingId = null;
+              hideRowDropIndicator();
+              document.body.classList.remove("db-row-dragging");
               document
                 .querySelectorAll<HTMLElement>(".db-gallery-drop-indicator")
                 .forEach((indicator) => {

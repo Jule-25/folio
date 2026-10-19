@@ -1,3 +1,4 @@
+import "src/lib/safe-node-view-selection";
 import { useMemo } from "react";
 import { StarterKit } from "@tiptap/starter-kit";
 import {

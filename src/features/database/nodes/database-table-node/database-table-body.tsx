@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { Plus } from "lucide-react";
 import { NodeViewWrapper, NodeViewContent } from "@tiptap/react";
 import { Button } from "src/components/tiptap-ui-primitive/button";
@@ -102,6 +102,25 @@ export function DatabaseTableBody({
     sortedRecords.length,
     onNewRecord,
   );
+
+  // At the top of a page the whole database scrolls sideways in .db-node,
+  // whose left padding lines the table up with the text. Columns scrolled
+  // past the frozen ones kept showing in that padding, left of the frozen
+  // block. Clip the table at its resting left edge (= the scroll distance,
+  // in the table's own coordinates) while it's scrolled. Nested tables
+  // scroll inside themselves: .db-node doesn't scroll, nothing is clipped.
+  useEffect(() => {
+    const table = tableRef.current;
+    const scroller = table?.closest<HTMLElement>(".db-node");
+    if (!table || !scroller) return;
+    const update = () => {
+      const x = scroller.scrollLeft;
+      table.style.clipPath = x > 0 ? `inset(-100vh -100vw -100vh ${x}px)` : "";
+    };
+    update();
+    scroller.addEventListener("scroll", update, { passive: true });
+    return () => scroller.removeEventListener("scroll", update);
+  }, [tableRef]);
 
   return (
     <NodeViewWrapper

@@ -310,3 +310,11 @@
     color: var(--sp-text);
   }
 }
+
+// A row found by its ID: the ID before its title.
+.sp-row__id {
+  margin-right: 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.85em;
+  color: var(--tt-text-secondary);
+}

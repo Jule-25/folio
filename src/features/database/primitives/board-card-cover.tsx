@@ -116,6 +116,10 @@ function BoardCardCoverImpl({
                   width: "100%",
                   height: "100%",
                   objectFit: "contain",
+                  objectPosition: "center top",
+                  margin: 0,
+                  borderRadius: 0,
+                  maxWidth: "none",
                 }
               : {
                   position: "absolute",
@@ -124,6 +128,9 @@ function BoardCardCoverImpl({
                   objectFit: "cover",
                   top: `${-(positionY / 100) * 50}%`,
                   left: 0,
+                  margin: 0,
+                  borderRadius: 0,
+                  maxWidth: "none",
                 }
           }
         />

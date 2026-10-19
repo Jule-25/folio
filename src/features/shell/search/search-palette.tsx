@@ -10,11 +10,16 @@ import type { JSONContent } from "@tiptap/core";
 import { usePages } from "src/hooks/use-pages";
 import { Spacer } from "src/components/tiptap-ui-primitive/spacer";
 import { useIsMobile } from "src/hooks/use-breakpoint";
+import { useRowIdIndex } from "src/features/database/hooks/use-row-id-index";
+import { useRowLinks } from "src/features/database/hooks/use-row-links";
+import { idMatches } from "src/features/database/utils/row-summary";
 
-type Group = "today" | "past";
+type Group = "ids" | "today" | "past";
 
 interface SearchEntry {
   page: Page;
+  /** A database row found by its ID ("TASK-12"): opens in its database. */
+  idText?: string;
   title: string;
   location: string | null; // parent page title
   group: Group;
@@ -336,6 +341,8 @@ export default function SearchPalette() {
   const { data: pages } = usePages();
   const { setActivePageId } = useActivePageActions();
   const { onOpenChange } = useSearch();
+  const { list: rowsWithIds } = useRowIdIndex();
+  const { openRow } = useRowLinks();
   const isMobile = useIsMobile();
   const [query, setQuery] = useState("");
   const [titlesOnly, setTitlesOnly] = useState(false);
@@ -376,6 +383,24 @@ export default function SearchPalette() {
     const q = query.trim();
     if (!q) return entries.map((entry) => ({ entry, titleHl: [], locHl: [] }));
     const out: Match[] = [];
+    // Rows whose ID starts with what's typed ("BUG-4" → BUG-4, BUG-42…)
+    // come first: an ID is the most precise thing someone can type.
+    for (const { row, idText } of rowsWithIds) {
+      if (out.length >= 5) break;
+      if (!idMatches(idText, q)) continue;
+      out.push({
+        entry: {
+          page: row,
+          idText,
+          title: row.title || t("page.untitled"),
+          location: null,
+          group: "ids",
+          date: null,
+        },
+        titleHl: [],
+        locHl: null,
+      });
+    }
     for (const entry of entries) {
       const titleHl = fuzzyMatch(q, entry.title);
       const locHl =
@@ -384,12 +409,13 @@ export default function SearchPalette() {
         out.push({ entry, titleHl, locHl });
     }
     return out;
-  }, [query, titlesOnly, entries]);
+  }, [query, titlesOnly, entries, rowsWithIds, t]);
 
   const groups = useMemo(() => {
+    const ids = results.filter((r) => r.entry.group === "ids");
     const today = results.filter((r) => r.entry.group === "today");
     const past = results.filter((r) => r.entry.group === "past");
-    return { today, past, order: [...today, ...past] };
+    return { ids, today, past, order: [...ids, ...today, ...past] };
   }, [results]);
 
   // Clamp selection at point of use — no effect, no cascading render.
@@ -428,7 +454,9 @@ export default function SearchPalette() {
 
   const open = (page: Page) => {
     onOpenChange?.(false);
-    setActivePageId(page.id);
+    // A row opens in its database (the peek); a page as itself.
+    if (page.sourceId) openRow(page.id);
+    else setActivePageId(page.id);
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -469,6 +497,9 @@ export default function SearchPalette() {
           <PageItemIcon cover={m.entry.page.cover} styles={{ fontSize: 15 }} />
         </span>
         <span className="sp-row__title">
+          {m.entry.idText && (
+            <span className="sp-row__id">{m.entry.idText}</span>
+          )}
           <Highlight text={m.entry.title} indices={m.titleHl} />
         </span>
         {m.entry.location && (
@@ -572,6 +603,12 @@ export default function SearchPalette() {
               <div className="sp-empty">
                 {query ? t("search.noResults", { query }) : t("search.noPages")}
               </div>
+            )}
+            {groups.ids.length > 0 && (
+              <>
+                <div className="sp-section">{t("search.byId")}</div>
+                {groups.ids.map(renderRow)}
+              </>
             )}
             {groups.today.length > 0 && (
               <>

@@ -37,6 +37,8 @@ import { pendingRecordDeletes } from "../utils/pending-record-deletes";
 import { useCurrentPerson } from "src/hooks/use-session";
 import { useCurrentWorkspace } from "src/hooks/use-workspaces";
 import { templateValues } from "../utils/row-templates";
+import { useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "src/lib/queryKeys";
 import {
   loadFormulaEngine,
   useFormulaEngineReady,
@@ -312,18 +314,34 @@ export function useDataSource(
   );
 
   // the ONE hook allowed to write properties[] — layout only (reorder/width/wrap)
+  const qc = useQueryClient();
   const updatePropertiesAsync = useCallback(
     async (properties: DatabaseProperty[]) => {
       const src = sourceRef.current;
       if (!src) throw new Error("No source");
-      return patchSourceAsync({
+      const wasId = new Set(
+        src.properties
+          .filter((p) => p.config.type === "unique_id")
+          .map((p) => p.id),
+      );
+      const result = await patchSourceAsync({
         id: src.id,
         patch: { properties } as Parameters<
           typeof patchSourceAsync
         >[0]["patch"],
       });
+      // A new ID property: the database has just numbered the rows
+      // (migration 045) — fetch them to show it.
+      if (
+        properties.some(
+          (p) => p.config.type === "unique_id" && !wasId.has(p.id),
+        )
+      ) {
+        qc.invalidateQueries({ queryKey: queryKeys.pages.all });
+      }
+      return result;
     },
-    [patchSourceAsync],
+    [patchSourceAsync, qc],
   );
 
   const updateSourceMetaAsync = useCallback(

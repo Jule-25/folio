@@ -1,4 +1,10 @@
-import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import type { SuggestionKeyDownProps } from "@tiptap/suggestion";
 import type { MentionListProps } from "./types";
 import type { MentionListRef } from "./types";
@@ -6,21 +12,26 @@ import { Card, CardGroupLabel } from "src/components/tiptap-ui-primitive/card";
 import { Button } from "src/components/tiptap-ui-primitive/button";
 
 import "./mention-list.scss";
-import { AlarmClock, Clock, File, Users } from "lucide-react";
+import { AlarmClock, Clock, File, Rows3, Users } from "lucide-react";
 import { Spacer } from "src/components/tiptap-ui-primitive/spacer";
 import { Badge } from "src/components/tiptap-ui-primitive/badge";
 import { PageItemIcon } from "src/features/pages/page-item/page-item-icon";
 import { useCurrentEditor } from "@tiptap/react";
-import { usePeople } from "src/hooks/use-people";
-import { usePages } from "src/hooks/use-pages";
-import type { Page, Person } from "src/types";
+import { useMentionData } from "./use-mention-data";
 import { useTranslation } from "react-i18next";
 
 const SECTION_KEYS = {
   Date: "mention.sections.dates",
   Pages: "mention.sections.pages",
   People: "mention.sections.people",
+  Rows: "mention.sections.rows",
 } as const;
+
+// A pick (Enter or click) this soon after the menu opens isn't one: nobody
+// reads the list and chooses in a quarter of a second. It's an event that was
+// already on its way when "@" opened the menu — and it used to insert the
+// first page, at random.
+const PICK_GRACE_MS = 250;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const isSelectable = (item: any) => !item.title && item.type !== "divider";
@@ -41,9 +52,25 @@ const MentionList = forwardRef<MentionListRef, MentionListProps>(
       setSelectedIndex(items.findIndex(isSelectable));
     }
 
-    const selectItem = (index: number) => {
+    // When the menu opened (set once mounted, read in event handlers).
+    const openedAt = useRef<number | null>(null);
+    useEffect(() => {
+      openedAt.current = performance.now();
+    }, []);
+
+    const selectItem = (index: number, how: "enter" | "click") => {
       const item = items[index];
-      if (item && isSelectable(item)) command(item);
+      if (!item || !isSelectable(item)) return;
+      const opened = openedAt.current;
+      if (opened == null || performance.now() - opened < PICK_GRACE_MS) {
+        // Logged so a stray event can be traced if it ever happens again.
+        console.warn(
+          `[mention] ignored a ${how} right after the menu opened`,
+          item.label,
+        );
+        return;
+      }
+      command(item);
     };
 
     const upHandler = () => {
@@ -67,7 +94,7 @@ const MentionList = forwardRef<MentionListRef, MentionListProps>(
     };
 
     const enterHandler = () => {
-      selectItem(selectedIndex);
+      selectItem(selectedIndex, "enter");
     };
 
     useImperativeHandle(ref, () => ({
@@ -97,14 +124,9 @@ const MentionList = forwardRef<MentionListRef, MentionListProps>(
 
     const { editor } = useCurrentEditor();
 
-    const { data: people = [] } = usePeople();
-    const { data: pages = [] } = usePages();
-
-    useEffect(() => {
-      if (!editor) return;
-      editor.commands.setMentionPeople(people as Person[]);
-      editor.commands.setMentionPages(pages as Page[]);
-    }, [editor, people, pages]);
+    // Normally already there (mounted with the editor); this covers an
+    // editor that doesn't mount it.
+    useMentionData(editor);
 
     return (
       <Card className="mention-menu" data-mention-menu-open={menuVisible}>
@@ -122,6 +144,8 @@ const MentionList = forwardRef<MentionListRef, MentionListProps>(
                     <AlarmClock />
                   ) : item.title === "Pages" ? (
                     <File />
+                  ) : item.title === "Rows" ? (
+                    <Rows3 />
                   ) : (
                     <Users />
                   )}
@@ -134,7 +158,7 @@ const MentionList = forwardRef<MentionListRef, MentionListProps>(
                 className="mention-item"
                 data-highlighted={index === selectedIndex}
                 variant="ghost"
-                onClick={() => selectItem(index)}
+                onClick={() => selectItem(index, "click")}
               >
                 <Clock className="tiptap-button-icon" />
                 <span>{item.label}</span>
@@ -150,17 +174,35 @@ const MentionList = forwardRef<MentionListRef, MentionListProps>(
                 <Button
                   className="mention-item"
                   data-highlighted={index === selectedIndex}
-                  onClick={() => selectItem(index)}
+                  onClick={() => selectItem(index, "click")}
                 >
                   <PageItemIcon cover={item.cover} styles={{ fontSize: 12 }} />
                   <span>{item.label}</span>
                 </Button>
               )}
+            {!item.title && !item.date && item.type === "row" && (
+              <Button
+                className="mention-item"
+                data-highlighted={index === selectedIndex}
+                onClick={() => selectItem(index, "click")}
+              >
+                {item.cover && (
+                  <PageItemIcon cover={item.cover} styles={{ fontSize: 12 }} />
+                )}
+                {item.idText && (
+                  <span className="mention-item__id">{item.idText}</span>
+                )}
+                <span>{item.label}</span>
+                {item.hint && (
+                  <span className="mention-item__hint">{item.hint}</span>
+                )}
+              </Button>
+            )}
             {!item.title && !item.date && item.type === "user" && (
               <Button
                 className="mention-item"
                 data-highlighted={index === selectedIndex}
-                onClick={() => selectItem(index)}
+                onClick={() => selectItem(index, "click")}
               >
                 <img
                   style={{

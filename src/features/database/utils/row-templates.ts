@@ -17,6 +17,7 @@ const COMPUTED: ReadonlySet<PropertyType> = new Set<PropertyType>([
   "edited_time",
   "created_by",
   "edited_by",
+  "unique_id",
 ]);
 
 /**

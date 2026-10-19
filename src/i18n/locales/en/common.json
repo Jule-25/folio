@@ -468,6 +468,7 @@
   "inbox.kind.user-mention": "Mention",
   "inbox.kind.comment-mention": "Comment mention",
   "inbox.kind.chat-mention": "Chat mention",
+  "inbox.kind.row-look": "Row to look at",
   "inbox.kind.date-due": "Reminder",
   "inbox.kind.date-overdue": "Overdue",
   "inbox.kind.backlink": "Link to your page",
@@ -522,6 +523,7 @@
     "templatePlaceholder": "Search templates...",
     "noResults": "No results for \"{{query}}\"",
     "noPages": "No pages yet",
+    "byId": "Rows by ID",
     "today": "Today",
     "past": "Past",
     "openPage": "Open page",
@@ -1221,9 +1223,16 @@
     "sections": {
       "dates": "Dates",
       "pages": "Pages",
-      "people": "People"
+      "people": "People",
+      "rows": "Rows"
     },
     "noResults": "No results"
+  },
+  "rowMention": {
+    "in": "in {{name}}",
+    "open": "Click to open",
+    "unavailable": "Deleted or no access",
+    "untitled": "Untitled"
   },
   "pageLink": {
     "deleted": "Deleted page",
@@ -1321,6 +1330,23 @@
       "deleteView": "Delete view",
       "deleteConfirm": "Delete this view?"
     },
+    "uniqueId": {
+      "prefix": "ID prefix",
+      "prefixPlaceholder": "Type a prefix",
+      "prefixClash": "“{{name}}” already uses {{prefix}}: IDs like {{prefix}}-1 would point to two rows."
+    },
+    "askToLook": {
+      "label": "Ask someone to look",
+      "search": "Search people…",
+      "nobody": "No one to ask",
+      "someone": "Someone",
+      "notifTitle": "{{who}} asked you to look at a row",
+      "sent": "Sent to {{name}}"
+    },
+    "rowLink": {
+      "copied": "Link to the row copied",
+      "failed": "Couldn't copy the link"
+    },
     "layout": {
       "title": "Layouts",
       "showDatabaseTitle": "Show database title",
@@ -1334,6 +1360,9 @@
       "cardSizeSmall": "Small",
       "cardSizeMedium": "Medium",
       "cardSizeLarge": "Large",
+      "cardLayout": "Card layout",
+      "cardLayoutCompact": "Compact",
+      "cardLayoutList": "List",
       "fitImage": "Fit image",
       "openPagesIn": "Open pages in",
       "showPageIcon": "Show page icon",
@@ -1382,7 +1411,9 @@
       "layout": "Layout",
       "propertyVisibility": "Property visibility",
       "openIn": "Open in",
-      "noResults": "No actions found"
+      "noResults": "No actions found",
+      "moveUp": "Move up",
+      "moveDown": "Move down"
     },
     "person": {
       "me": "Me",
@@ -1508,7 +1539,12 @@
     },
     "emptyList": "No pages yet",
     "rowsDeleted_one": "Deleted {{count}} row",
-    "rowsDeleted_other": "Deleted {{count}} rows"
+    "rowsDeleted_other": "Deleted {{count}} rows",
+    "reorder": {
+      "sortedTitle": "This view is sorted.",
+      "sortedBody": "Remove the sort to put rows in your own order? The rows keep their current order, with your move applied.",
+      "removeSort": "Remove sort"
+    }
   },
   "toolbar": {
     "blockquote": "Blockquote",

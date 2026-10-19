@@ -177,3 +177,24 @@
     
   }
 }
+// ── Reordering rows ─────────────────────────────────────────────────────────
+// The line where a dragged row will land (board-drag.ts, extensions/utils.ts).
+// Fixed and in <body>, so the table's clip and scroll boxes can't hide it.
+.db-row-drop-indicator {
+  position: fixed;
+  z-index: 60;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--tt-brand-color-400);
+  pointer-events: none;
+  display: none;
+}
+
+// While a row is dragged, the editor's own drop line (for moving blocks)
+// would point at page positions: the row line above replaces it.
+body.db-row-dragging {
+  .prosemirror-dropcursor-block,
+  .prosemirror-dropcursor-inline {
+    display: none !important;
+  }
+}

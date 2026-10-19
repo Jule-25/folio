@@ -87,3 +87,30 @@
 .db-list-grid .db-node-cell--pending {
   min-height: 34px;
 }
+
+// The title cell: the text takes its own width (truncating when long), and
+// the Edit / Open button follows it instead of sitting at the row's end.
+// (Selector as long as the rule that makes cells display: block, plus the
+// :has — so this one wins.)
+.db-list-grid
+  .react-renderer.node-databaseRecord.node-databaseRecord
+  .db-node-cell:has(> .db-cell-overlay-open--list) {
+  display: flex;
+  align-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; // flush left like before; a parent rule centred it
+
+  > .db-cell {
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+
+  .db-cell-title--inline {
+    width: auto !important; // the inline style says 100%
+  }
+
+  .db-cell-title__text--editable {
+    flex: 0 1 auto;
+  }
+}

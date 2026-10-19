@@ -63,6 +63,7 @@ import { useCalendarLayout } from "../../hooks/use-calendar-layout";
 import { useCalendarViewState } from "../../context/calendar-view-context";
 import { useTimelineViewState } from "../../context";
 import { useTimelineLayout } from "../../hooks/use-timeline-layout";
+import { recordOpenerBlock } from "../../utils/record-opener";
 
 const EMPTY_SOURCE = { properties: [] };
 const EMPTY_PROPERTIES: DatabaseProperty[] = [];
@@ -206,6 +207,7 @@ function DatabaseNodeViewBody({
 export function DatabaseNodeView({
   node,
   editor,
+  getPos,
   updateAttributes,
 }: NodeViewProps) {
   const attrs = node.attrs as DatabaseAttrs;
@@ -267,11 +269,25 @@ export function DatabaseNodeView({
   const tableRef = useRef<HTMLDivElement>(null);
 
   // ── Record open in peek/center view decoration
+  // Marked only in the block it was opened from (utils/record-opener.ts);
+  // opened from elsewhere (sidebar, a relation), in every block.
   const { target } = usePageViewState();
+  const getPosRef = useRef(getPos);
+  useEffect(() => {
+    getPosRef.current = getPos;
+  }, [getPos]);
   useEffect(() => {
     if (!editor) return;
     const openId = target?.pageId ?? null;
-    editor.commands.setOpenRecord(openId);
+    const opener = openId ? recordOpenerBlock(openId) : null;
+    const pos = getPosRef.current();
+    const mine =
+      opener != null &&
+      typeof pos === "number" &&
+      editor.view.nodeDOM(pos) === opener;
+    // Opened from another block: that one marks it.
+    if (opener && !mine) return;
+    editor.commands.setOpenRecord(openId, mine ? pos : null);
     // A record is open → the active-cell ring is redundant/noisy; clear it.
     // (It returns on the next cell click, or you could re-set it on close.)
     if (openId) editor.commands.clearActiveCell();

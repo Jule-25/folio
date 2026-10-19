@@ -105,3 +105,11 @@
   color: var(--tt-color-text-gray);
   white-space: nowrap;
 }
+
+// A row's ID before its title (@ menu, Rows section).
+.mention-item__id {
+  flex-shrink: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.85em;
+  color: var(--tt-text-secondary);
+}

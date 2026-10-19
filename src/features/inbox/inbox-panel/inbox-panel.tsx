@@ -8,6 +8,7 @@ import {
   Check,
   ChevronRight,
   MessagesSquare,
+  Eye,
 } from "lucide-react";
 import { useNotifications } from "src/features/inbox/notification/notification-context";
 import type { Notification, NotificationType } from "src/types";
@@ -176,6 +177,8 @@ function NotifIcon({ type }: { type: NotificationType }) {
       return <Calendar size={15} />;
     case "backlink":
       return <Link2 size={15} />;
+    case "row-look":
+      return <Eye size={15} />;
     default:
       return <InboxIcon size={15} />;
   }

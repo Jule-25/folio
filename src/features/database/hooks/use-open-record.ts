@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import type { DatabaseView, ID, OpenPageIn } from "src/types";
 import { usePageViewActions } from "src/features/pages/context/page-view-context";
 import { useOptionalActivePage } from "src/features/pages/context/active-page-context";
+import { noteRecordOpener } from "../utils/record-opener";
 
 /** What "Open pages in" means when a view hasn't set it — the same default
  *  the layout panel shows. */
@@ -27,6 +28,7 @@ export function useOpenRecord(view: DatabaseView | null | undefined) {
         setTarget(undefined);
         setActivePageId(recordId);
       } else {
+        noteRecordOpener(recordId);
         setTarget({
           pageId: recordId,
           view: openIn === "Center" ? "Center" : "Peek",

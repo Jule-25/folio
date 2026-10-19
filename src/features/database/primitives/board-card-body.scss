@@ -1,5 +1,6 @@
 .db-board-card{
   opacity: 1;
+  cursor: pointer;
   &[data-view-type="board"]{
     border: 0.3px solid var(--tt-border-color);
     background-color: var(--tt-bg-color);
@@ -48,12 +49,17 @@
   &[data-view-type="gallery"] {
     height: 100% !important;
     background-color: var(--tt-bg-color);
-    box-shadow: 0 0 0 1px rgba(15, 15, 15, 0.1), 0 2px 4px rgba(15, 15, 15, 0.06);
+    // A real border, inside the card: a 0 0 0 1px shadow ring sits outside
+    // it and was clipped wherever the card touches its scrolling container
+    // (the last row's bottom, the left side of a gallery in a column).
+    border: 1px solid rgba(15, 15, 15, 0.1);
+    box-shadow: 0 2px 4px rgba(15, 15, 15, 0.06);
     .dark & {
       background-color: color-mix(in srgb, #fff 5.5%, var(--tt-bg-color));
-      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.075);
+      border-color: rgba(255, 255, 255, 0.075);
+      box-shadow: none;
     }
-
+   
     &:hover {
       background-image: linear-gradient(rgba(55, 53, 47, 0.035), rgba(55, 53, 47, 0.035));
       .dark & {
@@ -110,5 +116,30 @@
     margin-left: 0;
     margin-right: 0;
     margin-top: 0; 
+  }
+}
+
+// Card layout "Compact" (Layout panel): the properties sit side by side and
+// wrap, instead of one per line.
+.db-board-card__props[data-layout="compact"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 8px;
+  // Pickers (the date's button) set a min-width inline for the table;
+  // side by side they take only their text's width.
+  .tiptap-button {
+    min-width: 0 !important;
+    width: auto !important;
+  }
+  > * {
+    flex: 0 1 auto;
+    width: auto !important;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .db-cell-board-view {
+    margin: 4px 0;
   }
 }

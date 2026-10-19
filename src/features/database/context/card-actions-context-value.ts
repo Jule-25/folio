@@ -35,10 +35,19 @@ export interface CardActionsValue {
   /** Save where a card's cover image sits (0 = top, 100 = bottom). */
   setRecordCoverPosition: (recordId: ID, positionY: number) => void;
 
+  /** Table / list rows: Move up (-1) / Move down (+1) in the row menu. */
+  moveRecordBy: (recordId: ID, delta: -1 | 1) => void;
+  canMoveRecord: (recordId: ID, delta: -1 | 1) => boolean;
+
   // ── Panels (open the view-options popover at a panel) ─────────────────────
   openLayout: () => void;
   openPropertyVisibility: () => void;
   openEditProperty: (propertyId: ID) => void;
 
   openInRecord: (recordId: ID, mode: OpenInMode) => void;
+  /** Copy the row's link: its database page, with the row open (use-row-links). */
+  copyRecordLink: (recordId: ID) => void;
+  /** Ask a workspace member to look at the row: an Inbox notification that
+   *  opens it in its database. */
+  askToLook: (recordId: ID, personId: ID) => void;
 }

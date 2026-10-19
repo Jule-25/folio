@@ -37,7 +37,14 @@ export function useRowAnchor(
     // Pin `left` to the scroll container's edge so the checkbox stays put
     // during horizontal scroll. Table uses .db-table; list uses .db-list.
     const container = node.closest<HTMLElement>(".db-table, .db-list");
-    const left = container ? container.getBoundingClientRect().left : r.left;
+    // At the top of a page .db-node scrolls the table sideways; add its
+    // scroll back so the checkbox stays at the table's resting left edge.
+    // (Nested, .db-node is clip: scrollLeft is 0, and the table scrolls
+    // inside itself without moving its own box.)
+    const scroller = node.closest<HTMLElement>(".db-node");
+    const left =
+      (container ? container.getBoundingClientRect().left : r.left) +
+      (scroller?.scrollLeft ?? 0);
 
     setMeasured((prev) => {
       const next = { top: r.top, left, height: r.height };

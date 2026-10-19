@@ -97,6 +97,7 @@ function cellToFormulaValue(
       return value as string;
 
     case "number":
+    case "unique_id": // its number (the prefix is display only)
       return (value as number) ?? null;
 
     case "checkbox":

@@ -16,6 +16,10 @@ import { normalizeColor } from "../utils/pill-colors";
 import "./board-card-body.scss";
 import { useCardActions } from "../context";
 
+// Gallery cover height per card size. A fitted image is as tall as the cover,
+// so a taller cover is also a wider image.
+const GALLERY_COVER_HEIGHT = { small: 150, medium: 190, large: 230 } as const;
+
 export function BoardCardBody({
   record,
   properties,
@@ -51,6 +55,10 @@ export function BoardCardBody({
   const { editor } = useCurrentEditor();
   const fit =
     view.type === "gallery" || view.type === "board" ? view.coverFit : "cover";
+  const cardLayout =
+    view.type === "gallery" || view.type === "board"
+      ? (view.cardLayout ?? "list")
+      : "list";
   // Notion offers Reposition only for an image that fills the cover.
   const canReposition = !!record.cover?.coverImage && fit !== "contain";
 
@@ -103,7 +111,11 @@ export function BoardCardBody({
           <BoardCardCover
             page={record}
             recordId={recordId}
-            height={120}
+            height={
+              view.type === "gallery"
+                ? GALLERY_COVER_HEIGHT[view.cardSize ?? "medium"]
+                : 120
+            }
             fit={fit}
             repositioning={repositioning}
             onPositionChange={(y) => {
@@ -168,6 +180,7 @@ export function BoardCardBody({
       {view.type !== "calendar" && (
         <div
           className="db-board-card__props"
+          data-layout={cardLayout}
           onClick={(e) => e.stopPropagation()}
         >
           {otherProps.map((p) => (

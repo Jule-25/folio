@@ -13,26 +13,33 @@
 // read a stale snapshot and never updated (the in-tree context path did update,
 // which is why the toggle worked in the card menu but not the drag-handle menu).
 //
-// Holds ONE bundle (the active database's). Sufficient because only one
-// card/record menu is open at a time. If simultaneous menus across databases
-// ever happen, key this by databaseId.
 import type { CardActionsValue } from "./card-actions-context-value";
 
-let current: CardActionsValue | null = null;
+// Keyed by database id. With one shared slot, the last database to render
+// won, and the row menu of another database on the same page found no
+// record (it showed nothing) or acted on the wrong database.
+const bundles = new Map<string, CardActionsValue>();
+let last: CardActionsValue | null = null;
 const listeners = new Set<() => void>();
 
+const emit = () => listeners.forEach((l) => l());
+
 export const cardActionsStore = {
-  set(value: CardActionsValue) {
-    current = value;
-    listeners.forEach((l) => l());
+  set(databaseId: string, value: CardActionsValue) {
+    bundles.set(databaseId, value);
+    last = value;
+    emit();
   },
-  clear() {
-    if (current === null) return;
-    current = null;
-    listeners.forEach((l) => l());
+  /** Removes the bundle only if it's still the one this provider set. */
+  clear(databaseId: string, value: CardActionsValue) {
+    if (bundles.get(databaseId) !== value) return;
+    bundles.delete(databaseId);
+    if (last === value) last = null;
+    emit();
   },
-  get(): CardActionsValue | null {
-    return current;
+  /** This database's bundle; without an id, the latest one published. */
+  get(databaseId?: string | null): CardActionsValue | null {
+    return databaseId ? (bundles.get(databaseId) ?? null) : last;
   },
   subscribe(listener: () => void): () => void {
     listeners.add(listener);

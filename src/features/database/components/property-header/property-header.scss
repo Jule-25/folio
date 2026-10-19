@@ -7,3 +7,36 @@
   box-shadow: var(--tt-shadow-elevated-md);
   border: 1px solid var(--tt-border-color);
 }
+
+// The ID property's prefix field (property-config-editor.tsx).
+.db-unique-id-prefix {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px 8px 6px;
+
+  &__label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--tt-text-primary);
+
+    .tiptap-input {
+      flex: 1;
+      min-width: 0;
+      height: 28px;
+    }
+  }
+
+  &__example {
+    font-size: 12px;
+    color: var(--tt-text-secondary);
+  }
+
+  &__clash {
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--tt-color-text-orange, #d9730d);
+  }
+}

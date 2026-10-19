@@ -28,6 +28,7 @@ import { CollapseToggle } from "./collapse-toggle";
 import { useActivePageActions } from "src/features/pages/context/active-page-context";
 import { NoDatePanel } from "../no-date-panel";
 import { startingTemplateId } from "../../utils/row-templates";
+import { useLocalStorage } from "src/hooks/use-local-storage";
 // ── helpers ──────────────────────────────────────────────────────────────────
 
 function getActiveView(attrs: DatabaseAttrs): DatabaseView | undefined {
@@ -80,13 +81,19 @@ function DatabaseToolbarImpl() {
 
   // Collapsed toolbar — the control cluster folds behind the chevron, leaving
   // just New. Local (per-session UI), not synced view attrs.
-  const [collapsed, setCollapsed] = useState(false);
+  // Collapsed toolbar — the control cluster folds behind the chevron, leaving
+  // just New. Remembered per database block in this browser (your own view
+  // of the page — not synced to others, unlike view attrs).
+  const [collapsed, setCollapsed] = useLocalStorage<boolean>(
+    `db-toolbar-collapsed:${attrs.id}`,
+    false,
+  );
   const [templateOpen, setTemplateOpen] = useState(false);
   const [showChevrons, setShowChevrons] = useState(false);
 
   const onViewOptionsOpenChange = useCallback(
     (o: boolean) => setViewOptionsOpen(o),
-    [],
+    [setViewOptionsOpen],
   );
   const onTemplateOpenChange = useCallback(
     (o: boolean) => setTemplateOpen(o),
@@ -120,7 +127,7 @@ function DatabaseToolbarImpl() {
       .catch((error) => console.error("Failed to create page", error));
   }, [addRecordAsync, setTarget, source]);
 
-  const onToggle = useCallback(() => setCollapsed((v) => !v), []);
+  const onToggle = useCallback(() => setCollapsed((v) => !v), [setCollapsed]);
 
   const onCreateTemplate = useCallback(async () => {
     onTemplateOpenChange(false);
@@ -170,10 +177,15 @@ function DatabaseToolbarImpl() {
         position: "sticky",
         top: "0px",
         maxWidth: "var(--db-editor-width)",
+        minWidth: 0, // CardItemGroup is max-content by default: the row
+        width: "100%", // must stay this wide for the tabs to overflow
       }}
       contentEditable={false}
     >
-      <CardItemGroup orientation="horizontal">
+      <CardItemGroup
+        orientation="horizontal"
+        style={{ minWidth: 0, width: "100%" }}
+      >
         {/* Always the view tabs, even with a single view; the database's
             title sits above them (DatabaseNodeView), not in their place. */}
         <DatabaseViewTabs onRename={onViewOptionsOpenChange} />
