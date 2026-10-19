@@ -80,6 +80,10 @@ type DropTarget =
   | { kind: "section"; category: PageCategory }
   | null;
 
+// How far each level of the page tree is set in, as in Notion: a child's
+// icon sits a little right of its parent's, not past it.
+const TREE_INDENT = 10;
+
 const SECTION_DRAG_PREFIX = "section-drag:";
 
 const isSectionId = (id: string | number) =>
@@ -185,7 +189,7 @@ function TreeRow({
       : null;
 
   const rowStyle: CSSProperties = {
-    paddingLeft: depth * 14,
+    paddingLeft: depth * TREE_INDENT,
     opacity: isDragging ? 0.3 : 1,
     position: "relative",
   };
@@ -252,7 +256,7 @@ function TreeRow({
             <div
               className="sidebar-tree__empty-leaf"
               style={{
-                paddingLeft: (depth + 1) * 14 + 6,
+                paddingLeft: (depth + 1) * TREE_INDENT + 6,
                 paddingTop: 3,
                 paddingBottom: 3,
                 fontSize: 12.5,

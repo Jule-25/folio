@@ -26,29 +26,6 @@
     display: flex;
     flex-direction: column;
 
-    // A top-level page's pages (design 48): set in past its icon, hanging off
-    // a hairline under the icon's centre.
-    &--top-level {
-      position: relative;
-      padding-left: 32px;
-
-      &::before {
-        content: "";
-        position: absolute;
-        left: 40px; // the tile's centre
-        top: 3px;
-        bottom: 3px;
-        width: 1px;
-        background: var(--sb-guide-color, rgba(55, 53, 47, 0.12));
-        pointer-events: none;
-
-        .dark & {
-          background: var(--sb-guide-color, rgba(255, 255, 255, 0.09));
-        }
-      }
-    }
-  }
-
   // reorder indicator — a thin brand line at the top or bottom edge
   &__line {
     position: absolute;
@@ -153,4 +130,6 @@
 // !important is needed because PageItem sets the icon opacity inline.
 .sidebar-tree__row--has-children:hover .page-expand-btn + * {
   opacity: 0 !important;
+}
+
 }
