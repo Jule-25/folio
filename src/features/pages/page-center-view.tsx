@@ -13,7 +13,13 @@ import { Button } from "src/components/tiptap-ui-primitive/button";
 import { Ellipsis, Maximize2 } from "lucide-react";
 import { Spacer } from "src/components/tiptap-ui-primitive/spacer";
 import { EditorContent } from "@tiptap/react";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import type { Target } from "src/features/pages/cover/types";
 import { FloatingMenu } from "@tiptap/react/menus";
 import { FloatingActions } from "../shell/floating-actions";
@@ -26,7 +32,8 @@ import { usePatchPage } from "src/hooks/use-patch-page";
 import { patchPage } from "src/api/pages";
 import { useDebouncedCallback } from "use-debounce";
 import { TemplateChoicePanel } from "./templates/template-choice-panel";
-import { PageCenterSkeleton } from "../shell/skeletons";
+import { PageBodySkeleton } from "./page-body-skeleton";
+import { Bone } from "src/components/tiptap-ui-primitive/bone/bone";
 import { usePageComment } from "../comments/page-comment-node/use-page-comment";
 import { FavoriteToggle } from "./favorite-toggle";
 import { ShareButton } from "./share/share-button";
@@ -128,6 +135,11 @@ function getTitleChange(
 // the page is opened full-size. It's created only once that document has
 // synced (or opened from the offline copy); keying by page.id gives each
 // page its own editor.
+//
+// The modal itself opens at once: its frame (backdrop, card, toolbar) stays
+// mounted from the click on — so its entry animation plays once — the cover
+// and title show as soon as the page is known, and the body is a skeleton
+// until the editor is ready (page-body-skeleton).
 export function PageCenterView({
   onClose,
   onCreated,
@@ -136,38 +148,136 @@ export function PageCenterView({
   onCreated?: (page: Page) => void;
 }) {
   const { target } = usePageView();
-  const { data: page, isLoading } = usePage(target?.pageId ?? null);
-
-  if (isLoading || !page) return <PageCenterSkeleton onClose={onClose} />;
+  const pageId = target?.pageId ?? null;
+  const { data: page } = usePage(pageId);
 
   return (
-    <PageCenterCollab
-      key={page.id}
-      page={page}
-      onClose={onClose}
-      onCreated={onCreated}
-    />
+    <CenterFrame pageId={pageId} page={page ?? null} onClose={onClose}>
+      {page ? (
+        <PageCenterCollab key={page.id} page={page} onCreated={onCreated} />
+      ) : (
+        <div>
+          <PageBodySkeleton
+            page={null}
+            contentClassName="page-create-content"
+          />
+        </div>
+      )}
+    </CenterFrame>
   );
 }
 
-function PageCenterCollab({
+// ── Frame ─────────────────────────────────────────────────────────────────────
+// Backdrop, card and toolbar — everything that doesn't need the editor, so it
+// can show before the editor exists.
+function CenterFrame({
+  pageId,
   page,
   onClose,
+  children,
+}: {
+  pageId: string | null;
+  page: Page | null;
+  onClose?: () => void;
+  children: ReactNode;
+}) {
+  const { setTarget: setViewTarget } = usePageViewActions();
+  const { setActivePageId } = useActivePageActions();
+
+  // Escape closes, loaded or not.
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose?.();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
+  return (
+    <>
+      <ModalBackdrop onClose={onClose} />
+
+      <Card className="page-create-modal">
+        <CardItemGroup
+          orientation="horizontal"
+          style={{ width: "100%", justifyContent: "flex-start" }}
+        >
+          <Button
+            size="large"
+            variant="ghost"
+            disabled={!pageId}
+            onClick={() => {
+              if (!pageId) return;
+              setViewTarget(undefined);
+              setActivePageId(pageId);
+            }}
+            aria-label="Open full page"
+          >
+            <Maximize2 className="tiptap-button-icon" />
+          </Button>
+          <Spacer orientation="horizontal" />
+          <CardItemGroup orientation="horizontal">
+            {page ? (
+              <>
+                <ShareButton page={page} />
+                <Spacer orientation="horizontal" size={2} />
+                <FavoriteToggle page={page} />
+              </>
+            ) : (
+              <>
+                <Bone width={56} height={24} rounded />
+                <Spacer orientation="horizontal" size={2} />
+                <Bone width={28} height={28} rounded />
+              </>
+            )}
+            <Spacer orientation="horizontal" size={2} />
+            <Button variant="ghost">
+              <Ellipsis className="tiptap-button-icon" />
+            </Button>
+          </CardItemGroup>
+        </CardItemGroup>
+
+        <CardBody style={{ width: "100%" }}>{children}</CardBody>
+      </Card>
+    </>
+  );
+}
+
+// ── Page (known): cover at once, body once the live document is ready ────────
+function PageCenterCollab({
+  page,
   onCreated,
 }: {
   page: Page;
-  onClose?: () => void;
   onCreated?: (page: Page) => void;
 }) {
   const { extensions, ready } = usePeekCollab(page);
-  if (!ready || !extensions) return <PageCenterSkeleton onClose={onClose} />;
   return (
-    <PageCenterEditor
-      page={page}
-      extensions={extensions}
-      onClose={onClose}
-      onCreated={onCreated}
-    />
+    <>
+      <CoverHeader
+        collapsed={false}
+        sidebarWidth={0}
+        paddingLeft={0}
+        translateX={0}
+        hasThreads={false}
+        providedPage={page}
+        marginLeft={0}
+      />
+      {ready && extensions ? (
+        <PageCenterEditor
+          page={page}
+          extensions={extensions}
+          onCreated={onCreated}
+        />
+      ) : (
+        <div>
+          <PageBodySkeleton
+            page={page}
+            contentClassName="page-create-content"
+          />
+        </div>
+      )}
+    </>
   );
 }
 
@@ -175,16 +285,12 @@ function PageCenterCollab({
 function PageCenterEditor({
   page,
   extensions,
-  onClose,
 }: {
   page: Page;
   extensions: Extensions;
-  onClose?: () => void;
   onCreated?: (page: Page) => void;
 }) {
-  const { setTarget: setViewTarget } = usePageViewActions();
   const { mutateAsync } = usePatchPage(({ id, patch }) => patchPage(id, patch));
-  const { setActivePageId } = useActivePageActions();
 
   const floatingRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
@@ -276,14 +382,6 @@ function PageCenterEditor({
     };
   }, [editor]);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose?.();
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onClose]);
-
   const onSelectAsync = useCallback(
     async (name: string, color?: string) => {
       if (!pageRef.current) return;
@@ -320,77 +418,41 @@ function PageCenterEditor({
   usePageComment(editor, page);
 
   // Editor may still be null for the first render tick after mount.
-  if (!editor) return <PageCenterSkeleton onClose={onClose} />;
+  if (!editor) {
+    return (
+      <div>
+        <PageBodySkeleton page={page} contentClassName="page-create-content" />
+      </div>
+    );
+  }
 
   const showTemplatePanel = bodyEmpty && !templateDismissed;
 
   return (
     <>
-      <ModalBackdrop onClose={onClose} />
+      <div>
+        <EditorContent editor={editor} className="page-create-content" />
+      </div>
 
-      <Card className="page-create-modal">
-        <CardItemGroup
-          orientation="horizontal"
-          style={{ width: "100%", justifyContent: "flex-start" }}
-        >
-          <Button
-            size="large"
-            variant="ghost"
-            onClick={() => {
-              setViewTarget(undefined);
-              setActivePageId(page.id);
-            }}
-            aria-label="Open full page"
-          >
-            <Maximize2 className="tiptap-button-icon" />
-          </Button>
-          <Spacer orientation="horizontal" />
-          <CardItemGroup orientation="horizontal">
-            <ShareButton page={page} />
-            <Spacer orientation="horizontal" size={2} />
-            <FavoriteToggle page={page} />
-            <Spacer orientation="horizontal" size={2} />
-            <Button variant="ghost">
-              <Ellipsis className="tiptap-button-icon" />
-            </Button>
-          </CardItemGroup>
-        </CardItemGroup>
+      {showTemplatePanel && (
+        <TemplateChoicePanel
+          page={page}
+          editor={editor}
+          onDismiss={() => setTemplateDismissed(true)}
+        />
+      )}
 
-        <CardBody style={{ width: "100%" }}>
-          <CoverHeader
-            collapsed={false}
-            sidebarWidth={0}
-            paddingLeft={0}
-            translateX={0}
-            hasThreads={false}
-            providedPage={page}
-            marginLeft={0}
-          />
-          <div>
-            <EditorContent editor={editor} className="page-create-content" />
-          </div>
-
-          {showTemplatePanel && (
-            <TemplateChoicePanel
-              page={page}
-              editor={editor}
-              onDismiss={() => setTemplateDismissed(true)}
-            />
-          )}
-
-          <FloatingMenuMemo
-            editor={editor}
-            open={open}
-            setOpen={setOpen}
-            target={iconTarget}
-            setTarget={setIconTarget}
-            onSelectAsync={onSelectAsync}
-            onAddCoverAsync={onAddCoverAsync}
-            floatingRef={floatingRef}
-            page={page}
-          />
-        </CardBody>
-      </Card>
+      <FloatingMenuMemo
+        editor={editor}
+        open={open}
+        setOpen={setOpen}
+        target={iconTarget}
+        setTarget={setIconTarget}
+        onSelectAsync={onSelectAsync}
+        onAddCoverAsync={onAddCoverAsync}
+        floatingRef={floatingRef}
+        page={page}
+      />
     </>
   );
 }

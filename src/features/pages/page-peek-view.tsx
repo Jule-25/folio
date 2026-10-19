@@ -13,7 +13,13 @@ import { Button } from "src/components/tiptap-ui-primitive/button";
 import { ChevronsRight, Ellipsis, Maximize2 } from "lucide-react";
 import { Spacer } from "src/components/tiptap-ui-primitive/spacer";
 import { EditorContent } from "@tiptap/react";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import type { Target } from "src/features/pages/cover/types";
 import { FloatingMenu } from "@tiptap/react/menus";
 import { FloatingActions } from "../shell/floating-actions";
@@ -31,6 +37,8 @@ import {
 import { usePage } from "src/hooks/use-pages";
 import { useLocalStorage } from "../../hooks/use-local-storage";
 import "./page-peek-view.scss";
+import { PageBodySkeleton } from "./page-body-skeleton";
+import { Bone } from "src/components/tiptap-ui-primitive/bone/bone";
 import { usePageComment } from "../comments/page-comment-node/use-page-comment";
 import { FavoriteToggle } from "./favorite-toggle";
 import { ShareButton } from "./share/share-button";
@@ -106,68 +114,61 @@ function getTitleChange(
 // the page is opened full-size. It's created only once that document has
 // synced (or opened from the offline copy); keying by page.id gives each
 // peeked page its own editor.
+//
+// The panel itself opens at once: its frame (toolbar, width) stays mounted
+// from the click on, the cover and title show as soon as the page is known,
+// and the body is a skeleton until the editor is ready (page-body-skeleton).
 export function PagePeekView({ onClose }: { onClose?: () => void }) {
   const { target: viewTarget } = usePageViewState();
-  const { data: page, isLoading } = usePage(viewTarget?.pageId ?? null);
+  const pageId = viewTarget?.pageId ?? null;
+  const { data: page } = usePage(pageId);
 
-  if (isLoading || !page) return null; // peek has no skeleton; render nothing until loaded
-
-  return <PagePeekCollab key={page.id} page={page} onClose={onClose} />;
-}
-
-function PagePeekCollab({
-  page,
-  onClose,
-}: {
-  page: Page;
-  onClose?: () => void;
-}) {
-  const { extensions, ready } = usePeekCollab(page);
-  if (!ready || !extensions) return null;
   return (
-    <PagePeekEditor page={page} extensions={extensions} onClose={onClose} />
+    <PeekFrame pageId={pageId} page={page ?? null} onClose={onClose}>
+      {page ? (
+        <PagePeekCollab key={page.id} page={page} />
+      ) : (
+        <div>
+          <PageBodySkeleton page={null} contentClassName="page-peek-content" />
+        </div>
+      )}
+    </PeekFrame>
   );
 }
 
-// ── Editor (only mounts once the live document is ready) ───────────────────────
-function PagePeekEditor({
+// ── Frame ─────────────────────────────────────────────────────────────────────
+// The panel, its resize handle and its toolbar — everything that doesn't need
+// the editor, so it can show before the editor exists.
+const PEEK_MIN = 380;
+const PEEK_DEFAULT = 480; // ← set to your current .page-peek width
+
+const clampWidth = (w: number) =>
+  Math.min(Math.max(w, PEEK_MIN), Math.round(window.innerWidth * 0.9));
+
+function PeekFrame({
+  pageId,
   page,
-  extensions,
   onClose,
+  children,
 }: {
-  page: Page;
-  extensions: Extensions;
+  pageId: string | null;
+  page: Page | null;
   onClose?: () => void;
+  children: ReactNode;
 }) {
   const { setTarget: setViewTarget } = usePageViewActions();
   const { setActivePageId } = useActivePageActions();
-  const { mutateAsync } = usePatchPage(({ id, patch }) => patchPage(id, patch));
-
-  const floatingRef = useRef<HTMLDivElement>(null);
-  const [open, setOpen] = useState(false);
-  const [target, setTarget] = useState<Target>("Emoji");
-
-  const pageRef = useRef(page);
-  useEffect(() => {
-    pageRef.current = page;
-  }, [page]);
 
   // ── Resize ────────────────────────────────────────────────────────────────
   // Left-edge drag handle widens/narrows the right-anchored peek. Width persists
   // via useLocalStorage. During the drag we write straight to the card's DOM (no
   // per-move re-render — the live editor would stutter otherwise) and commit the
   // final width to storage on release.
-  const PEEK_MIN = 380;
-  const PEEK_DEFAULT = 480; // ← set to your current .page-peek width
-
   const [width, setWidth] = useLocalStorage<number>("peek-width", PEEK_DEFAULT);
 
   const cardRef = useRef<HTMLDivElement | null>(null);
   const resizingRef = useRef(false);
   const liveWidthRef = useRef(width);
-
-  const clampWidth = (w: number) =>
-    Math.min(Math.max(w, PEEK_MIN), Math.round(window.innerWidth * 0.9));
 
   const onResizeStart = useCallback((e: React.PointerEvent) => {
     e.preventDefault();
@@ -192,6 +193,129 @@ function PagePeekEditor({
     },
     [setWidth],
   );
+
+  return (
+    <Card
+      ref={cardRef}
+      className="page-peek"
+      style={{
+        position: "fixed",
+        borderRadius: 0,
+        top: 0,
+        bottom: 0,
+        right: 0,
+        width,
+        border: "1px solid var(--tt-border-color)",
+        boxShadow: "var(--tt-shadow-elevated-md)",
+      }}
+    >
+      {/* Left-edge resize handle */}
+      <div
+        className="page-peek__resize"
+        onPointerDown={onResizeStart}
+        onPointerMove={onResizeMove}
+        onPointerUp={onResizeEnd}
+        onPointerCancel={onResizeEnd}
+      />
+
+      <CardItemGroup
+        orientation="horizontal"
+        style={{ width: "100%", justifyContent: "flex-start" }}
+      >
+        <CardItemGroup orientation="horizontal">
+          <Button
+            size="large"
+            style={{ background: "transparent" }}
+            variant="ghost"
+            onClick={onClose}
+          >
+            <ChevronsRight
+              className="tiptap-button-icon"
+              strokeWidth={1}
+              style={{ width: 28, height: 22 }}
+            />
+          </Button>
+          <Button
+            variant="ghost"
+            disabled={!pageId}
+            onClick={() => {
+              if (!pageId) return;
+              setViewTarget(undefined);
+              setActivePageId(pageId);
+            }}
+          >
+            <Maximize2 className="tiptap-button-icon" />
+          </Button>
+        </CardItemGroup>
+        <Spacer orientation="horizontal" />
+        <CardItemGroup orientation="horizontal">
+          {page ? (
+            <>
+              <ShareButton page={page} />
+              <Spacer orientation="horizontal" size={2} />
+              <FavoriteToggle page={page} />
+            </>
+          ) : (
+            <>
+              <Bone width={56} height={24} rounded />
+              <Spacer orientation="horizontal" size={2} />
+              <Bone width={28} height={28} rounded />
+            </>
+          )}
+          <Spacer orientation="horizontal" size={2} />
+          <Button variant="ghost">
+            <Ellipsis className="tiptap-button-icon" />
+          </Button>
+        </CardItemGroup>
+      </CardItemGroup>
+      <CardBody style={{ width: "100%" }}>{children}</CardBody>
+    </Card>
+  );
+}
+
+// ── Page (known): cover at once, body once the live document is ready ────────
+function PagePeekCollab({ page }: { page: Page }) {
+  const { extensions, ready } = usePeekCollab(page);
+  return (
+    <>
+      <CoverHeader
+        collapsed={false}
+        sidebarWidth={0}
+        paddingLeft={0}
+        translateX={0}
+        hasThreads={false}
+        providedPage={page}
+        marginLeft={0}
+      />
+      {ready && extensions ? (
+        <PagePeekEditor page={page} extensions={extensions} />
+      ) : (
+        <div>
+          <PageBodySkeleton page={page} contentClassName="page-peek-content" />
+        </div>
+      )}
+    </>
+  );
+}
+
+// ── Editor (only mounts once the live document is ready) ───────────────────────
+function PagePeekEditor({
+  page,
+  extensions,
+}: {
+  page: Page;
+  extensions: Extensions;
+}) {
+  const { mutateAsync } = usePatchPage(({ id, patch }) => patchPage(id, patch));
+
+  const floatingRef = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(false);
+  const [target, setTarget] = useState<Target>("Emoji");
+
+  const pageRef = useRef(page);
+  useEffect(() => {
+    pageRef.current = page;
+  }, [page]);
 
   // No `content`: Collaboration reads it from the live document.
   const editor = useEditor({
@@ -286,97 +410,32 @@ function PagePeekEditor({
   useRecordPropertyPanel(editor, page);
   usePageComment(editor, page);
 
-  if (!editor) return null;
+  if (!editor) {
+    return (
+      <div>
+        <PageBodySkeleton page={page} contentClassName="page-peek-content" />
+      </div>
+    );
+  }
 
   return (
-    <Card
-      ref={cardRef}
-      className="page-peek"
-      style={{
-        position: "fixed",
-        borderRadius: 0,
-        top: 0,
-        bottom: 0,
-        right: 0,
-        width,
-        border: "1px solid var(--tt-border-color)",
-        boxShadow: "var(--tt-shadow-elevated-md)",
-      }}
-    >
-      {/* Left-edge resize handle */}
-      <div
-        className="page-peek__resize"
-        onPointerDown={onResizeStart}
-        onPointerMove={onResizeMove}
-        onPointerUp={onResizeEnd}
-        onPointerCancel={onResizeEnd}
+    <>
+      <div>
+        <PeekEditorProvider value={editor}>
+          <EditorContent editor={editor} className="page-peek-content" />
+        </PeekEditorProvider>
+      </div>
+      <FloatingMenuMemo
+        editor={editor}
+        open={open}
+        setOpen={setOpen}
+        target={target}
+        setTarget={setTarget}
+        onSelectAsync={onSelectAsync}
+        onAddCoverAsync={onAddCoverAsync}
+        floatingRef={floatingRef}
+        page={page}
       />
-
-      <CardItemGroup
-        orientation="horizontal"
-        style={{ width: "100%", justifyContent: "flex-start" }}
-      >
-        <CardItemGroup orientation="horizontal">
-          <Button
-            size="large"
-            style={{ background: "transparent" }}
-            variant="ghost"
-            onClick={onClose}
-          >
-            <ChevronsRight
-              className="tiptap-button-icon"
-              strokeWidth={1}
-              style={{ width: 28, height: 22 }}
-            />
-          </Button>
-          <Button
-            variant="ghost"
-            onClick={() => {
-              setViewTarget(undefined);
-              setActivePageId(page.id);
-            }}
-          >
-            <Maximize2 className="tiptap-button-icon" />
-          </Button>
-        </CardItemGroup>
-        <Spacer orientation="horizontal" />
-        <CardItemGroup orientation="horizontal">
-          <ShareButton page={page} />
-          <Spacer orientation="horizontal" size={2} />
-          <FavoriteToggle page={page} />
-          <Spacer orientation="horizontal" size={2} />
-          <Button variant="ghost">
-            <Ellipsis className="tiptap-button-icon" />
-          </Button>
-        </CardItemGroup>
-      </CardItemGroup>
-      <CardBody style={{ width: "100%" }}>
-        <CoverHeader
-          collapsed={false}
-          sidebarWidth={0}
-          paddingLeft={0}
-          translateX={0}
-          hasThreads={false}
-          providedPage={page}
-          marginLeft={0}
-        />
-        <div>
-          <PeekEditorProvider value={editor}>
-            <EditorContent editor={editor} className="page-peek-content" />
-          </PeekEditorProvider>
-        </div>
-        <FloatingMenuMemo
-          editor={editor}
-          open={open}
-          setOpen={setOpen}
-          target={target}
-          setTarget={setTarget}
-          onSelectAsync={onSelectAsync}
-          onAddCoverAsync={onAddCoverAsync}
-          floatingRef={floatingRef}
-          page={page}
-        />
-      </CardBody>
-    </Card>
+    </>
   );
 }
