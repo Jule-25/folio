@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   checks:
-    name: Typecheck, lint, translations, build
+    name: Typecheck, test, lint, translations, build
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -36,6 +36,9 @@ jobs:
 
       - name: Typecheck
         run: npx tsc --noEmit -p tsconfig.app.json
+
+      - name: Test
+        run: npm test
 
       # Only the files this pull request adds or changes: new code must be
       # lint-clean, while older files with known problems don't block anyone
