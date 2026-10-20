@@ -31,8 +31,7 @@
     "open": "Search in pages",
     "close": "Close search",
     "hint": "Type to search across your pages",
-    "clear": "Clear",
-    "openPalette": "Open the search palette"
+    "clear": "Clear"
   },
   "chat": {
     "outbox": {
@@ -311,6 +310,12 @@
       "databases": "Organize anything with databases",
       "collaborate": "Work together: comments, suggestions and rooms"
     },
+    "search": {
+      "label": "Search or create a page",
+      "short": "Search or create a page",
+      "placeholder": "Search your pages, or type a title to create one",
+      "create": "Create “{{title}}”"
+    },
     "actions": {
       "template": "Use a template",
       "inbox": "Inbox",
@@ -487,10 +492,7 @@
     "personalSpace": "{{name}}'s Space",
     "pinned": "Pinned",
     "pin": "Pin to teamspace",
-    "unpin": "Unpin",
-    "empty": {
-      "add": "Add a page"
-    }
+    "unpin": "Unpin"
   },
   "library": {
     "title": "Library",
@@ -523,21 +525,18 @@
     "noPages": "No pages yet",
     "byId": "Rows by ID",
     "today": "Today",
-    "yesterday": "Yesterday",
-    "pastWeek": "Past week",
-    "past30Days": "Past 30 days",
-    "older": "Older",
-    "togglePreview": "Show or hide the preview",
+    "past": "Past",
     "openPage": "Open page",
     "previewEmpty": "Select a result to preview it here.",
     "noContent": "No content yet",
     "hintSelect": "Select",
     "hintOpen": "Open",
+    "hintOpenNewWindow": "Open in a new window",
     "filters": {
-      "titlesOnly": "Title only",
+      "titlesOnly": "Only search titles",
       "createdBy": "Created by",
       "teamspace": "Teamspace",
-      "inPage": "In",
+      "inPage": "In page",
       "date": "Date"
     }
   },
@@ -1128,6 +1127,10 @@
         "title": "File",
         "description": "Upload a file attachment."
       },
+      "youtube": {
+        "title": "Youtube",
+        "description": "Embed a YouTube video."
+      },
       "video": {
         "title": "Video",
         "description": "Upload a video, or embed YouTube, Vimeo or Loom."
@@ -1520,7 +1523,6 @@
       }
     },
     "picker": {
-      "noSource": "No data source",
       "selectFor": {
         "table": "Select a data source for this table",
         "board": "Select a data source for this board",
@@ -1529,10 +1531,20 @@
         "calendar": "Select a data source for this calendar",
         "timeline": "Select a data source for this timeline"
       },
-      "search": "Link or create a database…",
       "loading": "Loading…",
       "none": "No data sources",
-      "newDatabase": "New database"
+      "newDatabase": "New database",
+      "newEmpty": "New empty data source",
+      "linkExisting": "Link to existing data source",
+      "searchSources": "Search data sources…",
+      "back": "Back",
+      "newPage": "New page",
+      "new": "New",
+      "addProperty": "Add property",
+      "name": "Name",
+      "notStarted": "Not started",
+      "inProgress": "In progress",
+      "done": "Done"
     },
     "emptyList": "No pages yet",
     "rowsDeleted_one": "Deleted {{count}} row",

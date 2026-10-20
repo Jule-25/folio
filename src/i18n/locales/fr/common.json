@@ -31,8 +31,7 @@
     "open": "Rechercher dans les pages",
     "close": "Fermer la recherche",
     "hint": "Tape pour rechercher dans tes pages",
-    "clear": "Effacer",
-    "openPalette": "Ouvrir la palette de recherche"
+    "clear": "Effacer"
   },
   "chat": {
     "outbox": {
@@ -400,10 +399,7 @@
     "personalSpace": "Espace de {{name}}",
     "pinned": "Épinglés",
     "pin": "Épingler dans l'espace d'équipe",
-    "unpin": "Désépingler",
-    "empty": {
-      "add": "Ajouter une page"
-    }
+    "unpin": "Désépingler"
   },
   "library": {
     "title": "Bibliothèque",
@@ -436,21 +432,18 @@
     "noPages": "Aucune page pour le moment",
     "byId": "Lignes par ID",
     "today": "Aujourd'hui",
-    "yesterday": "Hier",
-    "pastWeek": "Semaine passée",
-    "past30Days": "30 derniers jours",
-    "older": "Plus ancien",
-    "togglePreview": "Afficher ou masquer l’aperçu",
+    "past": "Plus tôt",
     "openPage": "Ouvrir la page",
     "previewEmpty": "Sélectionnez un résultat pour l'aperçu.",
     "noContent": "Aucun contenu pour le moment",
     "hintSelect": "Sélectionner",
     "hintOpen": "Ouvrir",
+    "hintOpenNewWindow": "Ouvrir dans une nouvelle fenêtre",
     "filters": {
-      "titlesOnly": "Titre seulement",
+      "titlesOnly": "Rechercher uniquement les titres",
       "createdBy": "Créé par",
       "teamspace": "Espace d'équipe",
-      "inPage": "Dans",
+      "inPage": "Dans la page",
       "date": "Date"
     }
   },
@@ -827,6 +820,12 @@
       "databases": "Tout organiser avec les bases de données",
       "collaborate": "Travailler ensemble : commentaires, suggestions et salons"
     },
+    "search": {
+      "label": "Rechercher ou créer une page",
+      "short": "Chercher ou créer une page",
+      "placeholder": "Cherchez une page ou créez-en une",
+      "create": "Créer « {{title}} »"
+    },
     "actions": {
       "template": "Utiliser un modèle",
       "inbox": "Boîte de réception",
@@ -1127,6 +1126,10 @@
       "file": {
         "title": "Fichier",
         "description": "Importer une pièce jointe."
+      },
+      "youtube": {
+        "title": "Youtube",
+        "description": "Intégrer une vidéo YouTube."
       },
       "video": {
         "title": "Vidéo",
@@ -1520,7 +1523,6 @@
       }
     },
     "picker": {
-      "noSource": "Aucune source de données",
       "selectFor": {
         "table": "Choisissez une source de données pour ce tableau",
         "board": "Choisissez une source de données pour ce Kanban",
@@ -1529,10 +1531,20 @@
         "calendar": "Choisissez une source de données pour ce calendrier",
         "timeline": "Choisissez une source de données pour cette chronologie"
       },
-      "search": "Lier ou créer une base de données…",
       "loading": "Chargement…",
       "none": "Aucune source de données",
-      "newDatabase": "Nouvelle base de données"
+      "newDatabase": "Nouvelle base de données",
+      "newEmpty": "Nouvelle source de données vide",
+      "linkExisting": "Lier une source de données existante",
+      "searchSources": "Rechercher une source de données…",
+      "back": "Retour",
+      "newPage": "Nouvelle page",
+      "new": "Nouveau",
+      "addProperty": "Ajouter une propriété",
+      "name": "Nom",
+      "notStarted": "Pas commencé",
+      "inProgress": "En cours",
+      "done": "Terminé"
     },
     "emptyList": "Aucune page pour l’instant",
     "rowsDeleted_one": "{{count}} ligne supprimée",

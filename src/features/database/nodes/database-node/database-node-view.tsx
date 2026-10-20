@@ -343,6 +343,7 @@ export function DatabaseNodeView({
             the text column like any other block: .top-level-block. */}
         <div className="top-level-block">
           <DataSourcePicker
+            viewType={attrs.views[0]?.type ?? "table"}
             onSelect={(sourceId, pageId, isLinked, savedView) =>
               updateAttributes({
                 ...attrs,
