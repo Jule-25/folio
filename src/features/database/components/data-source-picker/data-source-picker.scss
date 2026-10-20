@@ -1,8 +1,9 @@
 // A database block waiting for its data source: a faded picture of its view,
 // with the "New database" menu over its right side (data-source-picker.tsx).
 .db-setup {
-  position: relative;
-  min-height: 300px;
+   // The preview and the menu share one grid cell: the block is as tall as
+  // the taller of the two, with no empty space under a short preview.
+  display: grid;
   padding-top: 4px;
   user-select: none;
   font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
@@ -12,7 +13,13 @@
   --db-ph-faint: color-mix(in srgb, var(--tt-text-primary) 28%, transparent);
   --db-ph-line: var(--tt-border-color);
 
+  &__preview,
+  &__menu {
+    grid-area: 1 / 1;
+  }
+
   &__preview {
+    min-width: 0;
     cursor: default;
   }
 
@@ -26,10 +33,10 @@
 
   // ── The menu ──
   &__menu {
-    position: absolute;
-    top: 0;
-    right: 0;
+    position: relative;
     z-index: 2;
+    justify-self: end;
+    align-self: start;
     width: 340px;
     max-width: 100%;
     box-sizing: border-box;
