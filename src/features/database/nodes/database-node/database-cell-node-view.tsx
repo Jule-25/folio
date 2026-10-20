@@ -15,6 +15,7 @@ import {
   parseCellText,
   registerCellClipboard,
 } from "../../utils/cell-clipboard";
+import { useWorkspacePeople } from "../../hooks/use-workspace-people";
 
 const EMPTY_PROPERTIES: DatabaseProperty[] = [];
 const EMPTY_COLUMN_VALUES: CellValue[] = [];
@@ -99,8 +100,7 @@ export default function DatabaseCellNodeView({ node, editor }: NodeViewProps) {
   const shownAsCells =
     data?.view?.type === "table" || data?.view?.type === "list";
 
-  // Copy / paste on the active cell (database-active-cell): what this cell
-  // gives and takes. Read through a ref, so it's registered once per cell.
+  const people = useWorkspacePeople();
   const clipboardValue =
     (recordId && propertyId
       ? data?.recordsById.get(recordId)?.values?.[propertyId]
@@ -109,10 +109,17 @@ export default function DatabaseCellNodeView({ node, editor }: NodeViewProps) {
     property,
     value: clipboardValue,
     handleChange,
+    people,
   });
   useEffect(() => {
-    clipboardRef.current = { property, value: clipboardValue, handleChange };
+    clipboardRef.current = {
+      property,
+      value: clipboardValue,
+      handleChange,
+      people,
+    };
   });
+
   useEffect(() => {
     if (!recordId || !propertyId) return;
     return registerCellClipboard(cellKey(recordId, propertyId), {
@@ -121,8 +128,8 @@ export default function DatabaseCellNodeView({ node, editor }: NodeViewProps) {
         return property ? cellText(property, value) : "";
       },
       paste: (text) => {
-        const { property, handleChange } = clipboardRef.current;
-        const parsed = property ? parseCellText(property, text) : null;
+        const { property, handleChange, people } = clipboardRef.current;
+        const parsed = property ? parseCellText(property, text, people) : null;
         if (!parsed) return false;
         handleChange(parsed.value);
         return true;

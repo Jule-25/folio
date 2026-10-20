@@ -1,4 +1,9 @@
-import type { CellValue, DatabaseProperty, SelectOption } from "src/types";
+import type {
+  CellValue,
+  DatabaseProperty,
+  PersonValue,
+  SelectOption,
+} from "src/types";
 import { formatUniqueId } from "src/lib/unique-id";
 
 /**
@@ -68,6 +73,7 @@ export function cellText(
     case "unique_id":
       return formatUniqueId(value, config);
     case "person":
+      return (value as PersonValue[]).map((p) => p.name).join(", ");
     case "relation":
       return ""; // no single text worth copying
     default:
@@ -80,6 +86,8 @@ export function cellText(
 export function parseCellText(
   property: DatabaseProperty,
   text: string,
+  /** Workspace members, for person cells (matched by name). */
+  people: PersonValue[] = [],
 ): { value: CellValue | null } | null {
   const t = text.trim();
   const config = property.config;
@@ -114,6 +122,17 @@ export function parseCellText(
         .flatMap((g) => g.items)
         .find((i) => same(i.name, t));
       return item ? { value: item.id } : null;
+    }
+    case "person": {
+      if (!t) return { value: [] };
+      const matched = t
+        .split(",")
+        .map((name) => people.find((p) => same(p.name, name)))
+        .filter((p): p is PersonValue => !!p);
+      if (!matched.length) return null; // nobody by those names
+      return {
+        value: config.limit === "single" ? matched.slice(0, 1) : matched,
+      };
     }
     case "date": {
       if (!t) return { value: null };
