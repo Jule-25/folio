@@ -1,86 +1,94 @@
-// SearchPalette.scss
-// Command-palette search, built on the same modal/backdrop pattern as
-// PageCreateModal. Theme-aware via CSS variables (light defaults + .dark).
+// The search palette (Ctrl/⌘+P), after Notion's: a large panel near the top,
+// the query on one line, plain-text filters, results grouped by when they
+// were edited, and a preview card beside them. Theme-aware via the variables
+// below (light defaults + .dark).
 
 :root {
-  --background-drop: rgba(216, 211, 211, 0.3);
+  --sp-font:
+    ui-sans-serif, -apple-system, BlinkMacSystemFont,
+    "Segoe UI Variable Display", "Segoe UI", Helvetica, Arial, sans-serif;
+  --background-drop: rgba(15, 15, 15, 0.012);
 
-  --sp-surface: #fffffff8;
+  --sp-surface: #ffffff;
   --sp-text: #37352f;
-  --sp-text-muted: rgba(55, 53, 47, 0.45);
-  --sp-text-soft: rgba(55, 53, 47, 0.85);
-  --sp-border: rgba(55, 53, 47, 0.16);
-  --sp-border-strong: rgba(55, 53, 47, 0.28);
+  --sp-text-muted: rgba(55, 53, 47, 0.5);
+  --sp-text-soft: rgba(55, 53, 47, 0.65);
   --sp-hover: rgba(55, 53, 47, 0.06);
-  --sp-pill-on: rgba(55, 53, 47, 0.08);
-  --sp-footer-bg: #fcfcfb;
+  --sp-on: rgba(35, 131, 226, 0.1);
+  --sp-on-text: #2383e2;
   --sp-divider: rgba(55, 53, 47, 0.09);
-  --sp-scroll: rgba(55, 53, 47, 0.18);
-  --sp-accent: #2383e2;
-  --sp-shadow: 0 0 0 1px rgba(15, 15, 15, 0.05), 0 14px 40px rgba(15, 15, 15, 0.18);
+  --sp-card: #ffffff;
+  --sp-card-border: rgba(55, 53, 47, 0.12);
+  --sp-scroll: rgba(55, 53, 47, 0.2);
+  --sp-shadow:
+    0 0 0 1px rgba(15, 15, 15, 0.06), 0 12px 32px rgba(15, 15, 15, 0.14),
+    0 2px 6px rgba(15, 15, 15, 0.06);
 }
 
 .dark {
-  --background-drop: rgba(15, 15, 15, 0.258);
+  --background-drop: rgba(0, 0, 0, 0.12);
 
-  --sp-surface: #252525f9;//f8; // #252525
+  --sp-surface: #252525;
   --sp-text: rgba(255, 255, 255, 0.9);
-  --sp-text-muted: rgba(255, 255, 255, 0.4);
-  --sp-text-soft: rgba(255, 255, 255, 0.7);
-  --sp-border: rgba(255, 255, 255, 0.12);
-  --sp-border-strong: rgba(255, 255, 255, 0.24);
-  --sp-hover: rgba(255, 255, 255, 0.06);
-  --sp-pill-on: rgba(255, 255, 255, 0.1);
-  --sp-footer-bg: rgba(255, 255, 255, 0.02);
-  --sp-divider: rgba(255, 255, 255, 0.08);
-  --sp-scroll: rgba(255, 255, 255, 0.1);
-  --sp-accent: #5b9ef0;
-  --sp-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4), 0 16px 48px rgba(0, 0, 0, 0.5);
+  --sp-text-muted: rgba(255, 255, 255, 0.46);
+  --sp-text-soft: rgba(255, 255, 255, 0.62);
+  --sp-hover: rgba(255, 255, 255, 0.055);
+  --sp-on: rgba(35, 131, 226, 0.18);
+  --sp-on-text: #529cca;
+  --sp-divider: rgba(255, 255, 255, 0.075);
+  --sp-card: #202020;
+  --sp-card-border: rgba(255, 255, 255, 0.08);
+  --sp-scroll: rgba(255, 255, 255, 0.14);
+  --sp-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.075), 0 16px 48px rgba(0, 0, 0, 0.55);
 }
 
 .sp-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 101;
+  z-index: 901;
   background: var(--background-drop);
-  backdrop-filter: blur(1px);
-  -webkit-backdrop-filter: blur(1px);
   animation: sp-backdrop-in 120ms ease;
 }
 
 @keyframes sp-backdrop-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .sp {
   position: fixed;
   z-index: 201;
-
-  // Anchored toward the top — the command-palette convention
-  top: 20%;
+  top: 9vh;
   left: 50%;
   transform: translateX(-50%);
 
-  width: min(800px, 86vw);
-  max-height: min(90vh, 820px);
+  // A fixed size, like Notion's: the panel doesn't jump as results change.
+  width: min(1180px, 94vw);
+  height: min(780px, 86vh);
   display: flex;
   flex-direction: column;
   overflow: hidden;
 
   background: var(--sp-surface);
   color: var(--sp-text);
+  font-family: var(--sp-font);
   border-radius: 12px;
-  box-shadow: none; //var(--sp-shadow);
-  
+  box-shadow: var(--sp-shadow);
 
   animation: sp-modal-in 160ms cubic-bezier(0.22, 1, 0.36, 1);
 
+  // ── The query ──
   &-search {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 16px 18px;
+    height: 58px;
+    padding: 0 14px 0 20px;
     flex: none;
 
     &__icon {
@@ -90,152 +98,331 @@
 
     &__input {
       flex: 1;
+      min-width: 0;
+      height: 100%;
       border: 0;
       outline: 0;
       background: transparent;
       font: inherit;
       font-size: 18px;
-      letter-spacing: -0.01em;
       color: var(--sp-text);
 
-      &::placeholder { color: var(--sp-text-muted); }
+      &::placeholder {
+        color: var(--sp-text-muted);
+      }
     }
   }
 
+  &-icon-btn {
+    all: unset;
+    box-sizing: border-box;
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    color: var(--sp-text-muted);
+    cursor: pointer;
+
+    &:hover {
+      background: var(--sp-hover);
+      color: var(--sp-text);
+    }
+
+    &--on {
+      color: var(--sp-on-text);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--sp-on-text);
+      outline-offset: -2px;
+    }
+  }
+
+  // ── Filters: plain text, no outlines ──
   &-filters {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    padding: 0 18px 14px;
+    align-items: center;
+    gap: 2px;
+    padding: 0 14px 10px;
     flex: none;
   }
 
-  &-pill {
+  &-filter {
+    all: unset;
+    box-sizing: border-box;
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    font: inherit;
-    font-size: 13px;
+    height: 30px;
+    padding: 0 8px;
+    border-radius: 6px;
+    font-size: 15px;
     color: var(--sp-text-soft);
-    background: transparent;
-    border: 1px solid var(--sp-border);
-    border-radius: 999px;
-    padding: 5px 11px;
     cursor: pointer;
-    transition: background 0.12s, border-color 0.12s;
+    white-space: nowrap;
 
-    &:hover { background: var(--sp-hover); }
-
-    &--on {
-      background: var(--sp-pill-on);
-      border-color: var(--sp-border-strong);
+    &:hover {
+      background: var(--sp-hover);
+      color: var(--sp-text);
     }
 
-    &__aa { font-weight: 500; font-size: 12px; }
-    &__chev { display: flex; color: var(--sp-text-muted); }
+    &--on {
+      background: var(--sp-on);
+      color: var(--sp-on-text);
+
+      &:hover {
+        background: var(--sp-on);
+        color: var(--sp-on-text);
+      }
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--sp-on-text);
+      outline-offset: -2px;
+    }
+
+    &__aa {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    &__chev {
+      display: flex;
+      margin-left: -2px;
+      opacity: 0.8;
+    }
   }
 
-  // Scrollable results — mirrors the PageCreateModal scrollbar treatment
+  // ── Results + preview ──
+  &-body {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    gap: 16px;
+    padding: 0 16px 0 8px;
+  }
+
   &-results {
     flex: 1;
+    min-width: 0;
     overflow-y: auto;
-    padding: 4px 0 8px;
+    padding: 2px 4px 12px 0;
 
-    scrollbar-width: auto;
     scrollbar-color: var(--sp-scroll) transparent;
 
-    &::-webkit-scrollbar { width: auto; }
-    &::-webkit-scrollbar-track { background: transparent; }
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
     &::-webkit-scrollbar-thumb {
       background: var(--sp-scroll);
-      border-radius: 2px;
+      border-radius: 4px;
     }
   }
 
   &-section {
-    font-size: 11px;
+    padding: 14px 12px 6px;
+    font-size: 13px;
     font-weight: 500;
-    letter-spacing: 0.02em;
     color: var(--sp-text-muted);
-    padding: 10px 18px 4px;
   }
 
   &-row {
     display: flex;
     align-items: center;
-    gap: 8px;
-    min-height: 32px;
-    padding: 7px 18px;
-    margin: 0 6px;
-    border-radius: 6px;
+    gap: 10px;
+    min-height: 44px;
+    padding: 0 12px;
+    border-radius: 8px;
     cursor: pointer;
+    min-width: 0;
 
-    &--sel { background: var(--sp-hover); }
+    &--sel {
+      background: var(--sp-hover);
+    }
 
     &__icon {
+      display: grid;
+      place-items: center;
       flex: none;
-      width: 20px;
-      font-size: 16px;
+      width: 22px;
+      height: 22px;
+      font-size: 18px;
       line-height: 1;
-      text-align: center;
+      color: var(--sp-text-soft);
     }
 
     &__title {
-      font-weight: 500;
-      font-size: 14px;
+      flex: none;
+      max-width: 70%;
+      overflow: hidden;
+      text-overflow: ellipsis;
       white-space: nowrap;
+      font-size: 16px;
+      font-weight: 500;
       color: var(--sp-text);
     }
 
     &__loc {
-      font-size: 14px;
-      color: var(--sp-text-muted);
-      white-space: nowrap;
+      min-width: 0;
       overflow: hidden;
       text-overflow: ellipsis;
-    }
-
-    &__right {
-      margin-left: auto;
-      display: flex;
-      align-items: center;
+      white-space: nowrap;
+      font-size: 14px;
       color: var(--sp-text-muted);
     }
-
-    &__date { font-size: 13px; }
   }
 
+  // Matched letters: just heavier, no colour (like Notion's).
   &-hl {
-    color: var(--sp-accent);
-    font-weight: 600;
+    font-weight: 700;
+    color: var(--sp-text);
   }
 
   &-empty {
-    padding: 28px 18px;
+    padding: 40px 18px;
     text-align: center;
-    font-size: 14px;
+    font-size: 15px;
     color: var(--sp-text-muted);
   }
 
+  // ── Preview: the highlighted page, as a card ──
+  &-preview {
+    width: 42%;
+    max-width: 480px;
+    flex: none;
+    min-height: 0;
+    padding-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+
+    &__card {
+      position: relative;
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      border-radius: 10px;
+      border: 1px solid var(--sp-card-border);
+      background: var(--sp-card);
+      scrollbar-width: none;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+
+      &:hover .sp-preview__open {
+        opacity: 1;
+      }
+    }
+
+    &__cover {
+      height: 100px;
+      flex: none;
+    }
+
+    &__open {
+      all: unset;
+      box-sizing: border-box;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      background: color-mix(in srgb, var(--sp-surface) 85%, transparent);
+      box-shadow: 0 0 0 1px var(--sp-card-border);
+      color: var(--sp-text-soft);
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.12s ease;
+
+      &:hover {
+        color: var(--sp-text);
+      }
+
+      &:focus-visible {
+        opacity: 1;
+        outline: 2px solid var(--sp-on-text);
+      }
+    }
+
+    &__body {
+      padding: 28px 30px 30px;
+
+      // The icon sits half over the cover, as on the page itself.
+      &--under-cover {
+        padding-top: 0;
+
+        .sp-preview__icon {
+          margin-top: -26px;
+        }
+      }
+    }
+
+    &__icon {
+      margin-bottom: 10px;
+      line-height: 1;
+    }
+
+    &__crumbs {
+      margin-bottom: 6px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 13px;
+      color: var(--sp-text-muted);
+    }
+
+    &__title {
+      margin-bottom: 14px;
+      font-size: 24px;
+      font-weight: 700;
+      line-height: 1.25;
+      color: var(--sp-text);
+    }
+
+    &__content {
+      font-size: 14px;
+      color: var(--sp-text-soft);
+    }
+
+    &__empty,
+    &__placeholder {
+      font-size: 14px;
+      color: var(--sp-text-muted);
+    }
+
+    &__placeholder {
+      padding: 24px;
+      line-height: 1.5;
+    }
+  }
+
+  // ── Footer ──
   &-footer {
     display: flex;
     align-items: center;
     gap: 18px;
-    padding: 9px 18px;
+    height: 42px;
+    padding: 0 20px;
     border-top: 1px solid var(--sp-divider);
-    background: var(--sp-footer-bg);
     flex: none;
   }
 
   &-hint {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    font-size: 12px;
+    gap: 6px;
+    font-size: 13px;
     color: var(--sp-text-muted);
   }
-
-  &-kbd { font-size: 12px; line-height: 1; }
 }
 
 @keyframes sp-modal-in {
@@ -249,17 +436,29 @@
   }
 }
 
-.preview-panel,
-.sp-results{
-   &:not(:hover) {
-    scrollbar-width: none;
-    &::-webkit-scrollbar {
-      display: none;
-    }
-  }
-  &:hover {
-    scrollbar-width: thin;
-  }
+// Page icons draw at their own size by default (32px): fit them to the slot.
+.sp-row__icon .page-icon,
+.sp-row__icon .page-icon > svg {
+  display: grid;
+  place-items: center;
+  width: 18px !important;
+  height: 18px !important;
+}
+
+.sp-preview__icon .page-icon,
+.sp-preview__icon .page-icon > svg {
+  display: grid;
+  place-items: center;
+  width: 44px !important;
+  height: 44px !important;
+}
+
+// A row found by its ID: the ID before its title.
+.sp-row__id {
+  margin-right: 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.85em;
+  color: var(--sp-text-muted);
 }
 
 @media (max-width: 768px) {
@@ -270,51 +469,22 @@
     width: 100vw;
     max-width: 100vw;
     height: 100dvh;
-    max-height: 100dvh;
     border-radius: 0;
-    // Base rule animates via sp-modal-in, whose keyframes set
-    // translateX(-50%) — that would drag the full-screen sheet off-center.
+    // The base keyframes translate by -50%, which would pull the
+    // full-screen sheet off-centre.
     animation: none;
   }
 
   .sp-search__input {
-    font-size: 16px; // ≥16px so iOS doesn't auto-zoom on focus
+    font-size: 16px; // ≥16px so iOS doesn't zoom in on focus
   }
 
+  .sp-body {
+    padding: 0 4px;
+  }
+
+  // No keyboard on a phone: no keyboard hints.
   .sp-footer {
-    // The ⌘+Enter "open in new window" hint is desktop-only — hide the
-    // keyboard-shortcut hints on mobile where there's no keyboard.
     display: none;
   }
-}
-
-.sp-close {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: transparent;
-  border-radius: var(--tt-radius-md, 6px);
-  color: var(--sp-text-muted);
-  cursor: pointer;
-  transition: background 0.12s ease, color 0.12s ease;
-
-  &:hover {
-    background: var(--sp-hover);
-    color: var(--sp-text);
-  }
-}
-
-// A row found by its ID: the ID before its title.
-.sp-row__id {
-  margin-right: 6px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.85em;
-  color: var(--tt-text-secondary);
 }
