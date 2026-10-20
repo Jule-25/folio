@@ -57,6 +57,76 @@ function isCellAt(doc: import("@tiptap/pm/model").Node, pos: number): boolean {
   return !!node && node.type.name === "databaseCell";
 }
 
+type Direction = "up" | "down" | "left" | "right";
+
+/** The active cell's own box (its .db-node-cell; the wrappers around it are
+ *  display: contents and have no size). */
+function cellElement(
+  view: import("@tiptap/pm/view").EditorView,
+  pos: number,
+): HTMLElement | null {
+  const dom = view.nodeDOM(pos);
+  if (!(dom instanceof HTMLElement)) return null;
+  return dom.querySelector<HTMLElement>(".db-node-cell") ?? dom;
+}
+
+/**
+ * The cell next to the one at `pos` in `dir`, found by where cells are ON
+ * SCREEN: rows are placed by their sorted order (grid-row), not their order
+ * in the doc, and hidden columns have no box. Tables only.
+ */
+function neighbourCell(
+  view: import("@tiptap/pm/view").EditorView,
+  pos: number,
+  dir: Direction,
+): number | null {
+  const from = cellElement(view, pos);
+  const table = from?.closest(".db-table");
+  if (!from || !table) return null;
+
+  const a = from.getBoundingClientRect();
+  const ax = a.left + a.width / 2;
+  const ay = a.top + a.height / 2;
+  const vertical = dir === "up" || dir === "down";
+
+  let best: HTMLElement | null = null;
+  let bestScore = Infinity;
+  table.querySelectorAll<HTMLElement>(".db-node-cell").forEach((el) => {
+    if (el === from) return;
+    const r = el.getBoundingClientRect();
+    if (!r.width || !r.height) return; // hidden
+    const dx = r.left + r.width / 2 - ax;
+    const dy = r.top + r.height / 2 - ay;
+    const along =
+      dir === "down" ? dy : dir === "up" ? -dy : dir === "right" ? dx : -dx;
+    const across = Math.abs(vertical ? dx : dy);
+    if (along <= 1) return; // behind us
+    if (across > (vertical ? a.width : a.height) / 2) return; // other column/row
+    const score = along + across * 2;
+    if (score < bestScore) {
+      bestScore = score;
+      best = el;
+    }
+  });
+  if (!best) return null;
+
+  // The cell node that owns that box.
+  const p = view.posAtDOM(best, 0);
+  if (view.state.doc.nodeAt(p)?.type.name === "databaseCell") return p;
+  const $p = view.state.doc.resolve(p);
+  for (let depth = $p.depth; depth > 0; depth--) {
+    if ($p.node(depth).type.name === "databaseCell") return $p.before(depth);
+  }
+  return null;
+}
+
+const ARROW_DIRECTION: Record<string, Direction> = {
+  ArrowUp: "up",
+  ArrowDown: "down",
+  ArrowLeft: "left",
+  ArrowRight: "right",
+};
+
 export const DatabaseActiveCell = Extension.create({
   name: "databaseActiveCell",
 
@@ -115,7 +185,76 @@ export const DatabaseActiveCell = Extension.create({
             };
           },
         },
+        // Keys for the active cell, listened for on the DOCUMENT: after a
+        // cell editor closes, focus is on the page body, not the editor, so
+        // the editor's own key handling never sees them.
+        view(editorView) {
+          const onKey = (event: KeyboardEvent) => {
+            const active = activeCellPluginKey.getState(
+              editorView.state,
+            )?.active;
+            if (active === null || active === undefined) return;
+            if (event.metaKey || event.ctrlKey || event.altKey) return;
 
+            // Someone is typing somewhere (a cell editor, a menu's search,
+            // another editor): leave their keys alone.
+            const target = event.target as HTMLElement | null;
+            if (
+              target &&
+              (target.closest(
+                "input, textarea, select, [data-radix-popper-content-wrapper]",
+              ) ||
+                (target.isContentEditable && target !== editorView.dom))
+            ) {
+              return;
+            }
+
+            const setActive = (pos: number | null) => {
+              const meta: ActiveCellMeta = { active: pos };
+              editorView.dispatch(
+                editorView.state.tr.setMeta(activeCellPluginKey, meta),
+              );
+            };
+
+            const dir: Direction | undefined =
+              event.key === "Tab"
+                ? event.shiftKey
+                  ? "left"
+                  : "right"
+                : ARROW_DIRECTION[event.key];
+
+            if (dir) {
+              const next = neighbourCell(editorView, active, dir);
+              if (next === null) return; // not in a table, or at the edge
+              event.preventDefault();
+              event.stopPropagation();
+              setActive(next);
+              cellElement(editorView, next)?.scrollIntoView({
+                block: "nearest",
+                inline: "nearest",
+              });
+            } else if (event.key === "Enter") {
+              const opener = cellElement(
+                editorView,
+                active,
+              )?.querySelector<HTMLElement>(
+                ".db-cell-editor__display, button, [role='button'], input[type='checkbox']",
+              );
+              if (!opener) return;
+              event.preventDefault();
+              event.stopPropagation();
+              opener.click();
+            } else if (event.key === "Escape") {
+              setActive(null);
+            }
+          };
+
+          // Capture: run before the editor moves its text cursor.
+          document.addEventListener("keydown", onKey, true);
+          return {
+            destroy: () => document.removeEventListener("keydown", onKey, true),
+          };
+        },
         props: {
           decorations(state) {
             const { active } = this.getState(state) ?? { active: null };
