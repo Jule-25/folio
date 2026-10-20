@@ -23,6 +23,7 @@
 import { Extension } from "@tiptap/core";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
+import { cellClipboard, cellKey } from "../utils/cell-clipboard";
 
 export const activeCellPluginKey = new PluginKey<ActiveCellState>(
   "databaseActiveCell",
@@ -118,6 +119,18 @@ function neighbourCell(
     if ($p.node(depth).type.name === "databaseCell") return $p.before(depth);
   }
   return null;
+}
+
+/** Copy / paste handlers of the cell at `pos` (see utils/cell-clipboard). */
+function clipboardAt(view: import("@tiptap/pm/view").EditorView, pos: number) {
+  const node = view.state.doc.nodeAt(pos);
+  const { recordId, propertyId } = (node?.attrs ?? {}) as {
+    recordId?: string | null;
+    propertyId?: string | null;
+  };
+  return recordId && propertyId
+    ? cellClipboard(cellKey(recordId, propertyId))
+    : undefined;
 }
 
 const ARROW_DIRECTION: Record<string, Direction> = {
@@ -249,10 +262,75 @@ export const DatabaseActiveCell = Extension.create({
             }
           };
 
+          // Ctrl/⌘+C and Ctrl/⌘+V on the active cell. The copy/paste
+          // EVENTS, not the keys: they carry the clipboard with no
+          // permission prompt.
+          const activeFor = (event: ClipboardEvent) => {
+            const active = activeCellPluginKey.getState(
+              editorView.state,
+            )?.active;
+            if (active === null || active === undefined) return null;
+            const target = event.target as HTMLElement | null;
+            if (
+              target &&
+              (target.closest(
+                "input, textarea, select, [data-radix-popper-content-wrapper]",
+              ) ||
+                (target.isContentEditable && target !== editorView.dom))
+            ) {
+              return null;
+            }
+            // Text selected on the page: let the browser copy that.
+            if (!window.getSelection()?.isCollapsed) return null;
+            return active;
+          };
+
+          const onCopy = (event: ClipboardEvent) => {
+            const active = activeFor(event);
+            if (active === null) return;
+            const text = clipboardAt(editorView, active)?.copyText();
+            if (text === undefined) return;
+            event.preventDefault();
+            event.clipboardData?.setData("text/plain", text);
+          };
+
+          // One value fills the active cell; rows and tabs copied from a
+          // spreadsheet fill down and to the right from it. Values that don't
+          // fit a column (an unknown option, text in a number…) are skipped.
+          const onPaste = (event: ClipboardEvent) => {
+            const active = activeFor(event);
+            if (active === null) return;
+            const text = event.clipboardData?.getData("text/plain");
+            if (text == null) return;
+            event.preventDefault();
+            const rows = text
+              .replace(/\r/g, "")
+              .replace(/\n$/, "")
+              .split("\n")
+              .map((row) => row.split("\t"));
+            let rowStart: number | null = active;
+            for (const row of rows) {
+              if (rowStart === null) break;
+              let cell: number | null = rowStart;
+              for (const value of row) {
+                if (cell === null) break;
+                clipboardAt(editorView, cell)?.paste(value);
+                cell = neighbourCell(editorView, cell, "right");
+              }
+              rowStart = neighbourCell(editorView, rowStart, "down");
+            }
+          };
+
           // Capture: run before the editor moves its text cursor.
           document.addEventListener("keydown", onKey, true);
+          document.addEventListener("copy", onCopy, true);
+          document.addEventListener("paste", onPaste, true);
           return {
-            destroy: () => document.removeEventListener("keydown", onKey, true),
+            destroy: () => {
+              document.removeEventListener("keydown", onKey, true);
+              document.removeEventListener("copy", onCopy, true);
+              document.removeEventListener("paste", onPaste, true);
+            },
           };
         },
         props: {

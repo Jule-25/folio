@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { NodeViewWrapper } from "@tiptap/react";
 import type { NodeViewProps } from "@tiptap/core";
 import { useDatabaseBridgeData } from "../../hooks/use-database-bridge-data";
@@ -9,6 +9,12 @@ import { isCopiableType } from "../database-board-node-view/utils";
 import { useOpenRecord } from "../../hooks/use-open-record";
 import { useRecordNearScreen } from "../../utils/record-visibility";
 import { formatUniqueId } from "src/lib/unique-id";
+import {
+  cellKey,
+  cellText,
+  parseCellText,
+  registerCellClipboard,
+} from "../../utils/cell-clipboard";
 
 const EMPTY_PROPERTIES: DatabaseProperty[] = [];
 const EMPTY_COLUMN_VALUES: CellValue[] = [];
@@ -92,6 +98,37 @@ export default function DatabaseCellNodeView({ node, editor }: NodeViewProps) {
   // never mount the cells' DOM, so rendering a Cell there was pure waste.
   const shownAsCells =
     data?.view?.type === "table" || data?.view?.type === "list";
+
+  // Copy / paste on the active cell (database-active-cell): what this cell
+  // gives and takes. Read through a ref, so it's registered once per cell.
+  const clipboardValue =
+    (recordId && propertyId
+      ? data?.recordsById.get(recordId)?.values?.[propertyId]
+      : null) ?? null;
+  const clipboardRef = useRef({
+    property,
+    value: clipboardValue,
+    handleChange,
+  });
+  useEffect(() => {
+    clipboardRef.current = { property, value: clipboardValue, handleChange };
+  });
+  useEffect(() => {
+    if (!recordId || !propertyId) return;
+    return registerCellClipboard(cellKey(recordId, propertyId), {
+      copyText: () => {
+        const { property, value } = clipboardRef.current;
+        return property ? cellText(property, value) : "";
+      },
+      paste: (text) => {
+        const { property, handleChange } = clipboardRef.current;
+        const parsed = property ? parseCellText(property, text) : null;
+        if (!parsed) return false;
+        handleChange(parsed.value);
+        return true;
+      },
+    });
+  }, [recordId, propertyId]);
 
   // An empty, row-height cell: no data yet, a view that doesn't show cells,
   // or a row that hasn't come near the screen (utils/record-visibility.ts).
