@@ -97,13 +97,13 @@
   visibility: visible;
 }
 
-/* ──────────────────────────────────────────────────────────────────────────
-   REMOVED (dead rules from the old imperative DOM — caused the collapse):
-   - .db-grid { grid-template-columns: var(--db-grid-columns) }  ← var never
-     defined, made the grid invalid → rows invisible. Node grid is now the
-     standalone .db-node-grid (see database-nodes.scss).
-   - .db-td, .db-td p, .db-row rules — targeted old cell DOM that no longer
-     exists (cells are .db-cell nodes now, styled in database-nodes.scss).
-   - .db-row:has(...) wrap-mode block — will be reintroduced against .db-cell
-     later if/when wrap mode is re-added to the node grid.
-   ────────────────────────────────────────────────────────────────────────── */
+  // Layout › Show vertical lines off: no lines between columns (the row lines
+// stay). Transparent rather than removed, so columns keep their width.
+.db-table[data-vlines="off"] {
+  .db-node-cell,
+  .db-node-cell--atom,
+  .db-table__placeholder-cell,
+  .db-skeleton-cell {
+    border-right-color: transparent !important;
+  }
+}

@@ -431,6 +431,8 @@ export interface TableView extends BaseView {
   /** Row order set by dragging rows or Move up / down. Used when the view
    *  has no sort; ids not listed follow in their usual order. */
   manualOrder?: ID[];
+    /** Layout › Show vertical lines. Absent = shown. */
+  showVerticalLines?: boolean;
 }
 
 export interface ListView extends BaseView {
