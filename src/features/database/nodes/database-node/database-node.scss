@@ -545,7 +545,18 @@ body.db-row-dragselect {
     border: 2px solid var(--tt-brand-color-500);
     pointer-events: none;
     z-index: 3;
+    cursor: crosshair;
   }
+}
+
+// Cells of a range (drag the corner dot, or Shift+click): tinted like the
+// active cell, without its ring.
+.react-renderer.node-databaseCell.db-cell-in-range .db-node-cell {
+  background: color-mix(
+    in srgb,
+    var(--tt-brand-color-400) 10%,
+    var(--tt-bg-color)
+  ) !important;
 }
 
 // ── Active record (decoration) ────────────────────────────────────────────────
