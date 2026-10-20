@@ -7,6 +7,7 @@ interface BoardCardCoverProps {
   page: Page | null;
   recordId: string;
   height?: number;
+  fit?: "cover" | "contain";
   /** Drag-to-reposition mode — only meaningful for image covers. */
   repositioning?: boolean;
   onPositionChange?: (positionY: number) => void;
@@ -26,6 +27,7 @@ function BoardCardCoverImpl({
   page,
   recordId,
   height = 130,
+  fit = "cover",
   repositioning = false,
   onPositionChange,
   onPositionCommit,
@@ -80,6 +82,7 @@ function BoardCardCoverImpl({
       <div
         className="db-board-card__cover"
         data-repositioning={repositioning || undefined}
+        data-fit={fit}
         style={{
           height,
           position: "relative",
@@ -102,15 +105,34 @@ function BoardCardCoverImpl({
           src={coverImage}
           alt="cover"
           draggable={false}
+          loading="lazy"
+          decoding="async"
           className="db-board-card__cover-img"
-          style={{
-            position: "absolute",
-            width: "100%",
-            height: "200%",
-            objectFit: "cover",
-            top: `${-(positionY / 100) * 50}%`,
-            left: 0,
-          }}
+          style={
+            fit === "contain"
+              ? {
+                  position: "absolute",
+                  inset: 0,
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "contain",
+                  objectPosition: "center top",
+                  margin: 0,
+                  borderRadius: 0,
+                  maxWidth: "none",
+                }
+              : {
+                  position: "absolute",
+                  width: "100%",
+                  height: "200%",
+                  objectFit: "cover",
+                  top: `${-(positionY / 100) * 50}%`,
+                  left: 0,
+                  margin: 0,
+                  borderRadius: 0,
+                  maxWidth: "none",
+                }
+          }
         />
       </div>
     );

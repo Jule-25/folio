@@ -12,6 +12,7 @@ import { spacePagePath } from "src/hooks/use-current-space";
 import { fetchNotificationTargetWorkspace } from "src/api/notifications";
 import { chatPath, useOpenChatRoom } from "../../chat/chat-utils";
 import { setPendingScrollTarget } from "./pending-scroll-target";
+import { useRowLinks } from "src/features/database/hooks/use-row-links";
 
 const allPagesLens = (pages: Page[]) => pages;
 
@@ -33,10 +34,22 @@ export function useOpenNotification(onDone?: () => void) {
   const { all: rooms } = useChatRooms();
   const openRoom = useOpenChatRoom();
   const switchWorkspace = useSwitchWorkspace();
+  const { openRow } = useRowLinks();
 
   return useCallback(
     async (n: Notification) => {
       markRead(n.id);
+
+      // "Have a look at this row": open it where it lives — its database,
+      // the row in the peek. (Not loaded here → the page route below.)
+      if (n.type === "row-look" && n.mentionId) {
+        const row = pages?.find((p) => p.id === n.mentionId);
+        if (row && row.deletedAt == null) {
+          openRow(row.id);
+          onDone?.();
+          return;
+        }
+      }
 
       const pageId = n.sourcePageId != null ? String(n.sourcePageId) : null;
       const roomId = !pageId && n.sourceRoomId ? n.sourceRoomId : null;
@@ -125,6 +138,7 @@ export function useOpenNotification(onDone?: () => void) {
       openRoom,
       switchWorkspace,
       navigate,
+      openRow,
       onDone,
     ],
   );

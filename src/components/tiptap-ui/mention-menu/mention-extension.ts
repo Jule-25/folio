@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Mention } from "@tiptap/extension-mention";
-import type { MentionItem, MentionListRef } from "./types";
+import type { MentionItem, MentionListRef, RowMentionEntry } from "./types";
 import {
   Editor,
   posToDOMRect,
@@ -37,12 +37,14 @@ declare module "@tiptap/core" {
     mention: {
       setMentionPeople: (people: Person[]) => ReturnType;
       setMentionPages: (pages: Page[]) => ReturnType;
+      setMentionRows: (rows: RowMentionEntry[]) => ReturnType;
     };
   }
 }
 
 interface MentionStorage {
   people: Person[];
+  rows: RowMentionEntry[];
 }
 
 declare module "@tiptap/core" {
@@ -63,12 +65,16 @@ const MentionWithView = Mention.extend({
       includeTime: { default: false },
       dateFormat: { default: "relative" }, // "relative" | "absolute"
       endDate: { default: null },
+      /** A mention of a database row: its page id (MentionView shows it as
+       *  a row chip — RowMention). */
+      rowId: { default: null },
     };
   },
   addStorage() {
     return {
       ...this.parent?.(),
       people: [],
+      rows: [],
     };
   },
   addCommands() {
@@ -84,6 +90,12 @@ const MentionWithView = Mention.extend({
         (pages: Page[]) =>
         ({ editor }) => {
           editor.storage.pageLink.pages = pages;
+          return true;
+        },
+      setMentionRows:
+        (rows: RowMentionEntry[]) =>
+        ({ editor }) => {
+          editor.storage.mention.rows = rows;
           return true;
         },
     };
@@ -134,6 +146,33 @@ export const MentionExtension = MentionWithView.configure({
           cover: p.cover,
         }));
 
+      // Rows: by title, like pages, or by their ID ("TASK-12", "task-1"…)
+      // for those that have one — no need to know it. A few at most: a
+      // database can hold hundreds.
+      const rows = editor.storage.mention.rows ?? [];
+      const matchedRows: MentionItem[] = q
+        ? rows
+            .filter(
+              (r) =>
+                (r.idText && r.idText.toLowerCase().startsWith(q)) ||
+                r.title.toLowerCase().includes(q),
+            )
+            .sort(
+              (a, b) =>
+                Number(b.idText.toLowerCase().startsWith(q)) -
+                Number(a.idText.toLowerCase().startsWith(q)),
+            )
+            .slice(0, 6)
+            .map((r) => ({
+              id: r.id,
+              label: r.title,
+              idText: r.idText,
+              cover: r.cover,
+              hint: r.dbName,
+              type: "row" as const,
+            }))
+        : [];
+
       const matchedDates: MentionItem[] = getDateSuggestions(query).map(
         (d) => ({
           id: `date:${d.id}`,
@@ -157,6 +196,16 @@ export const MentionExtension = MentionWithView.configure({
           type: "divider",
         });
         result.push(...matchedPages);
+      }
+
+      if (matchedRows.length) {
+        result.push({
+          id: "divider-rows",
+          label: "",
+          title: "Rows",
+          type: "divider",
+        });
+        result.push(...matchedRows);
       }
 
       if (matchedDates.length) {
@@ -205,6 +254,25 @@ export const MentionExtension = MentionWithView.configure({
             nodeId: `pageLink-${Date.now()}`,
           },
         });
+      } else if (props.type === "row") {
+        // A row: an inline chip that opens it in its database.
+        editor
+          .chain()
+          .focus()
+          .insertContentAt(range, [
+            {
+              type: "mention",
+              attrs: {
+                id: props.id,
+                label: props.label,
+                rowId: props.id,
+                mentionSuggestionChar: "@",
+                nodeId: `mention-${Date.now()}`,
+              },
+            },
+            { type: "text", text: " " },
+          ])
+          .run();
       } else if (props.type === "date") {
         // A date chip: the date itself is stored, so "Today" written on
         // Monday still reads Monday's date on Tuesday ("Yesterday").

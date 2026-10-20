@@ -132,6 +132,10 @@ export default defineConfig({
             id.includes("/fraction.js/")
           )
             return "vendor-mathjs";
+          // Babel's small helpers are shared by mathjs and the router. Left
+          // alone, Rollup puts them in vendor-mathjs, and the app then has to
+          // download all of mathjs at start just to reach them.
+          if (id.includes("/@babel/runtime/")) return "vendor-babel-runtime";
           if (id.includes("/lodash")) return "vendor-lodash";
         },
       },

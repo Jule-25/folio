@@ -293,6 +293,17 @@ export const OPERATORS_FOR_TYPE: Record<PropertyType, FilterOperator[]> = {
   person: ["contains", "does_not_contain", "is_empty", "is_not_empty"],
   created_by: ["contains", "does_not_contain", "is_empty", "is_not_empty"],
   edited_by: ["contains", "does_not_contain", "is_empty", "is_not_empty"],
+  // Filtered by its number (the prefix is the same on every row).
+  unique_id: [
+    "equals",
+    "does_not_equal",
+    "greater_than",
+    "greater_than_or_equal",
+    "less_than",
+    "less_than_or_equal",
+    "is_empty",
+    "is_not_empty",
+  ],
   rollup: [
     "equals",
     "does_not_equal",

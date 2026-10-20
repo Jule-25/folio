@@ -1,0 +1,22 @@
+// The peek / center view's body while the page loads (page-body-skeleton.tsx).
+// It borrows the editor's own classes (.tiptap, the title, the property
+// panel's rows), so it only adds the bones' spacing here.
+.page-body-skeleton {
+  pointer-events: none;
+  user-select: none;
+
+  &__title {
+    margin: 8px 0 16px;
+  }
+
+  .record-prop-panel__label {
+    gap: 8px;
+  }
+
+  &__lines {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 16px;
+  }
+}

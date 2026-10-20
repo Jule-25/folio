@@ -15,6 +15,7 @@ const COPIABLE_TYPES = new Set<PropertyType>([
   "created_time",
   "edited_time",
   "date",
+  "unique_id",
 ]);
 
 export function isCopiableType(type: PropertyType): boolean {

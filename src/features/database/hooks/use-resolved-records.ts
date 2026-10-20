@@ -1,12 +1,14 @@
 import { useMemo } from "react";
+import { rowMatchesSearch } from "../utils/row-summary";
 import type { DataSource, Page } from "src/types";
 import type { UseDatabaseReturn } from "./use-database";
 import { recordMatchesFilters } from "../utils/apply-filters";
 import { useSession } from "src/hooks/use-session";
 import { sortRecords } from "../utils/apply-sorts";
 import { usePageTitles } from "./use-page-titles";
+import { applyManualOrder } from "../utils/manual-order";
 
-// filter → search → sort → pin-editing
+// filter → search → sort (or a table / list's own row order) → pin-editing
 
 export function useResolvedRecords(
   resolvedRecords: Page[],
@@ -31,12 +33,17 @@ export function useResolvedRecords(
 
     const q = db.searchQuery.trim().toLowerCase();
     const searched = q
-      ? filtered.filter((r) => (r.title ?? "").toLowerCase().includes(q))
+      ? filtered.filter((r) => rowMatchesSearch(r, q, props))
       : filtered;
 
-    const sorted = sortRecords(searched, activeView?.sorts ?? [], props, {
-      titleOf,
-    });
+    const sorts = activeView?.sorts ?? [];
+    // A table or list without a sort keeps the order its rows were dragged
+    // into (manual-order.ts). A sort always wins.
+    const sorted =
+      sorts.length === 0 &&
+      (activeView?.type === "table" || activeView?.type === "list")
+        ? applyManualOrder(searched, activeView.manualOrder)
+        : sortRecords(searched, sorts, props, { titleOf });
 
     // Pin the row being created to the end so it doesn't jump under the active
     // sort while its title is still changing.

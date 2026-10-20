@@ -220,12 +220,6 @@
 
    
   }
-  &.is-teamspace-root{
-     .page-item-title {
-      font-weight: 600;
-      color: var(--sb-active-color) !important;
-    }
-  }
 
   &.active {
     background: var(--sb-active-bg, var(--page-item-active-bg-color));

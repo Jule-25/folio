@@ -37,6 +37,14 @@ function useHoveredRecordId(): string | null {
   );
 }
 
+function useHoveredDatabaseId(): string | null {
+  return useSyncExternalStore(
+    subscribe,
+    () => recordSelection.getHoveredDatabase(),
+    () => null,
+  );
+}
+
 export function RecordDragMenu({
   onAction,
   anchorRef,
@@ -46,7 +54,8 @@ export function RecordDragMenu({
   anchorRef: RefObject<HTMLElement | null>;
 }) {
   const recordId = useHoveredRecordId();
-  const actions = useCardActions();
+  // The hovered row's own database (a page can hold several).
+  const actions = useCardActions(useHoveredDatabaseId());
 
   // The ACTIONS menu popover has its own open state, opened on mount. Closing it
   // (via run's onClose, or picking an item) does NOT unmount this component, so
@@ -74,6 +83,10 @@ export function RecordDragMenu({
     openPropertyVisibility,
     openEditProperty,
     openInRecord: openRecordIn,
+    moveRecordBy,
+    canMoveRecord,
+    copyRecordLink,
+    askToLook,
   } = actions;
 
   // Close the whole thing (finished an action): close the menu AND tell the drag
@@ -125,6 +138,23 @@ export function RecordDragMenu({
                 duplicateRecord(recordId);
                 finish();
               }}
+              onMoveUp={
+                canMoveRecord(recordId, -1)
+                  ? () => {
+                      moveRecordBy(recordId, -1);
+                      finish();
+                    }
+                  : undefined
+              }
+              onMoveDown={
+                canMoveRecord(recordId, 1)
+                  ? () => {
+                      moveRecordBy(recordId, 1);
+                      finish();
+                    }
+                  : undefined
+              }
+              showMoveUpDown
               onAddToFavorites={() => toggleFavorite(recordId)}
               onLayout={() => {
                 openLayout();
@@ -137,6 +167,14 @@ export function RecordDragMenu({
               onOpenEditProperty={openEditProperty}
               onOpenIn={(mode) => {
                 openRecordIn(recordId, mode);
+                finish();
+              }}
+              onCopyLink={() => {
+                copyRecordLink(recordId);
+                finish();
+              }}
+              onAskToLook={(personId) => {
+                askToLook(recordId, personId);
                 finish();
               }}
               // These open a sub-popover: close ONLY the actions menu (keep this

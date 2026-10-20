@@ -1,5 +1,7 @@
 import type { JSONContent } from "@tiptap/core";
 import { usePersonNames } from "src/hooks/use-person-names";
+import { RowMention } from "src/features/database/components/row-mention/row-mention";
+import { TextWithRowIds } from "src/features/database/components/row-mention/text-with-row-ids";
 
 // Renders a comment body. Handles BOTH formats:
 //   - legacy: a plain string (old comments) → rendered as text
@@ -21,7 +23,11 @@ export function CommentBody({ body }: { body: string }) {
 
   if (!doc) {
     // Legacy plain-text comment.
-    return <span className="comment-body">{body}</span>;
+    return (
+      <span className="comment-body">
+        <TextWithRowIds text={body} />
+      </span>
+    );
   }
 
   return (
@@ -37,7 +43,21 @@ function renderNodes(
 ): React.ReactNode {
   return nodes.map((node, i) => {
     if (node.type === "text") {
-      return <span key={i}>{node.text}</span>;
+      // A row's ID ("BUG-42") in the text links to the row.
+      return (
+        <span key={i}>
+          <TextWithRowIds text={node.text ?? ""} />
+        </span>
+      );
+    }
+    if (node.type === "mention" && node.attrs?.rowId) {
+      return (
+        <RowMention
+          key={i}
+          rowId={node.attrs.rowId as string}
+          label={node.attrs.label as string | undefined}
+        />
+      );
     }
     if (node.type === "mention") {
       const id = node.attrs?.id as string | undefined;

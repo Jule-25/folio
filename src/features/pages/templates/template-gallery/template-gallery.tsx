@@ -76,6 +76,8 @@ function Avatar({
       <img
         src={person.avatarUrl}
         alt={person.name}
+        loading="lazy"
+        decoding="async"
         style={{ ...common, objectFit: "cover" }}
       />
     );

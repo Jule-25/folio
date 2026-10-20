@@ -1,5 +1,6 @@
 .db-board-card{
   opacity: 1;
+  cursor: pointer;
   &[data-view-type="board"]{
     border: 0.3px solid var(--tt-border-color);
     background-color: var(--tt-bg-color);
@@ -43,8 +44,42 @@
     }
   }
 
+    // Notion's gallery card. Light: page colour, hairline ring, soft drop.
+  // Dark: the page lifted 5.5% toward white, a faint ring.
+  &[data-view-type="gallery"] {
+    height: 100% !important;
+    background-color: var(--tt-bg-color);
+    // A real border, inside the card: a 0 0 0 1px shadow ring sits outside
+    // it and was clipped wherever the card touches its scrolling container
+    // (the last row's bottom, the left side of a gallery in a column).
+    border: 1px solid rgba(15, 15, 15, 0.1);
+    box-shadow: 0 2px 4px rgba(15, 15, 15, 0.06);
+    .dark & {
+      background-color: color-mix(in srgb, #fff 5.5%, var(--tt-bg-color));
+      border-color: rgba(255, 255, 255, 0.075);
+      box-shadow: none;
+    }
+   
+    &:hover {
+      background-image: linear-gradient(rgba(55, 53, 47, 0.035), rgba(55, 53, 47, 0.035));
+      .dark & {
+        background-image: linear-gradient(rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.055));
+      }
+    }
 
-  &[data-view-type="gallery"],
+    // Cover: rounded on top like the card, hairline under it. It's an inset
+    // shadow on the cover box, so an image that fills the box paints over it.
+    // It shows only around a fitted image or a gradient, as in Notion.
+    .db-board-card__cover,
+    .db-board-card__placeholder {
+      border-radius: var(--tt-radius-lg) var(--tt-radius-lg) 0 0;
+      box-shadow: inset 0 -1px 0 rgba(55, 53, 47, 0.09);
+      .dark & {
+        box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.094);
+      }
+    }
+  }
+
   &[data-view-type="calendar"]{
     background-color: var(--tt-gray-light-50);
     box-shadow: var(--tt-shadow-elevated-sm);
@@ -81,5 +116,30 @@
     margin-left: 0;
     margin-right: 0;
     margin-top: 0; 
+  }
+}
+
+// Card layout "Compact" (Layout panel): the properties sit side by side and
+// wrap, instead of one per line.
+.db-board-card__props[data-layout="compact"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 8px;
+  // Pickers (the date's button) set a min-width inline for the table;
+  // side by side they take only their text's width.
+  .tiptap-button {
+    min-width: 0 !important;
+    width: auto !important;
+  }
+  > * {
+    flex: 0 1 auto;
+    width: auto !important;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .db-cell-board-view {
+    margin: 4px 0;
   }
 }

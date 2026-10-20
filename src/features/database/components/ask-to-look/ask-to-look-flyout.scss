@@ -1,0 +1,72 @@
+// "Ask someone to look" — the people list beside the row menu.
+.db-ask-to-look {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 240px;
+  padding: 6px;
+  border-radius: var(--tt-radius-sm);
+
+  .tiptap-input {
+    height: 28px;
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    max-height: 240px;
+    overflow-y: auto;
+  }
+
+  &__person {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 5px 6px;
+    border: 0;
+    border-radius: var(--tt-radius-xs, 4px);
+    background: none;
+    color: var(--tt-text-primary);
+    font: inherit;
+    font-size: 14px;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      background: color-mix(in srgb, var(--tt-text-primary) 6%, transparent);
+      outline: none;
+    }
+
+    img,
+    .db-ask-to-look__initial {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+  }
+
+  &__initial {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    background: color-mix(in srgb, var(--tt-text-primary) 12%, transparent);
+  }
+
+  &__name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__empty {
+    padding: 6px;
+    font-size: 13px;
+    color: var(--tt-text-secondary);
+  }
+}

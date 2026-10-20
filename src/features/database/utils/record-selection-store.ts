@@ -6,6 +6,9 @@ const EMPTY: string[] = [];
 
 let selection: SelectionMap = {};
 let hoveredRecordId: string | null = null;
+// The database the hovered row belongs to (the row menu reads that
+// database's actions; a page can hold several).
+let hoveredDatabaseId: string | null = null;
 
 const listeners = new Set<() => void>();
 
@@ -29,7 +32,7 @@ export const recordSelection = {
 
 export const recordSelection = {
   // ── Hover (published by the drag handle) ─────────────────────────────
-  setHovered(recordId: string | null) {
+  setHovered(recordId: string | null, databaseId: string | null = null) {
     // Clearing is deferred: the checkbox is portaled outside the row, so moving
     // onto it momentarily reads as "left the row". A short grace period stops
     // that from unmounting the element the pointer is travelling toward.
@@ -39,6 +42,7 @@ export const recordSelection = {
       hoverClearTimer = setTimeout(() => {
         hoverClearTimer = null;
         hoveredRecordId = null;
+        hoveredDatabaseId = null;
         emit();
       }, 200);
       return;
@@ -50,12 +54,18 @@ export const recordSelection = {
       hoverClearTimer = null;
     }
 
-    if (hoveredRecordId === recordId) return;
+    if (hoveredRecordId === recordId && hoveredDatabaseId === databaseId) {
+      return;
+    }
     hoveredRecordId = recordId;
+    hoveredDatabaseId = databaseId;
     emit();
   },
   getHovered() {
     return hoveredRecordId;
+  },
+  getHoveredDatabase() {
+    return hoveredDatabaseId;
   },
 
   // ── Selection bookkeeping ────────────────────────────────────────────

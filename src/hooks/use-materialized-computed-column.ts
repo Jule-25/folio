@@ -12,6 +12,7 @@ import { patchDataSource, fetchDataSource } from "../api/data-sources";
 import { patchPage, fetchPages } from "../api/pages";
 import { computeRollup } from "../lib/compute-rollup";
 import { resolveRecordFormulas } from "src/lib/resolve-records-formula";
+import { loadFormulaEngine } from "src/features/database/components/formula-editor/formula-engine";
 
 // Convert a COMPUTED column (rollup/formula) to a scalar, snapshotting the
 // currently-displayed values into real stored cells.
@@ -57,6 +58,7 @@ export function useMaterializeComputedColumn() {
           }) as CellValue;
         }
       } else {
+        await loadFormulaEngine();
         const resolved = resolveRecordFormulas(rows, source.properties);
         for (const r of resolved)
           snapshot[r.id] = (r.values?.[propertyId] ?? null) as CellValue;
@@ -120,6 +122,7 @@ export function useMaterializeComputedColumn() {
             }) as CellValue;
           }
         } else if (cachedProp.config.type === "formula") {
+          await loadFormulaEngine();
           const resolved = resolveRecordFormulas(rows, cachedSource.properties);
           for (const r of resolved)
             snapshot[r.id] = (r.values?.[propertyId] ?? null) as CellValue;

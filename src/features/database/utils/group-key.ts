@@ -159,6 +159,7 @@ export function canWriteGroupValue(prop: DatabaseProperty): boolean {
     t === "edited_time" ||
     t === "created_by" ||
     t === "edited_by" ||
+    t === "unique_id" ||
     t === "title"
   ) {
     return false;

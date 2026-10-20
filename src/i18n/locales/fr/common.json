@@ -31,7 +31,8 @@
     "open": "Rechercher dans les pages",
     "close": "Fermer la recherche",
     "hint": "Tape pour rechercher dans tes pages",
-    "clear": "Effacer"
+    "clear": "Effacer",
+    "openPalette": "Ouvrir la palette de recherche"
   },
   "chat": {
     "outbox": {
@@ -375,6 +376,7 @@
   "inbox.kind.user-mention": "Mention",
   "inbox.kind.comment-mention": "Mention dans un commentaire",
   "inbox.kind.chat-mention": "Mention dans le chat",
+  "inbox.kind.row-look": "Ligne à regarder",
   "inbox.kind.date-due": "Rappel",
   "inbox.kind.date-overdue": "En retard",
   "inbox.kind.backlink": "Lien vers votre page",
@@ -398,7 +400,10 @@
     "personalSpace": "Espace de {{name}}",
     "pinned": "Épinglés",
     "pin": "Épingler dans l'espace d'équipe",
-    "unpin": "Désépingler"
+    "unpin": "Désépingler",
+    "empty": {
+      "add": "Ajouter une page"
+    }
   },
   "library": {
     "title": "Bibliothèque",
@@ -429,19 +434,23 @@
     "templatePlaceholder": "Rechercher des modèles...",
     "noResults": "Aucun résultat pour « {{query}} »",
     "noPages": "Aucune page pour le moment",
+    "byId": "Lignes par ID",
     "today": "Aujourd'hui",
-    "past": "Plus tôt",
+    "yesterday": "Hier",
+    "pastWeek": "Semaine passée",
+    "past30Days": "30 derniers jours",
+    "older": "Plus ancien",
+    "togglePreview": "Afficher ou masquer l’aperçu",
     "openPage": "Ouvrir la page",
     "previewEmpty": "Sélectionnez un résultat pour l'aperçu.",
     "noContent": "Aucun contenu pour le moment",
     "hintSelect": "Sélectionner",
     "hintOpen": "Ouvrir",
-    "hintOpenNewWindow": "Ouvrir dans une nouvelle fenêtre",
     "filters": {
-      "titlesOnly": "Rechercher uniquement les titres",
+      "titlesOnly": "Titre seulement",
       "createdBy": "Créé par",
       "teamspace": "Espace d'équipe",
-      "inPage": "Dans la page",
+      "inPage": "Dans",
       "date": "Date"
     }
   },
@@ -817,12 +826,6 @@
       "blocks": "Écrire avec des blocs",
       "databases": "Tout organiser avec les bases de données",
       "collaborate": "Travailler ensemble : commentaires, suggestions et salons"
-    },
-    "search": {
-      "label": "Rechercher ou créer une page",
-      "short": "Chercher ou créer une page",
-      "placeholder": "Cherchez une page ou créez-en une",
-      "create": "Créer « {{title}} »"
     },
     "actions": {
       "template": "Utiliser un modèle",
@@ -1221,9 +1224,16 @@
     "sections": {
       "dates": "Dates",
       "pages": "Pages",
-      "people": "Personnes"
+      "people": "Personnes",
+      "rows": "Lignes"
     },
     "noResults": "Aucun résultat"
+  },
+  "rowMention": {
+    "in": "dans {{name}}",
+    "open": "Cliquer pour ouvrir",
+    "unavailable": "Supprimée ou inaccessible",
+    "untitled": "Sans titre"
   },
   "pageLink": {
     "deleted": "Page supprimée",
@@ -1321,6 +1331,23 @@
       "deleteView": "Supprimer la vue",
       "deleteConfirm": "Supprimer cette vue ?"
     },
+    "uniqueId": {
+      "prefix": "Préfixe d'ID",
+      "prefixPlaceholder": "Saisir un préfixe",
+      "prefixClash": "« {{name}} » utilise déjà {{prefix}} : un ID comme {{prefix}}-1 désignerait deux lignes."
+    },
+    "askToLook": {
+      "label": "Demander à quelqu'un de regarder",
+      "search": "Rechercher une personne…",
+      "nobody": "Personne à qui demander",
+      "someone": "Quelqu'un",
+      "notifTitle": "{{who}} vous demande de regarder une ligne",
+      "sent": "Envoyé à {{name}}"
+    },
+    "rowLink": {
+      "copied": "Lien vers la ligne copié",
+      "failed": "Impossible de copier le lien"
+    },
     "layout": {
       "title": "Dispositions",
       "showDatabaseTitle": "Afficher le titre de la base de données",
@@ -1334,6 +1361,9 @@
       "cardSizeSmall": "Petite",
       "cardSizeMedium": "Moyenne",
       "cardSizeLarge": "Grande",
+      "cardLayout": "Disposition des cartes",
+      "cardLayoutCompact": "Compacte",
+      "cardLayoutList": "Liste",
       "fitImage": "Ajuster l'image",
       "openPagesIn": "Ouvrir les pages dans",
       "showPageIcon": "Afficher l'icône de page",
@@ -1382,7 +1412,9 @@
       "layout": "Disposition",
       "propertyVisibility": "Visibilité des propriétés",
       "openIn": "Ouvrir dans",
-      "noResults": "Aucune action trouvée"
+      "noResults": "Aucune action trouvée",
+      "moveUp": "Monter",
+      "moveDown": "Descendre"
     },
     "person": {
       "me": "Moi",
@@ -1508,7 +1540,12 @@
     },
     "emptyList": "Aucune page pour l’instant",
     "rowsDeleted_one": "{{count}} ligne supprimée",
-    "rowsDeleted_other": "{{count}} lignes supprimées"
+    "rowsDeleted_other": "{{count}} lignes supprimées",
+    "reorder": {
+      "sortedTitle": "Cette vue est triée.",
+      "sortedBody": "Retirer le tri pour ranger les lignes à votre façon ? Elles gardent leur ordre actuel, avec votre déplacement.",
+      "removeSort": "Retirer le tri"
+    }
   },
   "toolbar": {
     "blockquote": "Citation",

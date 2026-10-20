@@ -1,6 +1,11 @@
-import { expect, test } from "vitest";
+import { beforeAll, expect, test } from "vitest";
 import type { DatabaseProperty } from "src/types";
 import { evaluateFormula } from "./formula-evaluator";
+import { loadFormulaEngine } from "./formula-engine";
+
+beforeAll(async () => {
+  await loadFormulaEngine();
+}, 60_000); // mathjs loads on first use; the first run can take a while
 
 const text = (id: string, name: string): DatabaseProperty => ({
   id,

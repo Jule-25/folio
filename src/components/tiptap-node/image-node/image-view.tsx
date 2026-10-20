@@ -231,7 +231,13 @@ function ImageViewInner(props: NodeViewProps) {
         <div style={BAR} />
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column" }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          position: "relative",
+        }}
+      >
         {/* Skeleton occupies the node's box until the bytes land. The <img> is
             always mounted (so it can actually load) but stays out of layout
             until it's ready — swapping display avoids a second request. */}
@@ -244,8 +250,17 @@ function ImageViewInner(props: NodeViewProps) {
           title={props.node.attrs.title ?? undefined}
           onLoad={handleLoad}
           onError={() => setLoaded(true)}
+          loading="lazy"
+          decoding="async"
           style={{
-            display: loaded ? "block" : "none",
+            ...(loaded
+              ? { display: "block" }
+              : {
+                  position: "absolute",
+                  inset: 0,
+                  opacity: 0,
+                  pointerEvents: "none",
+                }),
             width: "100%",
             cursor: props.editor.isEditable ? undefined : "zoom-in",
             height: "auto",

@@ -9,11 +9,16 @@ import { BoardCardCover } from "./board-card-cover";
 import { BoardCardContent } from "./board-card-content";
 import { Cell } from "../components/cells/cell";
 import { BoardCardControls } from "../components/board-card-controls/board-card-controls";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useCurrentEditor } from "@tiptap/react";
 import type { DragStorage } from "../extensions";
 import { normalizeColor } from "../utils/pill-colors";
 import "./board-card-body.scss";
+import { useCardActions } from "../context";
+
+// Gallery cover height per card size. A fitted image is as tall as the cover,
+// so a taller cover is also a wider image.
+const GALLERY_COVER_HEIGHT = { small: 150, medium: 190, large: 230 } as const;
 
 export function BoardCardBody({
   record,
@@ -44,7 +49,18 @@ export function BoardCardBody({
   const [editing, setEditing] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [dragging, setDragging] = useState(false);
+  const [repositioning, setRepositioning] = useState(false);
+  const positionRef = useRef<number | null>(null);
+  const cardActions = useCardActions();
   const { editor } = useCurrentEditor();
+  const fit =
+    view.type === "gallery" || view.type === "board" ? view.coverFit : "cover";
+  const cardLayout =
+    view.type === "gallery" || view.type === "board"
+      ? (view.cardLayout ?? "list")
+      : "list";
+  // Notion offers Reposition only for an image that fills the cover.
+  const canReposition = !!record.cover?.coverImage && fit !== "contain";
 
   if (!recordId) return null;
 
@@ -71,6 +87,11 @@ export function BoardCardBody({
         height: view.type === "board" ? "fit-content" : "100%",
       }}
       onDragStart={(event) => {
+        // Dragging the image moves it inside the cover, not the card.
+        if (repositioning) {
+          event.preventDefault();
+          return;
+        }
         if (!editor) return;
         setDragging(true);
         const storage = editor.storage.boardDrag as DragStorage;
@@ -87,7 +108,28 @@ export function BoardCardBody({
     >
       {cardPreview === "cover" && (
         <>
-          <BoardCardCover page={record} recordId={recordId} height={120} />
+          <BoardCardCover
+            page={record}
+            recordId={recordId}
+            height={
+              view.type === "gallery"
+                ? GALLERY_COVER_HEIGHT[view.cardSize ?? "medium"]
+                : 120
+            }
+            fit={fit}
+            repositioning={repositioning}
+            onPositionChange={(y) => {
+              positionRef.current = y;
+            }}
+            onPositionCommit={() => {
+              if (positionRef.current === null) return;
+              cardActions?.setRecordCoverPosition(
+                recordId,
+                positionRef.current,
+              );
+              positionRef.current = null;
+            }}
+          />
           <BoardCardControls
             record={record}
             onOpenRecord={() => onOpenRecord(recordId)}
@@ -95,6 +137,10 @@ export function BoardCardBody({
             onEnableEdit={() => setEditing(true)}
             menuOpen={menuOpen}
             onMenuOpenChange={setMenuOpen}
+            onReposition={
+              canReposition ? () => setRepositioning((r) => !r) : undefined
+            }
+            repositioning={repositioning}
             color={color}
           />
         </>
@@ -134,6 +180,7 @@ export function BoardCardBody({
       {view.type !== "calendar" && (
         <div
           className="db-board-card__props"
+          data-layout={cardLayout}
           onClick={(e) => e.stopPropagation()}
         >
           {otherProps.map((p) => (

@@ -46,6 +46,7 @@ const allPropertyTypes = [
   "created_by",
   "edited_time",
   "edited_by",
+  "unique_id",
 ] as const satisfies readonly PropertyType[];
 
 export interface AddPropertyPopoverProps {

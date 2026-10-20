@@ -35,6 +35,7 @@ import {
   NewPageStarterExtension,
   RESTRUCTURE_META,
 } from "../new-page-starter/new-page-starter-extension";
+import { useMentionData } from "src/components/tiptap-ui/mention-menu/use-mention-data";
 
 // Exactly the array type useEditorExtensions produces — derived so it can't
 // drift from the real return, whatever member types are in it (one of them
@@ -184,6 +185,8 @@ function EditorInstance({
     // No `content` — Collaboration reads initial content from the Y.Doc,
     // which useCollabDoc has already seeded (or is genuinely empty/new).
   });
+  // What the @ menu offers, ready before its first open.
+  useMentionData(editor);
 
   const { canEditContent, isLoading } = usePageCapabilities(page.id);
   useEffect(() => {

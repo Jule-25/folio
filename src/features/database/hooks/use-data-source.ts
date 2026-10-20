@@ -37,6 +37,12 @@ import { pendingRecordDeletes } from "../utils/pending-record-deletes";
 import { useCurrentPerson } from "src/hooks/use-session";
 import { useCurrentWorkspace } from "src/hooks/use-workspaces";
 import { templateValues } from "../utils/row-templates";
+import { useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "src/lib/queryKeys";
+import {
+  loadFormulaEngine,
+  useFormulaEngineReady,
+} from "../components/formula-editor/formula-engine";
 
 // module scope, outside the hook
 const patchDataSourceFn = ({
@@ -308,18 +314,34 @@ export function useDataSource(
   );
 
   // the ONE hook allowed to write properties[] — layout only (reorder/width/wrap)
+  const qc = useQueryClient();
   const updatePropertiesAsync = useCallback(
     async (properties: DatabaseProperty[]) => {
       const src = sourceRef.current;
       if (!src) throw new Error("No source");
-      return patchSourceAsync({
+      const wasId = new Set(
+        src.properties
+          .filter((p) => p.config.type === "unique_id")
+          .map((p) => p.id),
+      );
+      const result = await patchSourceAsync({
         id: src.id,
         patch: { properties } as Parameters<
           typeof patchSourceAsync
         >[0]["patch"],
       });
+      // A new ID property: the database has just numbered the rows
+      // (migration 045) — fetch them to show it.
+      if (
+        properties.some(
+          (p) => p.config.type === "unique_id" && !wasId.has(p.id),
+        )
+      ) {
+        qc.invalidateQueries({ queryKey: queryKeys.pages.all });
+      }
+      return result;
     },
-    [patchSourceAsync],
+    [patchSourceAsync, qc],
   );
 
   const updateSourceMetaAsync = useCallback(
@@ -489,6 +511,7 @@ export function useDataSource(
   // formulas. Never saved; writes go through the raw rows.
   const { data: allSources } = useDataSources();
   const people = useWorkspacePeople();
+  const formulaReady = useFormulaEngineReady();
   const personName = useMemo(() => {
     const names = new Map(people.map((p) => [p.id, p.name] as const));
     return (id: string) => names.get(id);
@@ -517,8 +540,26 @@ export function useDataSource(
       (allSources as DataSource[] | undefined) ?? [],
       pages,
     );
+    // Formulas wait for mathjs (loaded by the effect below); this re-runs
+    // when it's in.
+    if (!formulaReady) return withRollups;
     return resolveRecordFormulas(withRollups, source.properties, personName);
-  }, [rows, source, allPages, allSources, personName, pendingDeletes]);
+  }, [
+    rows,
+    source,
+    allPages,
+    allSources,
+    personName,
+    pendingDeletes,
+    formulaReady,
+  ]);
+  // Start the mathjs download only when this database has a formula.
+  const hasFormula = !!source?.properties.some(
+    (p) => p.config.type === "formula",
+  );
+  useEffect(() => {
+    if (hasFormula) void loadFormulaEngine();
+  }, [hasFormula]);
 
   return {
     source,

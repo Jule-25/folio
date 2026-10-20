@@ -1,5 +1,5 @@
 import { DynamicIcon } from "src/features/pages/cover/dynamic-icon";
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import type { DatabaseProperty, ID, ConfigOf } from "src/types";
 import { useDatabaseContext } from "../../context/database-context";
 import { useDataSource } from "../../hooks/use-data-source";
@@ -19,6 +19,7 @@ import {
 } from "src/components/tiptap-ui-primitive/card";
 import { Separator } from "src/components/tiptap-ui-primitive/separator";
 import { usePagesBase } from "src/hooks/use-pages";
+import { loadFormulaEngine, useFormulaEngineReady } from "./formula-engine";
 
 interface FormulaEditorProps {
   propertyId: ID;
@@ -57,15 +58,21 @@ export default function FormulaEditor({
 
   const formulaBarRef = useRef<FormulaBarHandle>(null);
 
-  // Validate the current expression (parse-only — see validateFormula). Warns
-  // on malformed syntax without blocking save. Recomputes only when the formula
-  // changes; parsing a short string is cheap.
+  // Opening the editor starts the mathjs download; the check runs once it
+  // has loaded.
+  const formulaReady = useFormulaEngineReady();
+  useEffect(() => {
+    void loadFormulaEngine();
+  }, []);
   const error = useMemo(
-    () => validateFormula(formula, { properties, cellValues: {} }),
-    [formula, properties],
+    () =>
+      formulaReady
+        ? validateFormula(formula, { properties, cellValues: {} })
+        : null,
+    [formula, properties, formulaReady],
   );
 
-  function handleDone() {
+  async function handleDone() {
     const newConfig = {
       type: "formula",
       expression: formula,
@@ -78,6 +85,7 @@ export default function FormulaEditor({
     db.updateProperty(propertyId, { config: newConfig });
     if (!source) return;
 
+    await loadFormulaEngine(); // write real values, not nulls
     resolveFormulaValues(pages ?? [], updatedProperties, setCellValue);
     onDone();
   }

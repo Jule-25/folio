@@ -1,0 +1,110 @@
+// A mention of a database row (row-mention.tsx): an inline chip, and the
+// card shown on hover.
+.row-mention {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  max-width: 100%;
+  padding: 0 4px;
+  border: 0;
+  border-radius: var(--tt-radius-xs, 4px);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+  vertical-align: baseline;
+  cursor: pointer;
+
+  &:hover {
+    background: color-mix(in srgb, var(--tt-text-primary) 6%, transparent);
+  }
+
+  &[data-gone] {
+    color: var(--tt-text-secondary);
+    text-decoration: line-through;
+    cursor: default;
+  }
+
+  .page-icon,
+  .es-page-icon {
+    align-self: center;
+  }
+
+  &__id {
+    flex-shrink: 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.85em;
+    color: var(--tt-text-secondary);
+  }
+
+  &__title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    border-bottom: 1px solid
+      color-mix(in srgb, var(--tt-text-primary) 25%, transparent);
+  }
+}
+
+.row-mention-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 280px;
+  padding: 10px 12px;
+  font-size: 13px;
+
+  &__head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  &__title {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  &__source {
+    color: var(--tt-text-secondary);
+  }
+
+  &__values {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin: 2px 0 0;
+  }
+
+  &__value {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 8px;
+
+    dt {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--tt-text-secondary);
+    }
+
+    dd {
+      margin: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  &__hint {
+    margin-top: 2px;
+    font-size: 12px;
+    color: var(--tt-text-tertiary, var(--tt-text-secondary));
+  }
+}

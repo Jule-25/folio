@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { create, all } from "mathjs";
 import type {
   DatabaseProperty,
   CellValue,
@@ -8,74 +7,7 @@ import type {
   CellValueMap,
   Page,
 } from "src/types";
-
-// ─── mathjs instance ──────────────────────────────────────────────────────────
-
-const math = create(all);
-
-// Override equal/unequal to use strict JS equality so strings work correctly.
-// Ordering comparisons with an empty side are false (an empty date is neither
-// before nor after anything), instead of JS's null → 0.
-const isBlank = (v: unknown) => v === null || v === undefined || v === "";
-math.import(
-  {
-    equal: (a: unknown, b: unknown) => a === b,
-    unequal: (a: unknown, b: unknown) => a !== b,
-    smaller: (a: unknown, b: unknown) =>
-      !isBlank(a) && !isBlank(b) && (a as number) < (b as number),
-    larger: (a: unknown, b: unknown) =>
-      !isBlank(a) && !isBlank(b) && (a as number) > (b as number),
-    smallerEq: (a: unknown, b: unknown) =>
-      !isBlank(a) && !isBlank(b) && (a as number) <= (b as number),
-    largerEq: (a: unknown, b: unknown) =>
-      !isBlank(a) && !isBlank(b) && (a as number) >= (b as number),
-  },
-  { override: true },
-);
-
-// "a" + "b" joins text, like Notion ("Total: " + 3 → "Total: 3"). Numbers,
-// matrices etc. keep mathjs's own add (typed signatures merge).
-math.import({
-  add: math.typed("add", {
-    "string, string": (a: string, b: string) => a + b,
-    "string, number": (a: string, b: number) => a + String(b),
-    "number, string": (a: number, b: string) => String(a) + b,
-    "string, boolean": (a: string, b: boolean) => a + String(b),
-    "boolean, string": (a: boolean, b: string) => String(a) + b,
-    // An empty value joins as nothing: "Due " + prop("Due") on an empty date.
-    "string, null": (a: string) => a,
-    "null, string": (_a: null, b: string) => b,
-  }),
-});
-
-// Lazy logic: only the branch that's taken is evaluated, so
-// if(empty(prop("Due")), "", dateBetween(prop("Due"), now(), "days")) works
-// on rows without a date. rawArgs functions get the unevaluated argument
-// nodes; they must live on the math instance (scope functions are eager).
-type RawNode = { compile: () => { evaluate: (scope: unknown) => unknown } };
-type RawFn = ((args: RawNode[], m: unknown, scope: unknown) => unknown) & {
-  rawArgs?: boolean;
-};
-const lazy = (fn: RawFn): RawFn => {
-  fn.rawArgs = true;
-  return fn;
-};
-const run = (node: RawNode | undefined, scope: unknown) =>
-  node ? node.compile().evaluate(scope) : null;
-
-math.import({
-  _if: lazy((args, _m, scope) =>
-    run(args[0], scope) ? run(args[1], scope) : run(args[2], scope),
-  ),
-  ifs: lazy((args, _m, scope) => {
-    for (let i = 0; i + 1 < args.length; i += 2) {
-      if (run(args[i], scope)) return run(args[i + 1], scope);
-    }
-    return args.length % 2 !== 0 ? run(args[args.length - 1], scope) : null;
-  }),
-  _and: lazy((args, _m, scope) => args.every((a) => Boolean(run(a, scope)))),
-  _or: lazy((args, _m, scope) => args.some((a) => Boolean(run(a, scope)))),
-});
+import { getFormulaEngine, loadFormulaEngine } from "./formula-engine";
 
 // ─── expression pre-processing ────────────────────────────────────────────────
 
@@ -182,6 +114,7 @@ function cellToFormulaValue(
       return value as string;
 
     case "number":
+    case "unique_id": // its number (the prefix is display only)
       return (value as number) ?? null;
 
     case "checkbox":
@@ -465,7 +398,13 @@ function evaluateFormulaCore(
       ctx.personName,
     );
   });
-
+  // mathjs is downloaded on first use. Until it's in, there's no value yet;
+  // components re-render once it lands (useFormulaEngineReady).
+  const math = getFormulaEngine();
+  if (!math) {
+    void loadFormulaEngine();
+    return null;
+  }
   const substituted = preprocessExpression(
     substitutePropCalls(expression, ctx.properties),
   );
@@ -506,6 +445,11 @@ export function validateFormula(
   ctx: EvaluationContext,
 ): string | null {
   if (!expression?.trim()) return null; // empty is not an error
+  const math = getFormulaEngine();
+  if (!math) {
+    void loadFormulaEngine();
+    return null; // can't tell yet; the editor re-checks once it's loaded
+  }
   try {
     // Mirror the transforms evaluation applies, then parse (no evaluate).
     const substituted = preprocessExpression(

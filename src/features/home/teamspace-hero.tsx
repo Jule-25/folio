@@ -107,6 +107,8 @@ export function TeamspaceHero({
                   <img
                     key={person.id}
                     className="ts-hero__face"
+                    loading="lazy"
+                    decoding="async"
                     src={person.avatarUrl}
                     alt=""
                   />

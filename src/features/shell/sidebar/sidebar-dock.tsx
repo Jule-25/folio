@@ -5,18 +5,14 @@ import {
   SbChatsIcon,
   SbHomeIcon,
   SbInboxIcon,
-  SbSearchIcon,
 } from "src/components/tiptap-icons/sidebar-icons";
-import { TbX } from "src/components/tiptap-icons/tabler-icons";
 import { useNotificationState } from "src/features/inbox/notification/notification-context";
 import { useMyWorkspaceInvites } from "src/hooks/use-workspace-members";
 import { useMyInvites } from "src/hooks/use-teamspace-members";
 import { useUnreadCounts } from "src/hooks/use-chat";
 import { spaceHomePath, useCurrentSpace } from "src/hooks/use-current-space";
 import { useIsMobile } from "src/hooks/use-breakpoint";
-import { isMac } from "src/lib/tiptap-utils";
 import { useSpaceAccent } from "../space-accent/space-accent";
-import { requestFindFocus } from "src/lib/find-store";
 import {
   Tooltip,
   TooltipContent,
@@ -66,10 +62,10 @@ function DockTab({
   );
 }
 
-// The dock at the foot of the sidebar: Home · Inbox · Chats · Search, then
-// your account. Each tab swaps what the sidebar body shows; Inbox and Chats
-// carry red unread badges. Home again while already on Home goes to the
-// space's home page. Search opens the find row at the top (SidebarFind).
+// The dock at the foot of the sidebar: Home · Inbox · Chats, then your
+// account. Each tab swaps what the sidebar body shows; Inbox and Chats carry
+// red unread badges. Home again while already on Home goes to the space's
+// home page. Searching is the search bar at the top (SidebarFind).
 export const SidebarDock = memo(() => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -90,8 +86,6 @@ export const SidebarDock = memo(() => {
     [chatUnread],
   );
 
-  const findShortcut = isMac() ? "⌘⇧F" : "Ctrl+Shift+F";
-
   const goHome = () => {
     if (sidebarView === "pages") {
       const teamspaceId = space.kind === "teamspace" ? space.id : null;
@@ -100,11 +94,6 @@ export const SidebarDock = memo(() => {
       return;
     }
     setSidebarView("pages");
-  };
-
-  const openSearch = () => {
-    setSidebarView("search");
-    requestAnimationFrame(() => requestFindFocus());
   };
 
   return (
@@ -134,44 +123,17 @@ export const SidebarDock = memo(() => {
         count={chatTotal}
         onClick={() => setSidebarView("chats")}
       />
-      <DockTab
-        icon={<SbSearchIcon {...DOCK_ICON} />}
-        label={`${t("find.open", "Search in pages")} (${findShortcut})`}
-        active={sidebarView === "search"}
-        onClick={openSearch}
-      />
       <SidebarAccount compact />
     </div>
   );
 });
 SidebarDock.displayName = "SidebarDock";
 
-// The find-in-pages row under the top row, shown while searching. It stays
-// mounted (hidden) so Ctrl/⌘+Shift+F can focus it at once; × or Esc closes.
-export const SidebarFind = memo(() => {
-  const { t } = useTranslation();
-  const { sidebarView, setSidebarView } = useEditorLayout();
-  const isSearching = sidebarView === "search";
-
-  return (
-    <div
-      className={`sb-find${isSearching ? " is-open" : ""}`}
-      aria-hidden={!isSearching}
-    >
-      <div className="sb-find__inner">
-        <SidebarSearchInput />
-        <button
-          type="button"
-          className="sb-find__close"
-          aria-label={t("find.close", "Close search")}
-          title={t("find.close", "Close search")}
-          tabIndex={isSearching ? 0 : -1}
-          onClick={() => setSidebarView("pages")}
-        >
-          <TbX size={16} strokeWidth={1.7} />
-        </button>
-      </div>
-    </div>
-  );
-});
+// The search bar under the top row: find in pages, and the badge that opens
+// the search palette (sidebar-search-input).
+export const SidebarFind = memo(() => (
+  <div className="sb-find">
+    <SidebarSearchInput />
+  </div>
+));
 SidebarFind.displayName = "SidebarFind";

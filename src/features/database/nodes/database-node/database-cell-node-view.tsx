@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { NodeViewWrapper } from "@tiptap/react";
 import type { NodeViewProps } from "@tiptap/core";
 import { useDatabaseBridgeData } from "../../hooks/use-database-bridge-data";
@@ -7,6 +7,8 @@ import type { CellValue, DatabaseProperty, ID } from "src/types";
 import { CellOverlay } from "../../components/cell-overlay";
 import { isCopiableType } from "../database-board-node-view/utils";
 import { useOpenRecord } from "../../hooks/use-open-record";
+import { useRecordNearScreen } from "../../utils/record-visibility";
+import { formatUniqueId } from "src/lib/unique-id";
 
 const EMPTY_PROPERTIES: DatabaseProperty[] = [];
 const EMPTY_COLUMN_VALUES: CellValue[] = [];
@@ -17,6 +19,7 @@ export default function DatabaseCellNodeView({ node, editor }: NodeViewProps) {
   const databaseId = node.attrs.databaseId as string | null;
 
   const data = useDatabaseBridgeData(editor, databaseId);
+  const nearScreen = useRecordNearScreen(databaseId, recordId);
 
   const properties = data?.properties ?? EMPTY_PROPERTIES;
   const property = useMemo(
@@ -65,8 +68,16 @@ export default function DatabaseCellNodeView({ node, editor }: NodeViewProps) {
   const isListView = data?.view?.type === "list";
   const isListTitle = isTitle && isListView;
 
+  // `editing`: the title has focus (the button shows Open).
+  // `editRequested`: the Edit button was pressed — the title focuses itself,
+  // caret at the end (TitleCellDisplay's autoEdit). Not set when the title is
+  // clicked directly, so a click keeps its caret where it landed.
   const [editing, setEditing] = useState(false);
-  const titleRef = useRef<HTMLDivElement | null>(null);
+  const [editRequested, setEditRequested] = useState(false);
+  const onTitleEditingChange = useCallback((next: boolean) => {
+    setEditing(next);
+    if (!next) setEditRequested(false);
+  }, []);
 
   const view = data?.view;
   const openRecord = useOpenRecord(view);
@@ -76,24 +87,27 @@ export default function DatabaseCellNodeView({ node, editor }: NodeViewProps) {
     openRecord(recordId);
   };
 
-  const focusTitleEnd = () => {
-    titleRef.current?.focus();
-    const sel = window.getSelection();
-    if (sel && titleRef.current) {
-      const r = document.createRange();
-      r.selectNodeContents(titleRef.current);
-      r.collapse(false);
-      sel.removeAllRanges();
-      sel.addRange(r);
-    }
-  };
+  // Only a table or a list shows these cells. Board, gallery, calendar and
+  // timeline records draw their own content (BoardCardBody, the bars) and
+  // never mount the cells' DOM, so rendering a Cell there was pure waste.
+  const shownAsCells =
+    data?.view?.type === "table" || data?.view?.type === "list";
 
-  if (!data || !property || !recordId || !propertyId) {
+  // An empty, row-height cell: no data yet, a view that doesn't show cells,
+  // or a row that hasn't come near the screen (utils/record-visibility.ts).
+  if (
+    !data ||
+    !property ||
+    !recordId ||
+    !propertyId ||
+    !shownAsCells ||
+    !nearScreen
+  ) {
     return (
       <NodeViewWrapper
         as="div"
         data-type="database-cell"
-        className="db-node-cell"
+        className={`db-node-cell${data && property ? " db-node-cell--pending" : ""}`}
         style={viewStyle}
         contentEditable={false}
       />
@@ -128,9 +142,8 @@ export default function DatabaseCellNodeView({ node, editor }: NodeViewProps) {
           unwrapped={unwrapped}
           {...(isListTitle
             ? {
-                titleVariant: "inline" as const,
-                onTitleEditingChange: setEditing,
-                titleEditRef: titleRef,
+                autoEdit: editRequested,
+                onEditingChange: onTitleEditingChange,
               }
             : {})}
         />
@@ -140,10 +153,23 @@ export default function DatabaseCellNodeView({ node, editor }: NodeViewProps) {
         <CellOverlay
           viewType={data.view?.type}
           copiable={!isTitle && isCopiableType(property.config.type)}
-          getCopyText={() => (value == null ? "" : String(value))}
+          getCopyText={() =>
+            property.config.type === "unique_id"
+              ? formatUniqueId(value, property.config)
+              : value == null
+                ? ""
+                : String(value)
+          }
           onOpen={isTitle ? handleOpen : undefined}
           editing={isListTitle ? editing : undefined}
-          onEdit={isListTitle ? focusTitleEnd : undefined}
+          onEdit={
+            isListTitle
+              ? () => {
+                  setEditing(true); // Open shows at once, focus or not
+                  setEditRequested(true); // the title focuses, caret at the end
+                }
+              : undefined
+          }
         />
       )}
     </NodeViewWrapper>

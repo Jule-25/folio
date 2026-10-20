@@ -20,6 +20,7 @@ import { createPortal } from "react-dom";
 import { recordSelection } from "src/features/database/utils/record-selection-store";
 import { RecordDragMenu } from "src/features/database/components/record-drag-menu";
 import { readDatabaseData } from "src/features/database/utils/database-bridge";
+import type { DragStorage } from "src/features/database/extensions";
 import { GripVerticalIcon } from "src/components/tiptap-icons";
 import { useTranslation } from "react-i18next";
 import { insertBlockWithMenu } from "./insert-block";
@@ -479,6 +480,9 @@ export function DragHandle({ editor }: { editor: Editor | null }) {
           node.type.name === "databaseRecord"
             ? ((node.attrs.recordId as string | null) ?? null)
             : null,
+          node.type.name === "databaseRecord"
+            ? ((node.attrs.databaseId as string | null) ?? null)
+            : null,
         );
 
         // Only update refs/state when values actually change to avoid
@@ -494,6 +498,19 @@ export function DragHandle({ editor }: { editor: Editor | null }) {
       }}
       onElementDragStart={() => {
         isDraggingRef.current = true;
+
+        // A table / list row: the drag reorders the rows (board-drag.ts
+        // reads draggingId and handles the drop) instead of moving the
+        // record node around the page.
+        if (targetRef.current === "Record") {
+          const node = editor.state.doc.nodeAt(posRef.current);
+          const recordId = node?.attrs.recordId as string | null | undefined;
+          if (recordId) {
+            (editor.storage.boardDrag as DragStorage).draggingId = recordId;
+            document.body.classList.add("db-row-dragging");
+          }
+        }
+
         const range = multiRangeRef.current;
         if (range) {
           // Runs after the library's own dragstart handler (this listener is
@@ -518,6 +535,7 @@ export function DragHandle({ editor }: { editor: Editor | null }) {
       }}
       onElementDragEnd={() => {
         isDraggingRef.current = false;
+        document.body.classList.remove("db-row-dragging");
         editor.view.dom.classList.remove("is-dragging");
 
         // Broadcast drag end so the column drop plugin can clear globalDragNodePos

@@ -53,6 +53,14 @@ interface DatabaseContextValue {
   onUpdateView: (patch: Partial<DatabaseView>) => void;
 
   visibleProperties: DatabaseProperty[];
+
+  /** Table / list: put a row just before another (null = at the end).
+   *  In a sorted view it asks to remove the sort first. */
+  reorderRecord: (recordId: ID, beforeRecordId: ID | null) => void;
+  /** Move up (-1) / Move down (+1), within the row's group. */
+  moveRecordBy: (recordId: ID, delta: -1 | 1) => void;
+  /** Whether the row can move that way (not already first / last). */
+  canMoveRecord: (recordId: ID, delta: -1 | 1) => boolean;
 }
 
 // ── Context ────────────────────────────────────────────────────────────────

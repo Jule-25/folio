@@ -7,10 +7,9 @@ import { Plus } from "lucide-react";
 import { Button } from "src/components/tiptap-ui-primitive/button";
 import type { DragStorage } from "../../extensions";
 import {
-  beforeGalleryCardAtPoint,
+  galleryDropTarget,
   hideGalleryDropIndicator,
   showGalleryDropIndicator,
-  showGalleryEndIndicator,
 } from "../../extensions/utils";
 
 const CARD_SIZE_WIDTH: Record<"small" | "medium" | "large", number> = {
@@ -29,21 +28,23 @@ function DatabaseGalleryNodeViewImpl() {
   const EDGE = 60;
   const SPEED = 14;
   const scrollRAF = useRef<number | null>(null);
+  const rootRef = useRef<HTMLDivElement | null>(null);
 
-  const autoScroll = useCallback((x: number, y: number) => {
-    const scroller = document.querySelector<HTMLElement>(".db-node");
+  // Dragging near the top or bottom of the page scrolls it. The page scrolls
+  // in .simple-editor-main, not the window (window.scrollBy did nothing), so
+  // a card couldn't be dragged to a spot below the screen.
+  const autoScroll = useCallback((y: number) => {
+    const scroller = rootRef.current?.closest<HTMLElement>(
+      ".simple-editor-main",
+    );
     if (!scroller) return;
 
     const r = scroller.getBoundingClientRect();
-    let dx = 0;
-    if (x < r.left + EDGE) dx = -SPEED;
-    else if (x > r.right - EDGE) dx = SPEED;
-
     let dy = 0;
-    if (y < EDGE) dy = -SPEED;
-    else if (y > window.innerHeight - EDGE) dy = SPEED;
+    if (y < r.top + EDGE) dy = -SPEED;
+    else if (y > r.bottom - EDGE) dy = SPEED;
 
-    if (dx === 0 && dy === 0) {
+    if (dy === 0) {
       if (scrollRAF.current) {
         cancelAnimationFrame(scrollRAF.current);
         scrollRAF.current = null;
@@ -53,8 +54,7 @@ function DatabaseGalleryNodeViewImpl() {
     if (scrollRAF.current) return;
 
     const step = () => {
-      scroller.scrollLeft += dx;
-      if (dy !== 0) window.scrollBy(0, dy);
+      scroller.scrollTop += dy;
       scrollRAF.current = requestAnimationFrame(step);
     };
     scrollRAF.current = requestAnimationFrame(step);
@@ -67,32 +67,32 @@ function DatabaseGalleryNodeViewImpl() {
     }
   }, []);
 
+  // Keep scrolling while the pointer is anywhere over the page (it may leave
+  // the gallery to reach the edge). This database's own scroller, not the
+  // first .db-node on the page.
   useEffect(() => {
-    const scroller = document.querySelector<HTMLElement>(".db-node");
+    const scroller = rootRef.current?.closest<HTMLElement>(
+      ".simple-editor-main",
+    );
     if (!scroller) return;
     const onOver = (e: DragEvent) => {
-      const storage = editor?.storage.boardDrag as DragStorage;
-      if (!storage.draggingId) return;
-      e.preventDefault();
-      autoScroll(e.clientX, e.clientY);
+      const storage = editor?.storage.boardDrag as DragStorage | undefined;
+      if (!storage?.draggingId) return;
+      autoScroll(e.clientY);
     };
     scroller.addEventListener("dragover", onOver);
-    return () => scroller.removeEventListener("dragover", onOver);
-  }, [editor, autoScroll]);
+    return () => {
+      scroller.removeEventListener("dragover", onOver);
+      stopAutoScroll();
+    };
+  }, [editor, autoScroll, stopAutoScroll]);
 
   return (
     <div
-      className="db-board-grid"
+      ref={rootRef}
+      className="db-board-grid db-gallery"
       data-database-id={attrs.id}
-      style={{
-        display: "grid",
-        width: "var(--db-editor-width)",
-        gridTemplateColumns: `repeat(auto-fill, minmax(${colWidth}px, 1fr))`,
-        alignItems: "start",
-        gap: "8px",
-        position: "relative",
-        marginTop: 5,
-      }}
+      style={{ "--db-gallery-min": `${colWidth}px` } as React.CSSProperties}
       onDragOver={(event) => {
         if (!editor) return;
 
@@ -101,32 +101,16 @@ function DatabaseGalleryNodeViewImpl() {
         if (!storage.draggingId) return;
 
         event.preventDefault();
-
-        autoScroll(event.clientX, event.clientY);
-
+        // The same calculation the drop uses (board-drag.ts), so the line
+        // always shows where the card will land.
         const gallery = event.currentTarget;
-        const draggingId = storage.draggingId;
-
-        const beforeRecordId = beforeGalleryCardAtPoint(
+        const target = galleryDropTarget(
           gallery,
           event.clientX,
           event.clientY,
-          draggingId,
+          storage.draggingId,
         );
-
-        if (beforeRecordId) {
-          const card = gallery.querySelector<HTMLElement>(
-            `[data-type="database-record"][data-record-id="${beforeRecordId}"]`,
-          );
-
-          if (card) {
-            showGalleryDropIndicator(gallery, card);
-            return;
-          }
-        }
-
-        // `null` means we're dropping after the final visual card.
-        showGalleryEndIndicator(gallery);
+        showGalleryDropIndicator(gallery, target.card, target.side);
       }}
       onDragLeave={(event) => {
         const gallery = event.currentTarget as HTMLElement;
@@ -156,13 +140,12 @@ function DatabaseGalleryNodeViewImpl() {
         className="db-new-card--gallery"
         contentEditable={false}
         style={{
-          margin: "8px 10px",
           order: sortedRecords.length + 1,
         }}
         onClick={onNewRecord}
       >
         <Plus className="tiptap-button-icon" />
-        <span className="tiptap-button-text">New Page</span>
+        <span className="tiptap-button-text">New page</span>
       </Button>
     </div>
   );

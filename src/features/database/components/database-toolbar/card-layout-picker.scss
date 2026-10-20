@@ -1,0 +1,96 @@
+// The Layout panel's "Card layout" choice (card-layout-picker.tsx): a tinted
+// box with two drawings of a card, the chosen one outlined in the brand
+// colour.
+.db-card-layout {
+  margin: 6px 0 4px;
+  padding: 10px 12px 12px;
+  border-radius: var(--tt-radius-md, 8px);
+  background: color-mix(in srgb, var(--tt-text-primary) 4%, transparent);
+
+  &__label {
+    margin-bottom: 10px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--tt-text-secondary);
+  }
+
+  &__options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  &__option {
+    --ink: color-mix(in srgb, var(--tt-text-primary) 22%, transparent);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: 14px;
+    color: var(--tt-text-secondary);
+    cursor: pointer;
+
+    &[data-selected] {
+      --ink: color-mix(in srgb, var(--tt-brand-color-400) 55%, transparent);
+      color: var(--tt-text-primary);
+      font-weight: 600;
+    }
+  }
+
+  &__preview {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 6px;
+    width: 100%;
+    height: 72px;
+    padding: 10px;
+    overflow: hidden;
+    border: 1px solid var(--tt-border-color);
+    border-radius: var(--tt-radius-md, 8px);
+    background: var(--tt-card-bg-color);
+    transition: border-color 0.12s ease;
+
+    .db-card-layout__option:hover & {
+      border-color: color-mix(in srgb, var(--tt-text-primary) 25%, transparent);
+    }
+
+    .db-card-layout__option[data-selected] & {
+      border-color: var(--tt-brand-color-400);
+      box-shadow: 0 0 0 1px var(--tt-brand-color-400);
+    }
+  }
+
+  // The cover, on the List drawing.
+  &__band {
+    position: absolute;
+    inset: 0 0 auto;
+    height: 24px;
+    background: color-mix(in srgb, var(--ink) 50%, transparent);
+  }
+
+  &__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--ink);
+  }
+
+  &__bars {
+    display: flex;
+    gap: 4px;
+  }
+
+  &__bar {
+    width: 20px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--ink);
+  }
+}

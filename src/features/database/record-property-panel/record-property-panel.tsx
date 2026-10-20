@@ -31,6 +31,8 @@ import "./record-property-panel.scss";
 import i18n from "src/i18n/config";
 import { useTranslation } from "react-i18next";
 import { formatRelativeTime } from "src/utils/format-relative";
+import { formatUniqueId } from "src/lib/unique-id";
+import { useFormulaEngineReady } from "../components/formula-editor/formula-engine";
 
 export function RecordPropertyPanel({ page }: { page: Page }) {
   const { data: source } = useDataSource(page.sourceId);
@@ -88,6 +90,8 @@ function PropertyRow({
   const iconName = PROPERTY_TYPE_ICONS[prop.config.type];
   const { t } = useTranslation();
   const people = useWorkspacePeople();
+
+  useFormulaEngineReady();
 
   // Created by / Edited by: one person, resolved from the page itself.
   const personRef = (id: string | null | undefined) => {
@@ -232,6 +236,13 @@ function PropertyRow({
 
       case "edited_by":
         return personRef(page.editedBy ?? page.ownerId);
+
+      case "unique_id":
+        return (
+          <span className="record-prop-panel__value record-prop-panel__value--text">
+            {formatUniqueId(value, prop.config)}
+          </span>
+        );
 
       // Both sides of a two-way relation are editable here too.
       case "relation":

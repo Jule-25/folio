@@ -90,7 +90,7 @@ export function useMeasureViewDims(
           ),
         );
       } else if (viewType === "gallery") {
-        const cards = scope.querySelectorAll(".db-gallery__card");
+        const cards = scope.querySelectorAll(".db-gallery .db-board-card");
         next.rows = cards.length;
       } else {
         // calendar / timeline — no reliable selector yet; leave dims as default

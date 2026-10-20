@@ -30,6 +30,7 @@ export const PROPERTY_TYPE_ICONS: Record<PropertyType, string> = {
   created_by: "person_add",
   edited_time: "schedule",
   edited_by: "edit",
+  unique_id: "fingerprint",
 };
 
 // ─── default configs ──────────────────────────────────────────────────────────
@@ -102,6 +103,7 @@ const DEFAULT_CONFIGS: Record<PropertyType, PropertyConfig> = {
   created_by: { type: "created_by" },
   edited_time: { type: "edited_time" },
   edited_by: { type: "edited_by" },
+  unique_id: { type: "unique_id" },
 };
 
 // ─── meta list ────────────────────────────────────────────────────────────────
@@ -258,6 +260,14 @@ export const PROPERTY_TYPE_META: PropertyTypeMeta[] = [
     defaultConfig: DEFAULT_CONFIGS.edited_by,
     readOnly: true,
     filterOperators: OPERATORS_FOR_TYPE.edited_by,
+  },
+  {
+    type: "unique_id",
+    label: "ID",
+    icon: "fingerprint",
+    defaultConfig: DEFAULT_CONFIGS.unique_id,
+    readOnly: true,
+    filterOperators: OPERATORS_FOR_TYPE.unique_id,
   },
 ];
 

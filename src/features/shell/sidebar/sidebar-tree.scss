@@ -26,27 +26,47 @@
     display: flex;
     flex-direction: column;
 
-    // A top-level page's pages (design 48): set in past its icon, hanging off
-    // a hairline under the icon's centre.
-    &--top-level {
-      position: relative;
-      padding-left: 32px;
+    // A top-level page's pages are indented like any other level
+    // (TREE_INDENT in sidebar-tree.tsx), with no extra set-in, as in Notion.
+  }
 
-      &::before {
-        content: "";
-        position: absolute;
-        left: 40px; // the tile's centre
-        top: 3px;
-        bottom: 3px;
-        width: 1px;
-        background: var(--sb-guide-color, rgba(55, 53, 47, 0.12));
-        pointer-events: none;
+  // A section with no pages: one muted "Add a page" row, the size of a page
+  // row (page-item.scss: 6px in, a 20px icon slot, 6px to the text).
+  &__add-row {
+    all: unset;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 30px;
+    padding: 0 6px;
+    border-radius: var(--tt-radius-md, 6px);
+    font-size: 14px;
+    color: var(--tt-text-secondary);
+    cursor: pointer;
+    user-select: none;
 
-        .dark & {
-          background: var(--sb-guide-color, rgba(255, 255, 255, 0.09));
-        }
-      }
+    &:hover {
+      background: var(
+        --sb-hover-bg,
+        color-mix(in srgb, var(--tt-text-primary) 6%, transparent)
+      );
+      color: var(--tt-text-primary);
     }
+
+    &:focus-visible {
+      outline: 2px solid var(--tt-brand-color-500);
+      outline-offset: -2px;
+    }
+  }
+
+  &__add-row-icon {
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    margin-right: 6px;
+    flex: none;
   }
 
   // reorder indicator — a thin brand line at the top or bottom edge

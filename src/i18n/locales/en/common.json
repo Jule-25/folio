@@ -31,7 +31,8 @@
     "open": "Search in pages",
     "close": "Close search",
     "hint": "Type to search across your pages",
-    "clear": "Clear"
+    "clear": "Clear",
+    "openPalette": "Open the search palette"
   },
   "chat": {
     "outbox": {
@@ -310,12 +311,6 @@
       "databases": "Organize anything with databases",
       "collaborate": "Work together: comments, suggestions and rooms"
     },
-    "search": {
-      "label": "Search or create a page",
-      "short": "Search or create a page",
-      "placeholder": "Search your pages, or type a title to create one",
-      "create": "Create “{{title}}”"
-    },
     "actions": {
       "template": "Use a template",
       "inbox": "Inbox",
@@ -468,6 +463,7 @@
   "inbox.kind.user-mention": "Mention",
   "inbox.kind.comment-mention": "Comment mention",
   "inbox.kind.chat-mention": "Chat mention",
+  "inbox.kind.row-look": "Row to look at",
   "inbox.kind.date-due": "Reminder",
   "inbox.kind.date-overdue": "Overdue",
   "inbox.kind.backlink": "Link to your page",
@@ -491,7 +487,10 @@
     "personalSpace": "{{name}}'s Space",
     "pinned": "Pinned",
     "pin": "Pin to teamspace",
-    "unpin": "Unpin"
+    "unpin": "Unpin",
+    "empty": {
+      "add": "Add a page"
+    }
   },
   "library": {
     "title": "Library",
@@ -522,19 +521,23 @@
     "templatePlaceholder": "Search templates...",
     "noResults": "No results for \"{{query}}\"",
     "noPages": "No pages yet",
+    "byId": "Rows by ID",
     "today": "Today",
-    "past": "Past",
+    "yesterday": "Yesterday",
+    "pastWeek": "Past week",
+    "past30Days": "Past 30 days",
+    "older": "Older",
+    "togglePreview": "Show or hide the preview",
     "openPage": "Open page",
     "previewEmpty": "Select a result to preview it here.",
     "noContent": "No content yet",
     "hintSelect": "Select",
     "hintOpen": "Open",
-    "hintOpenNewWindow": "Open in a new window",
     "filters": {
-      "titlesOnly": "Only search titles",
+      "titlesOnly": "Title only",
       "createdBy": "Created by",
       "teamspace": "Teamspace",
-      "inPage": "In page",
+      "inPage": "In",
       "date": "Date"
     }
   },
@@ -1221,9 +1224,16 @@
     "sections": {
       "dates": "Dates",
       "pages": "Pages",
-      "people": "People"
+      "people": "People",
+      "rows": "Rows"
     },
     "noResults": "No results"
+  },
+  "rowMention": {
+    "in": "in {{name}}",
+    "open": "Click to open",
+    "unavailable": "Deleted or no access",
+    "untitled": "Untitled"
   },
   "pageLink": {
     "deleted": "Deleted page",
@@ -1321,6 +1331,23 @@
       "deleteView": "Delete view",
       "deleteConfirm": "Delete this view?"
     },
+    "uniqueId": {
+      "prefix": "ID prefix",
+      "prefixPlaceholder": "Type a prefix",
+      "prefixClash": "“{{name}}” already uses {{prefix}}: IDs like {{prefix}}-1 would point to two rows."
+    },
+    "askToLook": {
+      "label": "Ask someone to look",
+      "search": "Search people…",
+      "nobody": "No one to ask",
+      "someone": "Someone",
+      "notifTitle": "{{who}} asked you to look at a row",
+      "sent": "Sent to {{name}}"
+    },
+    "rowLink": {
+      "copied": "Link to the row copied",
+      "failed": "Couldn't copy the link"
+    },
     "layout": {
       "title": "Layouts",
       "showDatabaseTitle": "Show database title",
@@ -1334,6 +1361,9 @@
       "cardSizeSmall": "Small",
       "cardSizeMedium": "Medium",
       "cardSizeLarge": "Large",
+      "cardLayout": "Card layout",
+      "cardLayoutCompact": "Compact",
+      "cardLayoutList": "List",
       "fitImage": "Fit image",
       "openPagesIn": "Open pages in",
       "showPageIcon": "Show page icon",
@@ -1382,7 +1412,9 @@
       "layout": "Layout",
       "propertyVisibility": "Property visibility",
       "openIn": "Open in",
-      "noResults": "No actions found"
+      "noResults": "No actions found",
+      "moveUp": "Move up",
+      "moveDown": "Move down"
     },
     "person": {
       "me": "Me",
@@ -1508,7 +1540,12 @@
     },
     "emptyList": "No pages yet",
     "rowsDeleted_one": "Deleted {{count}} row",
-    "rowsDeleted_other": "Deleted {{count}} rows"
+    "rowsDeleted_other": "Deleted {{count}} rows",
+    "reorder": {
+      "sortedTitle": "This view is sorted.",
+      "sortedBody": "Remove the sort to put rows in your own order? The rows keep their current order, with your move applied.",
+      "removeSort": "Remove sort"
+    }
   },
   "toolbar": {
     "blockquote": "Blockquote",

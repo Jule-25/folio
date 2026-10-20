@@ -29,8 +29,10 @@ import { evaluateFormula } from "../../formula-editor/formula-evaluator";
 import { RelationCell } from "../relation-cell";
 import { RollupCell } from "../rollup-cell";
 import { PhoneCell } from "../phone-cell";
+import { UniqueIdCell } from "../unique-id-cell";
 import { memo } from "react";
 import { useWorkspacePeople } from "../../../hooks/use-workspace-people";
+import { useFormulaEngineReady } from "../../formula-editor/formula-engine";
 
 function CellImpl({
   property,
@@ -289,6 +291,18 @@ function CellImpl({
         />
       );
 
+    case "unique_id":
+      return (
+        <UniqueIdCell
+          value={v}
+          config={config}
+          onChange={change}
+          unwrapped={unwrapped}
+          className={`db-cell ${view?.type === "gallery" || view?.type === "board" ? "db-cell-board-view" : ""}`}
+          readonly
+        />
+      );
+
     default: {
       // Exhaustiveness guard — if a new PropertyType is added and not handled,
       // this errors at compile time.
@@ -319,6 +333,8 @@ function ComputedFormulaCell({
   className: string;
 }) {
   const people = useWorkspacePeople();
+  // Re-render once mathjs has loaded (evaluateFormula is null until then).
+  useFormulaEngineReady();
   const computed = evaluateFormula(config.expression, {
     properties,
     cellValues: record.values as Record<string, CellValue>,

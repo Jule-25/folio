@@ -26,6 +26,7 @@ import {
 import { MenuRow } from "../menu-row";
 import { NavigableMenuItem } from "../navigable-menu-item";
 import { ViewPalette } from "./view-palette";
+import { CardLayoutPicker } from "./card-layout-picker";
 
 interface LayoutPanelProps {
   view: DatabaseView;
@@ -163,9 +164,18 @@ export function LayoutPanel({
             >
               {(
                 [
-                  { value: "none", label: t("database.layout.cardPreviewNone") },
-                  { value: "cover", label: t("database.layout.cardPreviewCover") },
-                  { value: "content", label: t("database.layout.cardPreviewContent") },
+                  {
+                    value: "none",
+                    label: t("database.layout.cardPreviewNone"),
+                  },
+                  {
+                    value: "cover",
+                    label: t("database.layout.cardPreviewCover"),
+                  },
+                  {
+                    value: "content",
+                    label: t("database.layout.cardPreviewContent"),
+                  },
                 ] as const
               ).map(({ value, label }) => (
                 <MenuRow
@@ -208,7 +218,10 @@ export function LayoutPanel({
               {(
                 [
                   { value: "small", label: t("database.layout.cardSizeSmall") },
-                  { value: "medium", label: t("database.layout.cardSizeMedium") },
+                  {
+                    value: "medium",
+                    label: t("database.layout.cardSizeMedium"),
+                  },
                   { value: "large", label: t("database.layout.cardSizeLarge") },
                 ] as const
               ).map(({ value, label }) => (
@@ -232,7 +245,18 @@ export function LayoutPanel({
             checked={(view as GalleryView | BoardView).coverFit == "contain"}
             onToggle={async () =>
               db.updateView(view.id, {
-                fitImage: !(view as GalleryView | BoardView).coverFit,
+                coverFit:
+                  (view as GalleryView | BoardView).coverFit === "contain"
+                    ? "cover"
+                    : "contain",
+              } as Partial<GalleryView | BoardView>)
+            }
+          />
+          <CardLayoutPicker
+            value={(view as GalleryView | BoardView).cardLayout ?? "list"}
+            onChange={(cardLayout) =>
+              db.updateView(view.id, {
+                cardLayout,
               } as Partial<GalleryView | BoardView>)
             }
           />

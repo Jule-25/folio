@@ -9,6 +9,7 @@ import {
 } from "src/components/tiptap-ui-primitive/popover";
 
 import "./mention-view.scss";
+import { RowMention } from "src/features/database/components/row-mention/row-mention";
 import { users } from "./users";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
@@ -42,7 +43,24 @@ function legacyDate(id: unknown): Date | undefined {
   return d;
 }
 
-export function MentionView({
+/** A mention chip: a database row (RowMention), or a person or a date. */
+export function MentionView(props: ReactNodeViewProps) {
+  const rowId = props.node.attrs.rowId as string | null;
+  if (rowId) {
+    return (
+      <NodeViewWrapper
+        as="span"
+        className="mention-wrapper mention-wrapper--row"
+        data-node-id={props.node.attrs.nodeId}
+      >
+        <RowMention rowId={rowId} label={props.node.attrs.label} />
+      </NodeViewWrapper>
+    );
+  }
+  return <PersonOrDateMention {...props} />;
+}
+
+function PersonOrDateMention({
   node,
   updateAttributes,
   editor,

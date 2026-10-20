@@ -97,7 +97,8 @@ export type PropertyType =
   | "url"
   | "email"
   | "phone"
-  | "edited_by";
+  | "edited_by"
+  | "unique_id";
 
 export type ViewType =
   | "table"
@@ -231,7 +232,12 @@ export type PropertyConfig =
     }
   | { type: "url"; showFullUrl?: boolean }
   | { type: "phone" }
-  | { type: "email" };
+  | { type: "email" }
+  | {
+      type: "unique_id";
+      /** Shown before the number: "TASK" → TASK-12. */
+      prefix?: string;
+    };
 
 // Extract helper — used throughout cell nodes and views
 export type ConfigOf<T extends PropertyType> = Extract<
@@ -297,6 +303,9 @@ export type CellValueMap = {
   url: string;
   email: string;
   phone: string;
+  /** The row's number, given once by the database (migration 045) and never
+   *  reused; the prefix is the property's, added on display. */
+  unique_id: number | null; // read-only
 };
 
 export type CellValue<T extends PropertyType = PropertyType> = CellValueMap[T];
@@ -419,6 +428,9 @@ export interface TableView extends BaseView {
   groupByPropertyId?: ID | null;
   collapsedGroups?: string[]; // group value keys that are collapsed
   showEmptyGroups?: boolean;
+  /** Row order set by dragging rows or Move up / down. Used when the view
+   *  has no sort; ids not listed follow in their usual order. */
+  manualOrder?: ID[];
 }
 
 export interface ListView extends BaseView {
@@ -427,6 +439,8 @@ export interface ListView extends BaseView {
   groupByPropertyId?: ID | null;
   collapsedGroups?: string[];
   showEmptyGroups?: boolean;
+  /** Same as TableView.manualOrder. */
+  manualOrder?: ID[];
 }
 
 export interface BoardView extends BaseView {
@@ -440,11 +454,17 @@ export interface BoardView extends BaseView {
    *  fall through in sorted order. Flat across columns — per-column order is
    *  derived by filtering this to the column's records. */
   manualOrder?: ID[];
+  /** How cards list their properties; unset = "list". */
+  cardLayout?: CardLayout;
   /** Column/group ids hidden from the board (the "No {group}" column uses the
    *  NONE_COLUMN_ID sentinel). Hidden groups are filtered out of the rendered
    *  columns and surfaced in Edit groups for un-hiding. */
   hiddenGroups?: ID[];
 }
+
+/** A gallery or board card's properties: side by side, wrapping
+ *  ("compact"), or one per line ("list"). */
+export type CardLayout = "compact" | "list";
 
 export interface GalleryView extends BaseView {
   type: "gallery";
@@ -452,6 +472,8 @@ export interface GalleryView extends BaseView {
   cardSize: "small" | "medium" | "large";
   coverFit: "cover" | "contain";
   cardPreview?: "none" | "cover" | "content";
+  /** How cards list their properties; unset = "list". */
+  cardLayout?: CardLayout;
   /** Record ids in user-arranged order. Applied after `sorts`; ids not present
    *  fall through in sorted order. Flat across columns — per-column order is
    *  derived by filtering this to the column's records. */
@@ -552,14 +574,15 @@ export function isReadOnlyProperty(type: PropertyType): boolean {
     type === "created_time" ||
     type === "created_by" ||
     type === "edited_time" ||
-    type === "edited_by"
+    type === "edited_by" ||
+    type === "unique_id"
   );
 }
 
 export function isGroupableProperty(type: PropertyType): boolean {
   // Group by any property except ones where every row is its own group
   // (title = the row name) or that have no stable value to bucket by.
-  return type !== "title";
+  return type !== "title" && type !== "unique_id";
 }
 
 export function isContentBasedCell(
@@ -969,7 +992,9 @@ export type NotificationType =
   | "date-overdue"
   | "backlink"
   | "comment-mention"
-  | "chat-mention";
+  | "chat-mention"
+  /** Someone asked you to look at a database row (its row menu). */
+  | "row-look";
 
 export interface Notification {
   id: string;

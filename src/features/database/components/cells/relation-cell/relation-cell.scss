@@ -64,3 +64,11 @@
     opacity: 1;
   }
 }
+
+// A row's ID before its title in the relation picker.
+.db-relation-cell__id {
+  flex-shrink: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.85em;
+  color: var(--tt-text-secondary);
+}

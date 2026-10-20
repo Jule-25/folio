@@ -7,6 +7,7 @@ import { useRecordRowState } from "../../utils/record-selection-store";
 import { recordSelection } from "../../utils/record-selection-store";
 import { beginRowDragSelect } from "../../utils/row-drag-select";
 import { useRowAnchor } from "../../hooks/use-row-anchor";
+import { observeRecord } from "../../utils/record-visibility";
 import type {
   CalendarView,
   CellValue,
@@ -247,6 +248,18 @@ export default function DatabaseRecordNodeView({
     !isFilteredOut &&
     (isHovered || isSelected || pointerOnCheckbox);
   const anchor = useRowAnchor(wrapperEl, showCheckbox);
+
+  // Table and list rows: report when the row comes near the screen, so its
+  // cells render their content only then (utils/record-visibility.ts). The
+  // row's box is the renderer element — .db-record itself is display:
+  // contents there and has no box to watch.
+  const isRowView = isTableView || data?.view?.type === "list";
+  useLayoutEffect(() => {
+    if (!isRowView || !wrapperEl || !databaseId || !recordId) return;
+    const box =
+      wrapperEl.closest(".react-renderer.node-databaseRecord") ?? wrapperEl;
+    return observeRecord(box, databaseId, recordId);
+  }, [isRowView, wrapperEl, databaseId, recordId]);
 
   // ── TIMELINE: render as a bar, resizable to adjust endDate ─────────────
   if (isTimeline && record && data && recordId) {
