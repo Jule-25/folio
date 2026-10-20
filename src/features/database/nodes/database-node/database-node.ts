@@ -1,6 +1,6 @@
 import { mergeAttributes, Node } from "@tiptap/core";
 import { ReactNodeViewRenderer } from "@tiptap/react";
-import type { ID } from "src/types";
+import type { DatabaseView, ID } from "src/types";
 import { Plugin } from "@tiptap/pm/state";
 import { DatabaseNodeViewLazy } from "./database-node-view-lazy";
 import { DatabaseRecordNodeViewLazy } from "../database-record-node-view/database-record-node-view-lazy";
@@ -9,12 +9,14 @@ import {
   createDatabaseStorage,
   type DatabaseStorage,
 } from "../../utils/database-bridge";
+import { makeDefaultView } from "../../utils";
 
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     database: {
       insertDatabaseWithSource: (sourceId: ID, pageId?: ID) => ReturnType;
-      insertDatabaseNode: () => ReturnType;
+      /** A new inline database showing one view of `type` (table by default). */
+      insertDatabaseNode: (type?: DatabaseView["type"]) => ReturnType;
     };
   }
 }
@@ -116,7 +118,7 @@ export const DatabaseNode = Node.create<unknown, DatabaseStorage>({
             },
           }),
       insertDatabaseNode:
-        () =>
+        (type = "table") =>
         ({ commands }) =>
           commands.insertContent({
             type: "database",
@@ -124,17 +126,12 @@ export const DatabaseNode = Node.create<unknown, DatabaseStorage>({
               id: crypto.randomUUID(),
               sourceId: null,
               pageId: null,
-              title: "Untitled",
+              title: "",
               views: [
-                {
-                  id: crypto.randomUUID(),
-                  name: "Table",
-                  type: "table",
-                  filters: [],
-                  sorts: [],
-                  hiddenProperties: [],
-                  propertyOrder: [],
-                },
+                makeDefaultView(
+                  type,
+                  type.charAt(0).toUpperCase() + type.slice(1),
+                ),
               ],
               activeViewId: null,
               locked: false,
