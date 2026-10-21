@@ -740,7 +740,9 @@
       "offlineFavoritesDesc": "Vos pages favorites sont téléchargées sur cet appareil et tenues à jour, pour s'ouvrir sans connexion.",
       "offlineStorage": "Stockage hors ligne",
       "offlineStorageDesc": "Pages et images enregistrées sur cet appareil pour s'ouvrir sans connexion. Vider garde les modifications pas encore envoyées.",
-      "offlineStorageClear": "Vider"
+      "offlineStorageClear": "Vider",
+      "appearance": "Apparence",
+      "appearanceDesc": "Change le style de toute l'app. Toi seul le vois, sur cet appareil."
     },
     "title": "Paramètres",
     "appearance": "Apparence",
@@ -752,6 +754,13 @@
     "modalAria": "Paramètres de l’espace de travail",
     "closeAria": "Fermer",
     "getUnlimitedAi": "Passer à l’IA illimitée",
+    "appearance": {
+      "default": "Par défaut",
+      "aurora": "Aurore",
+      "midnight": "Minuit",
+      "notebook": "Carnet",
+      "retro": "Rétro"
+    },
     "workspace": {
       "banner": "Bannière d’accueil",
       "bannerDesc": "Une page affichée en haut de l’accueil de tout le monde : sa couverture, ses premières lignes et ses pages.",

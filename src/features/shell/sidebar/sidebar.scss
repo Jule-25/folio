@@ -100,7 +100,7 @@
   color: var(--sidebar-text-color);
   font-size: 14px;
   font-weight: 500;
-  background: var(--sidebar-bg-color);
+  background: var(--sidebar-surface, var(--sidebar-bg-color));
   border-right: 1px solid var(--sidebar-border-color);
   box-shadow: var(--sidebar-edge-shadow);
   padding: 0;
@@ -177,9 +177,7 @@
 }
 
 .sidebar--floating {
-  background: var(
-    --sidebar-bg-color
-  ) !important; 
+  background: var(--sidebar-surface, var(--sidebar-bg-color)) !important;
   box-shadow: var(--tt-shadow-elevated-md);
   border: 1px solid var(--tt-border-color);
 }

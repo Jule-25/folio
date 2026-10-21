@@ -14,6 +14,7 @@ import { useSession } from "src/hooks/use-session";
 import { Toggle } from "src/components/tiptap-ui-primitive/toggle";
 import { setKeepFavorites, useKeepChoices } from "src/lib/offline-keep";
 import "./workspace-settings-content.scss";
+import { AppearancePicker } from "./appearance-picker";
 
 function SettingRow({
   label,
@@ -142,7 +143,7 @@ export function MySettingsContent() {
           ]}
         />
       </SettingRow>
-
+      <AppearancePicker />
       <OfflineFavoritesRow />
       <OfflineStorageRow />
     </div>

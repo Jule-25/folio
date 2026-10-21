@@ -822,6 +822,13 @@
     "modalAria": "Workspace settings",
     "closeAria": "Close",
     "getUnlimitedAi": "Get unlimited AI",
+    "appearance": {
+      "default": "Default",
+      "aurora": "Aurora",
+      "midnight": "Midnight",
+      "notebook": "Notebook",
+      "retro": "Retro"
+    },
     "workspace": {
       "banner": "Home banner",
       "bannerDesc": "A page shown at the top of everyone's Home: its cover, first lines and pages.",
@@ -851,7 +858,9 @@
       "offlineFavoritesDesc": "Your favorite pages are downloaded to this device and kept up to date, so they open without a connection.",
       "offlineStorage": "Offline storage",
       "offlineStorageDesc": "Pages and images saved on this device so they open without a connection. Clearing keeps edits that haven't been sent yet.",
-      "offlineStorageClear": "Clear"
+      "offlineStorageClear": "Clear",
+      "appearance": "Appearance",
+      "appearanceDesc": "Restyle the whole app. Only you see it, on this device."
     },
     "nav": {
       "account": "Account",

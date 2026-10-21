@@ -1,0 +1,102 @@
+// Theme cards in My settings. Each preview is a mini sidebar: the theme's
+// background with three rows, the middle one in its "open page" style.
+.appearance-setting {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 0;
+}
+
+.appearance-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  gap: 10px;
+}
+
+.appearance-option {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 6px;
+  border: 0;
+  border-radius: var(--tt-radius-md, 8px);
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--tt-border-color);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: box-shadow 0.12s ease, background 0.12s ease;
+
+  &:hover {
+    background: color-mix(in srgb, var(--tt-text-primary) 4%, transparent);
+  }
+
+  &[aria-pressed="true"] {
+    box-shadow: inset 0 0 0 2px var(--tt-brand-color-500);
+  }
+
+  &__name {
+    padding-left: 2px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--tt-text-primary);
+  }
+}
+
+.appearance-swatch {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  height: 64px;
+  padding: 11px 10px;
+  box-sizing: border-box;
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 1px rgba(15, 15, 15, 0.08);
+
+  > span {
+    display: block;
+    width: 46%;
+    height: 8px;
+    border-radius: 4px;
+    background: var(--sw-bar);
+  }
+
+  > span.is-on {
+    width: 64%;
+    background: var(--sw-on);
+  }
+
+  &--default {
+    background: #f4f3ef;
+    --sw-bar: rgba(55, 53, 47, 0.16);
+    --sw-on: rgba(55, 53, 47, 0.3);
+  }
+
+  &--aurora {
+    background: radial-gradient(90% 80% at 0% 0%, #cbbcff, transparent 60%),
+      radial-gradient(80% 70% at 100% 40%, #a8f0df, transparent 60%),
+      radial-gradient(90% 80% at 20% 100%, #ffc9ad, transparent 60%), #f1edff;
+    --sw-bar: rgba(255, 255, 255, 0.7);
+    --sw-on: #ffffff;
+  }
+
+  &--midnight {
+    background: radial-gradient(1px 1px at 20px 14px, #fff 50%, transparent 51%),
+      radial-gradient(1px 1px at 90px 40px, #fff 50%, transparent 51%),
+      linear-gradient(180deg, #151b3d, #090c1a);
+    --sw-bar: rgba(255, 255, 255, 0.14);
+    --sw-on: rgba(190, 242, 100, 0.6);
+  }
+
+  &--notebook {
+    background: repeating-linear-gradient(180deg, transparent 0 14px, rgba(70, 110, 170, 0.2) 14px 15px), #fbf7ec;
+    --sw-bar: rgba(43, 42, 51, 0.2);
+    --sw-on: rgba(255, 212, 84, 0.9);
+  }
+
+  &--retro {
+    background: radial-gradient(rgba(17, 17, 17, 0.18) 1px, transparent 1.6px) 0 0 / 8px 8px, #ffd43b;
+    --sw-bar: rgba(17, 17, 17, 0.3);
+    --sw-on: #111111;
+  }
+}
