@@ -1372,8 +1372,11 @@
       "centerPeek": "Fenêtre modale",
       "centerPeekDesc": "Ouvre les pages dans une fenêtre modale centrée",
       "fullPage": "Pleine page",
-      "fullPageDesc": "Ouvre les pages en pleine page"
+      "fullPageDesc": "Ouvre les pages en pleine page",
+      "loadLimit": "Limite de chargement",
+      "loadAll": "Tout"
     },
+    "loadMore": "Charger plus",
     "sort": {
       "placeholder": "Trier par…",
       "allSorted": "Toutes les propriétés sont déjà triées",

@@ -911,3 +911,33 @@ body.db-row-dragselect {
     animation-range: 0px 24px;
   }
 }
+
+// "Load more" under a table or list past its load limit.
+.db-load-more {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  margin-top: 4px;
+  padding: 0 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--tt-text-secondary);
+  cursor: pointer;
+
+  &:hover {
+    background: color-mix(in srgb, var(--tt-text-primary) 6%, transparent);
+    color: var(--tt-text-primary);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--tt-brand-color-500);
+  }
+
+  &__count {
+    font-size: 12px;
+    opacity: 0.8;
+  }
+}

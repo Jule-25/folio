@@ -431,8 +431,10 @@ export interface TableView extends BaseView {
   /** Row order set by dragging rows or Move up / down. Used when the view
    *  has no sort; ids not listed follow in their usual order. */
   manualOrder?: ID[];
-    /** Layout › Show vertical lines. Absent = shown. */
+  /** Layout › Show vertical lines. Absent = shown. */
   showVerticalLines?: boolean;
+  /** Layout › Load limit: rows shown before "Load more". 0 = all; absent = 50. */
+  loadLimit?: number;
 }
 
 export interface ListView extends BaseView {
@@ -443,6 +445,8 @@ export interface ListView extends BaseView {
   showEmptyGroups?: boolean;
   /** Same as TableView.manualOrder. */
   manualOrder?: ID[];
+  /** Layout › Load limit: rows shown before "Load more". 0 = all; absent = 50. */
+  loadLimit?: number;
 }
 
 export interface BoardView extends BaseView {

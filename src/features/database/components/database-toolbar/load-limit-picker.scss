@@ -1,0 +1,49 @@
+// Layout › Load limit: a label and a row of small choices.
+.db-load-limit {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 32px;
+  padding: 0 8px;
+  font-size: 14px;
+
+  &__label {
+    color: var(--tt-text-primary);
+  }
+
+  &__options {
+    display: flex;
+    gap: 2px;
+    padding: 2px;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--tt-text-primary) 6%, transparent);
+  }
+
+  &__option {
+    all: unset;
+    box-sizing: border-box;
+    min-width: 30px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--tt-text-secondary);
+    cursor: pointer;
+
+    &:hover {
+      color: var(--tt-text-primary);
+    }
+
+    &[aria-checked="true"] {
+      background: var(--tt-bg-color);
+      color: var(--tt-text-primary);
+      box-shadow: 0 1px 2px rgba(15, 15, 15, 0.12);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--tt-brand-color-500);
+    }
+  }
+}

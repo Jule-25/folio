@@ -30,6 +30,7 @@ import { MenuRow } from "../menu-row";
 import { NavigableMenuItem } from "../navigable-menu-item";
 import { ViewPalette } from "./view-palette";
 import { CardLayoutPicker } from "./card-layout-picker";
+import { LoadLimitPicker } from "./load-limit-picker";
 
 interface LayoutPanelProps {
   view: DatabaseView;
@@ -288,6 +289,14 @@ export function LayoutPanel({ view, db, bare = false }: LayoutPanelProps) {
         onClick={() => db.pushPanel({ type: "open-pages-in" })}
         navigable
       />
+      {(isTable || view.type === "list") && (
+        <LoadLimitPicker
+          value={(view as TableView).loadLimit}
+          onChange={(loadLimit) =>
+            db.updateView(view.id, { loadLimit } as Partial<DatabaseView>)
+          }
+        />
+      )}
       {titleProp && (
         <MenuRow
           label={t("database.layout.showPageIcon")}

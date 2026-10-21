@@ -1372,8 +1372,11 @@
       "centerPeek": "Center peek",
       "centerPeekDesc": "Open pages in a focused, centered modal",
       "fullPage": "Full page",
-      "fullPageDesc": "Open pages in full page"
+      "fullPageDesc": "Open pages in full page",
+      "loadLimit": "Load limit",
+      "loadAll": "All"
     },
+    "loadMore": "Load more",
     "sort": {
       "placeholder": "Sort by...",
       "allSorted": "Every property is already sorted",
