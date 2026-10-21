@@ -171,7 +171,9 @@
     "addComment": "Ajoute un commentaire…",
     "showResolved_one": "{{count}} commentaire résolu",
     "showResolved_other": "{{count}} commentaires résolus",
-    "hideResolved": "Masquer les commentaires résolus"
+    "hideResolved": "Masquer les commentaires résolus",
+    "discussion": "Discussion",
+    "replyPlaceholder": "Répondre…"
   },
   "showcase": {
     "defaultName": "Vitrine",

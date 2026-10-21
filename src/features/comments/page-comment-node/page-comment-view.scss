@@ -1,37 +1,104 @@
-// Page-level comments, Notion style: one bordered card per thread, comments
-// stacked inside, and an "Add a comment…" row with your avatar at the bottom.
+// Page-level comments: one discussion card per thread (the Card primitive
+// gives the background, border, radius and shadow). Header · comments joined
+// by a thread line · filled reply field.
 .page-comment {
-  margin: 4px 0 12px;
+  margin: 4px 0 16px;
   padding: 0;
 
   &__threads {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin-bottom: 8px;
+    gap: 12px;
+    margin-bottom: 12px;
 
     &.is-resolved {
-      margin-top: 6px;
+      margin-top: 8px;
     }
   }
 
-  &__thread {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+  // Card overrides: full width, content stretched, our own padding.
+  &__thread.tiptap-card {
+    align-items: stretch;
+    width: 100%;
+    max-width: 708px;
+    padding: 0;
+    gap: 0;
+    overflow: hidden;
+
     &.is-resolved {
       opacity: 0.7;
-      box-shadow: none;
     }
   }
 
-  // "Add a comment…" (reply) and the new-thread composer share one shape.
-  &__reply,
-  &__composer {
+  &__head {
     display: flex;
     align-items: center;
     gap: 8px;
-    min-height: 32px;
+    padding: 6px 8px 6px 16px;
+    border-bottom: 1px solid var(--tt-border-color);
+  }
+
+  &__title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--tt-text-primary);
+  }
+
+  &__count {
+    padding: 1px 7px;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--tt-text-primary) 7%, transparent);
+    font-size: 12px;
+    font-weight: 500;
+    color: color-mix(in srgb, var(--tt-text-primary) 60%, transparent);
+  }
+
+  &__spacer {
+    flex: 1;
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 14px 16px 14px;
+
+    // Thread line: from under each avatar down to the next comment.
+    > .comment:not(:last-child)::before {
+      content: "";
+      position: absolute;
+      left: 10px;
+      top: 30px;
+      bottom: -12px;
+      width: 2px;
+      border-radius: 1px;
+      background: var(--tt-border-color);
+    }
+  }
+
+  &__footer {
+    padding: 0 12px 12px;
+  }
+
+  &__thread--new &__footer {
+    padding-top: 12px;
+  }
+
+  // Filled field: editor + send.
+  &__field {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 38px;
+    padding: 4px 4px 4px 12px;
+    border-radius: var(--tt-radius-md, 8px);
+    background: color-mix(in srgb, var(--tt-text-primary) 4%, transparent);
+    box-shadow: inset 0 0 0 1px var(--tt-border-color);
+
+    &:focus-within {
+      box-shadow: inset 0 0 0 1px
+        color-mix(in srgb, var(--tt-brand-color-500, #2b7fff) 60%, transparent);
+    }
 
     .comment-mention-editor {
       flex: 1;
@@ -40,33 +107,21 @@
       .ProseMirror {
         min-width: 0;
         min-height: 24px;
-        padding: 2px 0;
+        padding: 3px 0;
         background: transparent;
+        font-size: 14px;
       }
     }
-  }
-
-  &__reply {
-    padding-top: 10px;
-    border-top: 0.5px solid var(--tt-border-color);
-  }
-
-  &__composer {
-    padding: 10px 14px;
-    border: 0.5px solid var(--tt-border-color);
-    border-radius: var(--tt-radius-lg, 10px);
-    background-color: var(--tt-bg-color);
-    box-shadow: 0 1px 4px color-mix(in srgb, var(--tt-text-primary) 6%, transparent);
   }
 
   &__submit {
     display: grid;
     place-items: center;
-    width: 26px;
-    height: 26px;
+    width: 28px;
+    height: 28px;
     flex: 0 0 auto;
     border: none;
-    border-radius: 50%;
+    border-radius: var(--tt-radius-sm, 6px);
     background: var(--tt-brand-color-500, #2b7fff);
     color: #fff;
     cursor: pointer;
@@ -103,35 +158,35 @@
 // ── Narrow screens ─────────────────────────────────────────────────────────
 @media (max-width: 640px) {
   .page-comment {
-    &__thread {
-      gap: 10px;
-      padding: 10px 12px 8px;
-      border-radius: var(--tt-radius-md, 8px);
+    &__head {
+      padding-left: 12px;
     }
 
-    &__composer {
-      padding: 8px 12px;
-      border-radius: var(--tt-radius-md, 8px);
+    &__list {
+      padding: 12px;
+
+      // The body sits under the header on phones (no gutter) — no line.
+      > .comment::before {
+        display: none;
+      }
     }
 
     &__resolved-toggle {
-      padding: 6px 0; // bigger tap target
+      padding: 6px 0;
     }
   }
 }
 
-// Touch: the send button is a finger target, and editors stay at 16px so iOS
-// doesn't zoom in on focus.
+// Touch: finger-sized send button; editors at 16px so iOS doesn't zoom.
 @media (hover: none) {
   .page-comment {
     &__submit {
-      width: 32px;
-      height: 32px;
+      width: 34px;
+      height: 34px;
     }
 
-    &__reply,
-    &__composer {
-      min-height: 40px;
+    &__field {
+      min-height: 44px;
     }
   }
 }

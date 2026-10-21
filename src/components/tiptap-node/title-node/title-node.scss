@@ -5,12 +5,19 @@
   --placeholder-color: var(--tt-gray-dark-a-50);
 }
 
-.tiptap h1[data-type="title"].is-empty::before {
-  content: "New Page";
-  color: var(--tt-text-secondary);
-  pointer-events: none;
-  float: left;
-  height: 0;
+// The title isn't a heading inside the text: the h1 rule's 1.7em top margin
+// put a 68px gap under the page icon. 40px leaves room for the
+// Add icon / cover / comment row that appears above the title.
+.tiptap.ProseMirror h1[data-type="title"] {
+  position: relative;
+  margin-top: 40px;
+  margin-bottom: 1rem !important;
+}
+
+@media (max-width: 768px) {
+  .tiptap.ProseMirror h1[data-type="title"] {
+    margin-top: 32px;
+  }
 }
 
 h1[data-type='title'] br:only-child ~ ::before,

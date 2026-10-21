@@ -272,7 +272,9 @@
     "addComment": "Add a comment…",
     "showResolved_one": "{{count}} resolved comment",
     "showResolved_other": "{{count}} resolved comments",
-    "hideResolved": "Hide resolved comments"
+    "hideResolved": "Hide resolved comments",
+    "discussion": "Discussion",
+    "replyPlaceholder": "Reply…"
   },
   "quickOpen": {
     "placeholder": "Search pages…"
