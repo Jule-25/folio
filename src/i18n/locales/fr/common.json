@@ -1127,10 +1127,6 @@
         "title": "Fichier",
         "description": "Importer une pièce jointe."
       },
-      "youtube": {
-        "title": "Youtube",
-        "description": "Intégrer une vidéo YouTube."
-      },
       "video": {
         "title": "Vidéo",
         "description": "Importer une vidéo, ou intégrer YouTube, Vimeo ou Loom."
