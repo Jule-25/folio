@@ -805,7 +805,9 @@
       "teamspace": "Teamspace",
       "access": "Access",
       "members": "Members"
-    }
+    },
+    "memberCount_one": "{{count}} member",
+    "memberCount_other": "{{count}} members"
   },
   "settings": {
     "title": "Settings",

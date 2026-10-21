@@ -38,6 +38,7 @@ import { useAvailableOffline } from "../available-offline";
 import { SbChevronRightIcon } from "src/components/tiptap-icons/sidebar-icons";
 import { teamspaceTint } from "src/lib/teamspace-color";
 import { useTeamspaceAccentColor } from "src/hooks/use-teamspaces";
+import { TeamspaceFaces } from "./teamspace-faces";
 
 function initialOf(title: string): string {
   return Array.from(title.trim())[0]?.toUpperCase() ?? "T";
@@ -319,6 +320,9 @@ function PageItemView({
         )}
 
         {withBadge && <TeamspaceBadge teamspaceId={page.teamspaceId!} />}
+        {isTeamspaceRoot && !editing && (
+          <TeamspaceFaces teamspaceId={page.id} />
+        )}
 
         {(canEditContent || pinnable || isTeamspaceRoot) && (
           <CardItemGroup orientation="horizontal" className="page-item-actions">

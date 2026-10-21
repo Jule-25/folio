@@ -712,7 +712,9 @@
       "teamspace": "Espace d’équipe",
       "access": "Accès",
       "members": "Membres"
-    }
+    },
+    "memberCount_one": "{{count}} membre",
+    "memberCount_other": "{{count}} membres"
   },
   "settings": {
     "notifications": {
