@@ -1310,7 +1310,8 @@
       "copyLink": "Copy link to view",
       "copied": "Copied!",
       "duplicate": "Duplicate view",
-      "delete": "Delete view"
+      "delete": "Delete view",
+      "exportCsv": "Export as CSV"
     },
     "views": {
       "table": "Table",

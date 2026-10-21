@@ -1310,7 +1310,8 @@
       "copyLink": "Copier le lien de la vue",
       "copied": "Copié !",
       "duplicate": "Dupliquer la vue",
-      "delete": "Supprimer la vue"
+      "delete": "Supprimer la vue",
+      "exportCsv": "Exporter en CSV"
     },
     "views": {
       "table": "Tableau",

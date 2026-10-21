@@ -2,6 +2,7 @@ import {
   ArrowUpDown,
   ChevronLeft,
   Copy,
+  Download,
   Group,
   Layout,
   Link as LinkIcon,
@@ -51,6 +52,8 @@ import { usePanelTransition } from "../../hooks/use-panel-transition";
 import { SpinnerRing } from "src/components/tiptap-ui-primitive/spinner-ring";
 import { PanelSlide } from "../panel-slide";
 import { ConfirmDialog } from "src/features/shell/confirm-dialog";
+import { useDatabaseContext } from "../../context/database-context";
+import { downloadCsv, toCsv } from "../../utils/csv-export";
 
 // The delete confirmation is portaled to <body>, outside the options panel:
 // pressing inside it must not count as a click outside the panel.
@@ -153,6 +156,17 @@ function ViewOptionsContent({
 
   const filterCount = v.filters?.length ?? 0;
   const sortCount = v.sorts?.length ?? 0;
+
+  // Export as CSV: this view's rows (its filters, search and sort; all of
+  // them, past the load limit) and its visible columns, in order.
+  const { title, sortedRecords, visibleProperties } = useDatabaseContext();
+  const handleExportCsv = () => {
+    downloadCsv(
+      title || t("database.picker.newDatabase"),
+      toCsv(visibleProperties, sortedRecords),
+    );
+    (onDone ?? onClose)?.();
+  };
 
   const handleCopy = () => {
     onCopyLink?.();
@@ -413,7 +427,11 @@ function ViewOptionsContent({
             }
             onClick={handleCopy}
           />
-
+          <MenuRow
+            Icon={Download}
+            label={t("database.viewOptions.exportCsv")}
+            onClick={handleExportCsv}
+          />
           {/* The copy becomes the active view (duplicateView switches to it). */}
           <MenuRow
             Icon={Copy}
