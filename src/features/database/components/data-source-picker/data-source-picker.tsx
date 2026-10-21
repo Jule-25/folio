@@ -29,6 +29,7 @@ import { useCurrentWorkspace } from "src/hooks/use-workspaces";
 import { ViewPlaceholder } from "./view-placeholder";
 import { makeDefaultView } from "../../utils";
 import "./data-source-picker.scss";
+import { Card } from "src/components/tiptap-ui-primitive/card";
 
 const VIEW_ICON: Record<DatabaseView["type"], LucideIcon> = {
   table: Table,
@@ -117,7 +118,7 @@ export function DataSourcePicker({
   }
 
   return (
-    <div
+    <Card
       className="db-setup"
       data-view-type={viewType}
       aria-label={t(`database.picker.selectFor.${viewType}`)}
@@ -273,6 +274,6 @@ export function DataSourcePicker({
           )}
         </div>
       )}
-    </div>
+    </Card>
   );
 }
