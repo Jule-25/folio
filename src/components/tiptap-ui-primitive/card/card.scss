@@ -2,12 +2,14 @@
   --tiptap-card-bg-color: var(--tt-gray-light-50);
   --tiptap-card-border-color: var(--tt-gray-light-a-100);
   --tiptap-card-group-label-color: var(--tt-gray-light-a-800);
+  --tt-card-bg-color: var( --tiptap-card-bg-color);
 }
 
 .dark {
-  --tiptap-card-bg-color: var(--tt-gray-dark-100);
+  --tiptap-card-bg-color: #1f1f1f;
   --tiptap-card-border-color: var(--tt-gray-dark-a-100);
   --tiptap-card-group-label-color: var(--tt-gray-dark-a-800);
+  --tt-card-bg-color: var( --tiptap-card-bg-color);
 }
 
 .tiptap-card {

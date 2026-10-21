@@ -6,6 +6,8 @@ import {
   Bookmark,
   BookMarked,
   Box,
+  Calendar,
+  ChartBar,
   Code2,
   Columns2,
   Columns3,
@@ -19,6 +21,7 @@ import {
   Heading5,
   Heading6,
   Image,
+  LayoutGrid,
   List,
   ListOrdered,
   Milestone,
@@ -435,6 +438,25 @@ export function getSlashCommands(t: TFunction): SlashCommand[] {
       icon: Database,
       run: (e) => e.chain().focus().insertDatabaseNode().run(),
     },
+    // One item per view: a new database opening on that view.
+    ...(
+      [
+        ["table", "tableView", Table],
+        ["board", "boardView", Columns3],
+        ["gallery", "galleryView", LayoutGrid],
+        ["list", "listView", List],
+        ["calendar", "calendarView", Calendar],
+        ["timeline", "timelineView", ChartBar],
+      ] as const
+    ).map(([type, key, icon]) => ({
+      id: `database-${type}`,
+      node: "database",
+      type: "command" as const,
+      title: t(`slash.items.${key}.title`),
+      description: t(`slash.items.${key}.description`),
+      icon,
+      run: (e: Editor) => e.chain().focus().insertDatabaseNode(type).run(),
+    })),
     //  ─── Colors ─────────────────────────────────────────────
     // { id: "colorsDivider", type: "separator", title: "separator" },
     // { id: "colors", type: "title", title: "Colors" },

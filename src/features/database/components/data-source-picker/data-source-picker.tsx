@@ -1,21 +1,21 @@
 import {
-  FolderClosed,
-  Plus,
-  Database,
-  Table,
+  ArrowLeft,
+  ArrowUpRight,
+  Calendar,
   Columns3,
+  Database,
+  GanttChart,
   LayoutGrid,
   List as ListIcon,
-  Calendar,
-  GanttChart,
+  Plus,
+  Table,
+  X,
   type LucideIcon,
 } from "lucide-react";
 import { useState } from "react";
-import { Button } from "src/components/tiptap-ui-primitive/button";
-import { Card, CardItemGroup } from "src/components/tiptap-ui-primitive/card";
+import { useTranslation } from "react-i18next";
 import { useActivePageState } from "src/features/pages/context/active-page-context";
 import type { DatabaseView, SavedView, ID, DataSource } from "src/types";
-import "./data-source-picker.scss";
 import { PageItemIcon } from "src/features/pages/page-item/page-item-icon";
 import { useDataSources } from "src/hooks/use-data-sources";
 import { useCreateDataSource } from "src/hooks/use-create-data-source";
@@ -26,6 +26,9 @@ import { usePages } from "src/hooks/use-pages";
 import { newId } from "src/lib/id";
 import { useCurrentPerson } from "src/hooks/use-session";
 import { useCurrentWorkspace } from "src/hooks/use-workspaces";
+import { ViewPlaceholder } from "./view-placeholder";
+import { makeDefaultView } from "../../utils";
+import "./data-source-picker.scss";
 
 const VIEW_ICON: Record<DatabaseView["type"], LucideIcon> = {
   table: Table,
@@ -36,9 +39,18 @@ const VIEW_ICON: Record<DatabaseView["type"], LucideIcon> = {
   timeline: GanttChart,
 };
 
+/**
+ * A database block that has no data source yet (just inserted from the slash
+ * menu), as in Notion: a faded preview of the view it was inserted as, with
+ * the "New database" menu beside it — create a new data source (the block
+ * keeps its view, so a list stays a list) or link an existing one.
+ */
 export function DataSourcePicker({
+  viewType,
   onSelect,
 }: {
+  /** The view the block was inserted as. */
+  viewType: DatabaseView["type"];
   // savedView: when set, the caller should open a view of that layout on the
   // linked node (rather than the default).
   onSelect: (
@@ -48,26 +60,31 @@ export function DataSourcePicker({
     savedView?: SavedView,
   ) => void;
 }) {
+  const { t } = useTranslation();
   const { data: sources, isLoading } = useDataSources();
   const createPage = useCreatePage();
   const createDataSource = useCreateDataSource();
   const { activePageId, activePage } = useActivePageState();
-  const [query, setQuery] = useState("");
-  const [creating, setCreating] = useState(false);
   const { data: pages } = usePages();
   const { person } = useCurrentPerson();
   const { workspaceId } = useCurrentWorkspace();
 
+  // menu: the two choices; link: the list of data sources; closed: × hides
+  // the menu (clicking the preview brings it back).
+  const [panel, setPanel] = useState<"menu" | "link" | "closed">("menu");
+  const [query, setQuery] = useState("");
+  const [creating, setCreating] = useState(false);
+
   const filtered = ((sources as DataSource[]) ?? []).filter((s) =>
     s.name?.toLowerCase().includes(query.trim().toLowerCase()),
   );
+
   async function handleNew() {
+    if (creating || !person || !workspaceId) return;
     setCreating(true);
     try {
       const sourceId = newId();
-      const name = query.trim() || "New Database";
-      if (!person || !workspaceId) return;
-
+      const name = t("database.picker.newDatabase");
       const dbPage = makeDatabasePage({
         sourceId,
         name,
@@ -82,142 +99,180 @@ export function DataSourcePicker({
       await createPage.mutateAsync(dbPage);
       await createDataSource.mutateAsync(source);
 
-      onSelect(source.id, dbPage.id, false);
+      // The view the block was inserted as, made again now that the data
+      // source has properties (a board needs one to group by).
+      onSelect(
+        source.id,
+        dbPage.id,
+        false,
+        makeDefaultView(
+          viewType,
+          t(`database.views.${viewType}`),
+          source.properties,
+        ),
+      );
     } finally {
       setCreating(false);
     }
   }
+
   return (
-    <div className="db-source-picker">
-      <div className="db-source-picker__empty">
-        <div className="db-source-picker__empty-icon">
-          <FolderClosed size={46} />
+    <div
+      className="db-setup"
+      data-view-type={viewType}
+      aria-label={t(`database.picker.selectFor.${viewType}`)}
+    >
+      <div
+        className="db-setup__preview"
+        aria-hidden="true"
+        onClick={() => panel === "closed" && setPanel("menu")}
+      >
+        <div className="db-setup__title">
+          {t("database.picker.newDatabase")}
         </div>
-        <span className="db-source-picker__empty-title">No data source</span>
-        <span className="db-source-picker__empty-sub">
-          Select a data source to continue
-        </span>
+        <ViewPlaceholder type={viewType} />
       </div>
 
-      <div className="db-source-picker__panel">
-        <Card
-          style={{
-            padding: 8,
-            minWidth: 260,
-            border: "1px solid var(--tt-border-color)",
-            borderRadius: "var(--tt-radius-sm)",
-            boxShadow: "var(--tt-shadow-md)",
-          }}
+      {panel !== "closed" && (
+        <div
+          className="db-setup__menu"
+          role="dialog"
+          aria-label={t("database.picker.newDatabase")}
         >
-          <input
-            className="db-source-picker__search"
-            placeholder="Link or create a database…"
-            value={query}
-            autoFocus
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && filtered.length === 0) handleNew();
-            }}
-          />
+          {panel === "menu" ? (
+            <>
+              <div className="db-setup__menu-head">
+                <span className="db-setup__menu-title">
+                  {t("database.picker.newDatabase")}
+                </span>
+                <button
+                  type="button"
+                  className="db-setup__close"
+                  aria-label={t("actions.close")}
+                  onClick={() => setPanel("closed")}
+                >
+                  <X size={14} />
+                </button>
+              </div>
 
-          <CardItemGroup
-            style={{
-              marginTop: 6,
-              maxHeight: 240,
-              overflowY: "auto",
-              justifyContent: "flex-start",
-              width: "100%",
-            }}
-          >
-            {isLoading ? (
-              <span className="db-source-picker__hint">Loading…</span>
-            ) : filtered.length === 0 ? (
-              <span className="db-source-picker__hint">No data sources</span>
-            ) : (
-              filtered.map((s) => {
-                const sourcePage = pages?.find((p) => p.id === s.pageId);
-                const saved = s.savedViews ?? [];
-                return (
-                  <div key={s.id} className="db-source-picker__source">
-                    <Button
-                      variant="ghost"
-                      style={{
-                        justifyContent: "flex-start",
-                        width: "100%",
-                        gap: 8,
-                        borderRadius: "var(--tt-radius-sm)",
-                      }}
-                      onClick={() => onSelect(s.id, s.pageId, true)}
-                    >
-                      {sourcePage ? (
-                        <PageItemIcon
-                          cover={sourcePage.cover}
-                          styles={{ width: 16, height: 16 }}
-                        />
-                      ) : (
-                        <Database className="tiptap-button-icon" size={14} />
-                      )}
-                      <span className="tiptap-button-text">{s.name}</span>
-                    </Button>
+              <button
+                type="button"
+                className="db-setup__item"
+                disabled={creating}
+                onClick={handleNew}
+              >
+                <span className="db-setup__item-tile" aria-hidden="true">
+                  <Plus size={18} />
+                </span>
+                {t("database.picker.newEmpty")}
+              </button>
 
-                    {saved.length > 0 && (
-                      <div className="db-source-picker__views">
+              <div className="db-setup__divider" />
+
+              <button
+                type="button"
+                className="db-setup__item"
+                onClick={() => setPanel("link")}
+              >
+                <span className="db-setup__item-icon" aria-hidden="true">
+                  <ArrowUpRight size={18} />
+                </span>
+                {t("database.picker.linkExisting")}
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="db-setup__menu-head">
+                <button
+                  type="button"
+                  className="db-setup__close"
+                  aria-label={t("database.picker.back")}
+                  onClick={() => {
+                    setPanel("menu");
+                    setQuery("");
+                  }}
+                >
+                  <ArrowLeft size={14} />
+                </button>
+                <span className="db-setup__menu-title">
+                  {t("database.picker.linkExisting")}
+                </span>
+              </div>
+
+              <input
+                className="db-setup__search"
+                placeholder={t("database.picker.searchSources")}
+                aria-label={t("database.picker.searchSources")}
+                value={query}
+                autoFocus
+                onChange={(e) => setQuery(e.target.value)}
+              />
+
+              <div className="db-setup__sources">
+                {isLoading ? (
+                  <span className="db-setup__hint">
+                    {t("database.picker.loading")}
+                  </span>
+                ) : filtered.length === 0 ? (
+                  <span className="db-setup__hint">
+                    {t("database.picker.none")}
+                  </span>
+                ) : (
+                  filtered.map((s) => {
+                    const sourcePage = pages?.find((p) => p.id === s.pageId);
+                    const saved = s.savedViews ?? [];
+                    return (
+                      <div key={s.id}>
+                        <button
+                          type="button"
+                          className="db-setup__item db-setup__item--source"
+                          onClick={() => onSelect(s.id, s.pageId, true)}
+                        >
+                          <span
+                            className="db-setup__item-icon"
+                            aria-hidden="true"
+                          >
+                            {sourcePage ? (
+                              <PageItemIcon
+                                cover={sourcePage.cover}
+                                styles={{ width: 16, height: 16 }}
+                              />
+                            ) : (
+                              <Database size={16} />
+                            )}
+                          </span>
+                          <span className="db-setup__item-text">{s.name}</span>
+                        </button>
                         {saved.map((v) => {
                           const Icon = VIEW_ICON[v.type] ?? Database;
                           return (
-                            <Button
+                            <button
                               key={v.id}
-                              variant="ghost"
-                              className="db-source-picker__view"
-                              style={{
-                                justifyContent: "flex-start",
-                                width: "100%",
-                                gap: 8,
-                                paddingLeft: 26,
-                                borderRadius: "var(--tt-radius-sm)",
-                              }}
+                              type="button"
+                              className="db-setup__item db-setup__item--view"
                               onClick={() => onSelect(s.id, s.pageId, true, v)}
                             >
-                              <Icon className="tiptap-button-icon" size={13} />
-                              <span className="tiptap-button-text">
+                              <span
+                                className="db-setup__item-icon"
+                                aria-hidden="true"
+                              >
+                                <Icon size={14} />
+                              </span>
+                              <span className="db-setup__item-text">
                                 {v.name}
                               </span>
-                            </Button>
+                            </button>
                           );
                         })}
                       </div>
-                    )}
-                  </div>
-                );
-              })
-            )}
-          </CardItemGroup>
-
-          <div
-            className="db-source-picker__footer"
-            style={{
-              display: "flex",
-              justifyContent: "flex-start",
-              width: "100%",
-            }}
-          >
-            <Button
-              variant="ghost"
-              disabled={creating}
-              style={{
-                justifyContent: "flex-start",
-                width: "100%",
-                gap: 8,
-                borderRadius: "var(--tt-radius-sm)",
-              }}
-              onClick={handleNew}
-            >
-              <Plus className="tiptap-button-icon" size={14} />
-              <span className="tiptap-button-text">New database</span>
-            </Button>
-          </div>
-        </Card>
-      </div>
+                    );
+                  })
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }

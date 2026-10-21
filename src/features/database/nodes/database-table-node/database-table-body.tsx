@@ -129,6 +129,11 @@ export function DatabaseTableBody({
       className="db-table"
       data-type="database-table"
       data-locked={locked ? "true" : "false"}
+      data-vlines={
+        (activeView as TableView | undefined)?.showVerticalLines === false
+          ? "off"
+          : undefined
+      }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onPointerDown={(e: any) => {
         if ((e.target as HTMLElement).closest(".db-record") || !databaseId)

@@ -57,6 +57,9 @@ jobs:
       - name: Translations (no duplicate or missing keys)
         run: node scripts/check-i18n.mjs
 
+      - name: Slash menu items
+        run: node scripts/check-slash-items.mjs
+
       - name: Build
         run: npm run build
         env:

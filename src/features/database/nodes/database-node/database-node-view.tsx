@@ -34,7 +34,15 @@ import {
 import { useTableRecords } from "../../hooks/use-table-records";
 import { useViewSwitch } from "../../hooks/use-view-switch";
 
-import { type DatabaseAttrs, type ID, type DatabaseProperty } from "src/types";
+import {
+  type DatabaseAttrs,
+  type ID,
+  type DatabaseProperty,
+  type ListView,
+  type TableView,
+} from "src/types";
+import { useTranslation } from "react-i18next";
+import { DEFAULT_LOAD_LIMIT } from "../../utils/load-limit";
 import "./database-node.scss";
 import { SelectionToolbar } from "../../components/selection-toolbar";
 import {
@@ -77,6 +85,7 @@ function DatabaseNodeViewBody({
   editor: Editor;
   attrs: DatabaseAttrs;
 }) {
+  const { t } = useTranslation();
   const { db, source, sortedRecords } = useDatabaseContext();
   const activeView = db.activeView;
   const tableRef = useRef<HTMLDivElement>(null);
@@ -133,14 +142,51 @@ function DatabaseNodeViewBody({
     tlMonth,
   );
 
-  // Publish the ACTIVE view's rowSlots so record nodes position correctly in
-  // whichever view is hosting them (table/list/timeline all node-render records).
-  const activeRowSlots =
+  const allRowSlots =
     activeView?.type === "list"
       ? listLayout.rowSlots
       : activeView?.type === "timeline"
         ? sortedRecords.map((r) => r.id)
         : tableLayout.rowSlots;
+
+  // ── Load limit (table and list, ungrouped): the first N rows, then
+  //    "Load more". Rows past it aren't placed, so they don't render. ──
+  const limitable =
+    (activeView?.type === "table" && tableLayout.headers.length === 0) ||
+    (activeView?.type === "list" && listLayout.headers.length === 0);
+  const loadLimit =
+    (activeView as TableView | ListView | undefined)?.loadLimit ??
+    DEFAULT_LOAD_LIMIT;
+  // Extra rows loaded with "Load more", for this view only.
+  const [loaded, setLoaded] = useState({ viewId: "", extra: 0 });
+  const extra = loaded.viewId === activeView?.id ? loaded.extra : 0;
+  const shownRows = loadLimit > 0 ? loadLimit + extra : Infinity;
+  // Memoised: the bridge republishes when this array changes.
+  const activeRowSlots = useMemo(() => {
+    if (!limitable || allRowSlots.length <= shownRows) return allRowSlots;
+    const shown = allRowSlots.slice(0, shownRows);
+    // A row being added (or edited) stays in view past the limit.
+    return editingRecordId && !shown.includes(editingRecordId)
+      ? [...shown, editingRecordId]
+      : shown;
+  }, [limitable, allRowSlots, shownRows, editingRecordId]);
+  const hiddenRows = allRowSlots.length - activeRowSlots.length;
+  const loadMore = hiddenRows > 0 && (
+    <button
+      type="button"
+      className="db-load-more"
+      contentEditable={false}
+      onClick={() =>
+        setLoaded({
+          viewId: activeView?.id ?? "",
+          extra: extra + (loadLimit || DEFAULT_LOAD_LIMIT),
+        })
+      }
+    >
+      {t("database.loadMore")}
+      <span className="db-load-more__count">{hiddenRows}</span>
+    </button>
+  );
 
   useDatabaseBridgePublish({
     editor,
@@ -187,20 +233,29 @@ function DatabaseNodeViewBody({
   // ── View branches ─────────────────────────────────────────────────────────
   if (activeView?.type === "board") return <DatabaseBoardNodeView />;
   if (activeView?.type === "gallery") return <DatabaseGalleryNodeView />;
-  if (activeView?.type === "list") return <DatabaseListNodeView />;
+  if (activeView?.type === "list")
+    return (
+      <>
+        <DatabaseListNodeView />
+        {loadMore}
+      </>
+    );
   if (activeView?.type === "calendar") return <DatabaseCalendarNodeView />;
   if (activeView?.type === "timeline") return <DatabaseTimelineNodeView />;
 
   // ── Table view (node-rendered) ────────────────────────────────────────────
   return (
-    <DatabaseTableBody
-      tableRef={tableRef}
-      gridTemplateColumns={gridTemplateColumns}
-      bodyGridTemplateColumns={bodyGridTemplateColumns}
-      widthFor={widthFor}
-      onCommitColumnWidth={commitColumnWidth}
-      collapsedKeys={collapsedKeys}
-    />
+    <>
+      <DatabaseTableBody
+        tableRef={tableRef}
+        gridTemplateColumns={gridTemplateColumns}
+        bodyGridTemplateColumns={bodyGridTemplateColumns}
+        widthFor={widthFor}
+        onCommitColumnWidth={commitColumnWidth}
+        collapsedKeys={collapsedKeys}
+      />
+      {loadMore}
+    </>
   );
 }
 
@@ -343,6 +398,7 @@ export function DatabaseNodeView({
             the text column like any other block: .top-level-block. */}
         <div className="top-level-block">
           <DataSourcePicker
+            viewType={attrs.views[0]?.type ?? "table"}
             onSelect={(sourceId, pageId, isLinked, savedView) =>
               updateAttributes({
                 ...attrs,

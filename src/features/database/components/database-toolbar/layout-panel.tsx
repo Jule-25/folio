@@ -2,8 +2,11 @@ import type {
   BoardView,
   DatabaseView,
   GalleryView,
+  ID,
   OpenPageIn,
+  TableView,
 } from "src/types";
+import { useDatabaseContext } from "../../context/database-context";
 import { useTranslation } from "react-i18next";
 import { Button } from "src/components/tiptap-ui-primitive/button";
 import { PanelRight, Check, SquareSquare, Square } from "lucide-react";
@@ -27,33 +30,36 @@ import { MenuRow } from "../menu-row";
 import { NavigableMenuItem } from "../navigable-menu-item";
 import { ViewPalette } from "./view-palette";
 import { CardLayoutPicker } from "./card-layout-picker";
+import { LoadLimitPicker } from "./load-limit-picker";
 
 interface LayoutPanelProps {
   view: DatabaseView;
   db: UseDatabaseReturn;
   bare?: boolean;
-  showDbTitle?: boolean;
-  showVLines?: boolean;
-  wrapAllCols?: boolean;
-  onToggleShowDbTitle?: () => void;
-  onToggleShowVLines?: () => void;
-  onToggleWrapAllCols?: () => void;
 }
 
-export function LayoutPanel({
-  view,
-  db,
-  bare = false,
-  onToggleShowDbTitle,
-  onToggleShowVLines,
-  onToggleWrapAllCols,
-  showDbTitle = true,
-  showVLines = true,
-  wrapAllCols = false,
-}: LayoutPanelProps) {
+export function LayoutPanel({ view, db, bare = false }: LayoutPanelProps) {
   const { t } = useTranslation();
   const { editor } = useCurrentEditor();
+  const { attrs, updateAttributes, source } = useDatabaseContext();
 
+  // The four switches read and write settings that already exist:
+  //   title       → the block's hideTitle
+  //   lines       → this table view's showVerticalLines
+  //   wrap        → this table view's per-column wrap list (none listed = all wrap)
+  //   page icon   → the title property's showPageIcon (also in its own menu)
+  const properties = source?.properties ?? [];
+  const titleProp = properties.find((p) => p.config.type === "title");
+  const isTable = view.type === "table";
+  const showDbTitle = !attrs.hideTitle;
+  const showVLines = (view as TableView).showVerticalLines ?? true;
+  const unwrapped =
+    (view as { unwrappedProperties?: ID[] }).unwrappedProperties ?? [];
+  const wrapAllCols = unwrapped.length === 0;
+  const showPageIcon =
+    titleProp?.config.type === "title"
+      ? (titleProp.config.showPageIcon ?? true)
+      : true;
   const onSelect = (type: DatabaseView["type"]) => {
     if (view.type === type) return;
     db.updateView(view.id, { ...view, type });
@@ -125,20 +131,34 @@ export function LayoutPanel({
         label={t("database.layout.showDatabaseTitle")}
         toggle
         checked={showDbTitle}
-        onToggle={() => onToggleShowDbTitle?.()}
+        onToggle={() => updateAttributes({ ...attrs, hideTitle: showDbTitle })}
       />
-      <MenuRow
-        label={t("database.layout.showVerticalLines")}
-        toggle
-        checked={showVLines}
-        onToggle={async () => onToggleShowVLines?.()}
-      />
-      <MenuRow
-        label={t("database.layout.wrapAllColumns")}
-        toggle
-        checked={wrapAllCols}
-        onToggle={() => onToggleWrapAllCols?.()}
-      />
+      {isTable && (
+        <>
+          <MenuRow
+            label={t("database.layout.showVerticalLines")}
+            toggle
+            checked={showVLines}
+            onToggle={() =>
+              db.updateView(view.id, {
+                showVerticalLines: !showVLines,
+              } as Partial<DatabaseView>)
+            }
+          />
+          <MenuRow
+            label={t("database.layout.wrapAllColumns")}
+            toggle
+            checked={wrapAllCols}
+            onToggle={() =>
+              db.updateView(view.id, {
+                unwrappedProperties: wrapAllCols
+                  ? properties.map((p) => p.id)
+                  : [],
+              } as Partial<DatabaseView>)
+            }
+          />
+        </>
+      )}
       {(view.type === "gallery" || view.type === "board") && (
         <>
           <Separator orientation="horizontal" style={{ height: 0.5 }} />
@@ -269,7 +289,26 @@ export function LayoutPanel({
         onClick={() => db.pushPanel({ type: "open-pages-in" })}
         navigable
       />
-      <MenuRow label={t("database.layout.showPageIcon")} toggle />
+      {(isTable || view.type === "list") && (
+        <LoadLimitPicker
+          value={(view as TableView).loadLimit}
+          onChange={(loadLimit) =>
+            db.updateView(view.id, { loadLimit } as Partial<DatabaseView>)
+          }
+        />
+      )}
+      {titleProp && (
+        <MenuRow
+          label={t("database.layout.showPageIcon")}
+          toggle
+          checked={showPageIcon}
+          onToggle={() =>
+            void db.updateProperty(titleProp.id, {
+              config: { type: "title", showPageIcon: !showPageIcon },
+            })
+          }
+        />
+      )}
     </div>
   );
 
