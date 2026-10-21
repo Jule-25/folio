@@ -21,8 +21,7 @@ import { recordSelection } from "src/features/database/utils/record-selection-st
 import { RecordDragMenu } from "src/features/database/components/record-drag-menu";
 import { readDatabaseData } from "src/features/database/utils/database-bridge";
 import type { DragStorage } from "src/features/database/extensions";
-import { GripVerticalIcon } from "src/components/tiptap-icons";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { insertBlockWithMenu } from "./insert-block";
 import {
   extendSelectionToBlock,
@@ -196,11 +195,35 @@ const makeNestedOptions = (editor: Editor | null) => ({
   ],
 });
 
+/** Notion's grip: six small filled dots, two columns of three. */
+function GripDotsIcon() {
+  return (
+    <svg
+      className="tiptap-button-icon"
+      width="10"
+      height="16"
+      viewBox="0 0 10 16"
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <circle cx="2.5" cy="3" r="1.5" />
+      <circle cx="7.5" cy="3" r="1.5" />
+      <circle cx="2.5" cy="8" r="1.5" />
+      <circle cx="7.5" cy="8" r="1.5" />
+      <circle cx="2.5" cy="13" r="1.5" />
+      <circle cx="7.5" cy="13" r="1.5" />
+    </svg>
+  );
+}
+
 export function DragHandle({ editor }: { editor: Editor | null }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [target, setTarget] = useState("paragraph");
   const [hideHandle, setHideHandle] = useState(false);
+  // Flipped on every move to another block: switches the handle between two
+  // identical fade-in animations, which restarts it (drag-handle.scss).
+  const [fadeFlip, setFadeFlip] = useState(false);
   // The handle's block sits in a table cell: it's drawn as a solid chip a
   // little further out, clear of the row's grip on the table's border.
   const [inCell, setInCell] = useState(false);
@@ -442,7 +465,9 @@ export function DragHandle({ editor }: { editor: Editor | null }) {
     <TiptapDragHandle
       className={`drag-handle ${isColumnResizing ? "hide" : "show"} ${
         target === "Record" ? "is-record" : ""
-      } ${hideHandle ? "hide" : ""} ${inCell ? "in-cell" : ""}`}
+      } ${hideHandle ? "hide" : ""} ${inCell ? "in-cell" : ""} ${
+        fadeFlip ? "fade-a" : "fade-b"
+      }`}
       editor={editor}
       computePositionConfig={computePositionConfig}
       onNodeChange={({ node, pos: newPos }) => {
@@ -489,6 +514,7 @@ export function DragHandle({ editor }: { editor: Editor | null }) {
         // unnecessary re-renders on every cursor move
         if (newPos !== posRef.current) {
           posRef.current = newPos;
+          setFadeFlip((f) => !f);
         }
 
         if (newTarget !== targetRef.current) {
@@ -696,7 +722,14 @@ export function DragHandle({ editor }: { editor: Editor | null }) {
           tabIndex={-1}
           draggable={false}
           aria-label={t("dragHandle.add")}
-          title={t("dragHandle.addHint")}
+          tooltip={
+            <span className="drag-handle-tip">
+              <Trans
+                i18nKey="dragHandle.addTip"
+                components={{ b: <b />, br: <br /> }}
+              />
+            </span>
+          }
           // Keep the hovered block (and the editor's focus) on press.
           onMouseDown={(e) => e.preventDefault()}
           onClick={(e) => {
@@ -731,6 +764,15 @@ export function DragHandle({ editor }: { editor: Editor | null }) {
                 ref={gripRef}
                 className="grip-button"
                 tabIndex={-1}
+                aria-label={t("dragHandle.grip")}
+                tooltip={
+                  <span className="drag-handle-tip">
+                    <Trans
+                      i18nKey="dragHandle.gripTip"
+                      components={{ b: <b />, br: <br /> }}
+                    />
+                  </span>
+                }
                 onPointerDown={(e) => {
                   const pos = posRef.current;
                   if (e.shiftKey && pos >= 0) {
@@ -776,7 +818,7 @@ export function DragHandle({ editor }: { editor: Editor | null }) {
                   pointerEvents: open ? "none" : "auto",
                 }}
               >
-                <GripVerticalIcon className="tiptap-button-icon" />
+                <GripDotsIcon />
               </Button>
               <DropdownMenuTrigger asChild>
                 <span

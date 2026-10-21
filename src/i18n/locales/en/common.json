@@ -1250,7 +1250,9 @@
   },
   "dragHandle": {
     "add": "Add a block",
-    "addHint": "Click to add below · Alt-click to add above"
+    "addTip": "<b>Click</b> to add below<br/><b>Alt-click</b> to add above",
+    "grip": "Drag to move, click to open the menu",
+    "gripTip": "<b>Drag</b> to move<br/><b>Click</b> to open menu"
   },
   "moveTo": {
     "label": "Move to",

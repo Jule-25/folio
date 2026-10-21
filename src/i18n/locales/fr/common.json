@@ -1250,7 +1250,9 @@
   },
   "dragHandle": {
     "add": "Ajouter un bloc",
-    "addHint": "Cliquer pour ajouter en dessous · Alt+clic pour ajouter au-dessus"
+    "addTip": "<b>Cliquez</b> pour ajouter en dessous<br/><b>Alt-clic</b> pour ajouter au-dessus",
+    "grip": "Glisser pour déplacer, cliquer pour ouvrir le menu",
+    "gripTip": "<b>Glissez</b> pour déplacer<br/><b>Cliquez</b> pour ouvrir le menu"
   },
   "moveTo": {
     "label": "Déplacer vers",
