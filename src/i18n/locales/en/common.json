@@ -1127,10 +1127,6 @@
         "title": "File",
         "description": "Upload a file attachment."
       },
-      "youtube": {
-        "title": "Youtube",
-        "description": "Embed a YouTube video."
-      },
       "video": {
         "title": "Video",
         "description": "Upload a video, or embed YouTube, Vimeo or Loom."
