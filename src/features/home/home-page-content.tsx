@@ -194,7 +194,11 @@ export function HomePageContent({ userName }: { userName?: string }) {
             />
           )}
 
-          <Greeting name={userName} className="home-dense__greeting" compact />
+          <Greeting
+            name={userName}
+            className="home-dense__greeting"
+            compact={false}
+          />
 
           <HomeForYou onOpenInbox={openInbox} />
 

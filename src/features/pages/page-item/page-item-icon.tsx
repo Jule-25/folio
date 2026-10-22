@@ -4,6 +4,7 @@ import type { CSSProperties } from "react";
 import { FileText } from "src/components/tiptap-icons";
 import { SbPageIcon } from "src/components/tiptap-icons/sidebar-icons";
 import { UploadedIcon } from "src/components/uploaded-icon/uploaded-icon";
+import "./page-item-icon.scss";
 
 interface PageItemIconProps {
   cover: Page["cover"];
@@ -58,7 +59,7 @@ export function PageItemIcon({
   if (cover.target === "Emoji" && hasIcon) {
     return (
       <span
-        className="page-icon emoji"
+        className="page-icon page-icon--emoji"
         style={{ ...styles, fontSize: 15.5 }}
         aria-hidden="true"
       >

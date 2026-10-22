@@ -53,3 +53,13 @@
   justify-content: flex-end;
   gap: 8px;
 }
+
+:root[data-theme="retro"]{
+  .home-tlbr-new-page-button{
+    box-shadow: var(--tt-shadow-elevated-md);
+    border-radius: 5px;
+    margin-top: 10px;
+    min-height: 28px;
+    height: 28px;
+  }
+}

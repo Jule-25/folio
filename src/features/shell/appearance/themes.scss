@@ -319,6 +319,10 @@ html:root[data-theme="notebook"] {
   --tt-border-color: rgba(17, 17, 17, 0.22);
   --tt-border-color-tint: rgba(17, 17, 17, 0.1);
   --tt-shadow-elevated-md: 0 0 0 2px #111111, 4px 4px 0 #111111;
+  --tt-shadow-elevated-xs: 0 0 0 1px #111111, 2px 2px 0 #111111;
+  --tt-shadow-elevated-sm: 0 0 0 1.5px #111111, 3px 3px 0 #111111;
+  --tt-shadow-elevated-md: 0 0 0 2px #111111, 4px 4px 0 #111111;
+  --tt-shadow-elevated-lg: 0 0 0 3px #111111, 6px 6px 0 #111111;
 
   --sidebar-bg-color: #ffd43b;
   --sidebar-surface: radial-gradient(rgba(17, 17, 17, 0.14) 1px, transparent 1.6px) 0 0 / 14px 14px, #ffd43b;
@@ -338,11 +342,48 @@ html:root[data-theme="notebook"] {
   --sb-divider: rgba(17, 17, 17, 0.2);
   --sb-dock-bg: #ffffff;
   --sb-dock-shadow: 0 0 0 2px #111111, 3px 3px 0 #111111;
-  --theme-dock-active-bg: #ffd43b;
+  --theme-dock-active-bg: var(--theme-accent);
   --theme-dock-active-color: #111111;
+  --sb-doc-tab-height: 28px;
   --sb-dock-active-bg: var(--theme-dock-active-bg);
   --sb-dock-active-color: var(--theme-dock-active-color);
+  --sb-scrlbr-width: thin;
+  --sb-scrlbr-color: rgba(201, 199, 201, 0.1) transparent;
 
+  // .tiptap-button{
+  //   box-shadow: var(--tt-shadow-elevated-md);
+  // }
+ 
+  
+  .simple-editor-wrapper{
+    height: 96vh;
+  }
+
+  .cover-header-wrapper{
+    position: relative;
+  }
+  .cover-image-root{
+    width: 100% !important;
+
+    img{
+      position: absolute !important;
+      right: 0px;
+      left: 168px !important;
+    }
+    img[data-collapsed="true"]{
+      left: 24px !important;
+    }
+  }
+  .gradient-cover{
+    position: absolute !important;
+    width: 100% !important;
+    height: inherit;
+    right: 0px;
+    left: 168px !important;
+  }
+  .gradient-cover[data-collapsed="true"]{
+     left: 24px !important;
+  }
   .theme-sheet {
     right: 16px;
     bottom: 16px;

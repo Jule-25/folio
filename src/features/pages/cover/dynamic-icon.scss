@@ -1,0 +1,7 @@
+:root[data-theme="retro"] {
+  .dynamic-icon {
+    stroke-width: 2.5;
+    color: #111111;
+    filter: drop-shadow(1px 1px 0 var(--theme-accent));
+  }
+}

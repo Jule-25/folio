@@ -88,6 +88,10 @@
     gap: 10px;
   }
 
+  &__greeting.retro{
+    font-family: "Space Grotesk", system-ui, sans-serif !important;
+  }
+
   // Recent / Pinned / Created by me: text tabs on a hairline, the active one
   // underlined. The line is an inset shadow so the underline (drawn by the
   // tab, which paints on top) can sit right on it.
@@ -709,4 +713,13 @@
   display: inline-flex; 
   align-items: center; 
   gap: 6px;
+}
+
+:root[data-theme="retro"]{
+  .home-learn{
+    border: 2px solid #111111 !important;
+    box-shadow:
+      3px 3px 0 0 var(--theme-accent),
+      6px 6px 0 0 #111111;
+  }
 }

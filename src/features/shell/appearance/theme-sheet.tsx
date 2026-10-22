@@ -7,7 +7,7 @@ export function ThemeSheet({ left, flush }: { left: number; flush: boolean }) {
     <div
       aria-hidden="true"
       className={`theme-sheet${flush ? " theme-sheet--flush" : ""}`}
-      style={{ left: flush ? 0 : left + 8 }}
+      style={{ left: flush ? 0 : left + 24 }}
     />
   );
 }

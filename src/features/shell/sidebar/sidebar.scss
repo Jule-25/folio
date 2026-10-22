@@ -837,16 +837,24 @@
 }
 
 // ── Sidebar scrollbar ──
-// Notion's sidebar bar: the browser's own full-width scrollbar, arrows and
-// all, in a quiet grey on a clear track. Setting the standard properties is
-// what turns the app-wide ::-webkit-scrollbar pill (simple-editor.scss) off
-// for this element, so Chrome and Edge draw their native bar instead.
-// The body (SidebarBody's CardBody) is the element that scrolls.
+:root{
+  --sb-scrlbr-width: auto;
+  --sb-scrlbr-color: rgba(55, 53, 47, 0.25) transparent;
+}
+.dark {
+  --sb-scrlbr-color: rgba(255, 255, 255, 0.22) transparent;
+}
 .sidebar-body-content {
-  scrollbar-width: auto;
-  scrollbar-color: rgba(55, 53, 47, 0.25) transparent;
+  scrollbar-width: var(--sb-scrlbr-width);
+  scrollbar-color: var(--sb-scrlbr-color);
+}
 
-  .dark & {
-    scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
-  }
+:root[data-theme="retro"]{
+  .sidebar{
+    box-shadow: var(--tt-shadow-elevated-sm);
+    // height: calc(100vh - 24px) !important;
+    // margin-block: 12px;
+    // border-top-right-radius: 16px !important;
+    // border-bottom-right-radius: 16px !important;
+  } 
 }

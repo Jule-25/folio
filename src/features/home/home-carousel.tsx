@@ -9,8 +9,9 @@ import {
 } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { Button } from "src/components/tiptap-ui-primitive/button";
 
-// A horizontal row of cards (Notion home style): scrolls sideways and fades
+// A horizontal row of cards: scrolls sideways and fades
 // out (the "fog") at an edge that has more to show. On that edge, a bare
 // chevron sits ON TOP of the fog and the cards: the whole fog strip is the
 // button, layered above the cards, so clicking it scrolls and never opens a
@@ -111,14 +112,14 @@ export function HomeCarousel({
         {edges.right && (
           <>
             <div className="home-carousel__fog home-carousel__fog--right" />
-            <button
+            <Button
               type="button"
               className="home-carousel__arrow home-carousel__arrow--right"
               aria-label={t("home.scrollRight", "Scroll right")}
               onClick={() => scrollBy(1)}
             >
               <ChevronRight size={fit ? 17 : 22} strokeWidth={fit ? 2 : 2.2} />
-            </button>
+            </Button>
           </>
         )}
       </div>

@@ -9,6 +9,9 @@ import { TeamspaceMembersModal } from "../workspace/teamspaces/teamspace-members
 import { colorForPersonId } from "src/lib/person-color";
 import { ChevronRight, FileText, UserPlus } from "lucide-react";
 import "./teamspace-hero.scss";
+import { Button } from "src/components/tiptap-ui-primitive/button";
+import { Card } from "src/components/tiptap-ui-primitive/card";
+import { useAppearance } from "../shell/appearance/appearance";
 
 const MAX_FACES = 5;
 const MAX_PINS = 4;
@@ -74,13 +77,15 @@ export function TeamspaceHero({
     : (cover?.gradient ?? null);
   const list = pins.length > 0 ? pins : subpages.slice(0, MAX_PINS);
 
+  const [appearance] = useAppearance();
+
   return (
-    <section
-      className="ts-hero"
+    <Card
+      className={`ts-hero ${appearance}`}
       aria-label={name}
       data-has-side={list.length > 0 || undefined}
     >
-      {coverBg && (
+      {coverBg && appearance === "default" && (
         <div
           className="ts-hero__cover"
           style={{ background: coverBg }}
@@ -130,23 +135,23 @@ export function TeamspaceHero({
         )}
 
         <div className="ts-hero__actions">
-          <button
+          <Button
             type="button"
             className="ts-hero__btn ts-hero__btn--primary"
             onClick={() => page?.id && setActivePageId(page?.id)}
           >
             <FileText size={14} aria-hidden />
             {t("home.teamspaceHero.open")}
-          </button>
+          </Button>
           {teamspaceId && (
-            <button
+            <Button
               type="button"
               className="ts-hero__btn"
               onClick={() => setMembersOpen(true)}
             >
               <UserPlus size={14} aria-hidden />
               {t("home.teamspaceHero.invite")}
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -160,7 +165,7 @@ export function TeamspaceHero({
           </span>
           <div className="ts-hero__pins-grid">
             {list.map((p) => (
-              <button
+              <Button
                 key={p.id}
                 type="button"
                 className="ts-hero__pin"
@@ -176,7 +181,7 @@ export function TeamspaceHero({
                 <span className="ts-hero__pin-when">
                   <ChevronRight size={14} />
                 </span>
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -188,6 +193,6 @@ export function TeamspaceHero({
           onClose={() => setMembersOpen(false)}
         />
       )}
-    </section>
+    </Card>
   );
 }

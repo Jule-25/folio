@@ -17,7 +17,7 @@
   );
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ts-a) 17%, transparent);
   overflow: hidden;
-
+  font-family: "Space Grotesk", system-ui, sans-serif;
 
   .dark & {
     background: linear-gradient(
@@ -248,4 +248,35 @@
     height: 8px;
     margin: calc(-1 * var(--ts-pad, 24px)) calc(-1 * var(--ts-pad, 24px)) 0;
   }
+}
+
+.ts-hero.retro{
+  border: 2px solid #111111 !important;
+  box-shadow:
+    3px 3px 0 0 var(--theme-accent),
+    6px 6px 0 0 #111111;
+  border-radius: 5px;
+ .ts-hero{
+    &__btn,
+    &__icon{
+      box-shadow: var(--tt-shadow-elevated-md);
+      border-radius: 5px;
+    }
+    &__pins-label{
+      background-color: var(--theme-accent);
+      width: fit-content;
+      color: yellow;
+      font-weight: 500;
+      padding: 3px;
+      border-radius: 2px;
+      box-shadow: var(--tt-shadow-elevated-xs);
+    }
+    &__pins-grid{
+      row-gap: 10px;
+    }   
+    &__pin{
+      box-shadow: var(--tt-shadow-elevated-sm);
+    }
+ }
+ 
 }

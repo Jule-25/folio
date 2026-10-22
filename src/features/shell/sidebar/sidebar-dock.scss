@@ -7,6 +7,8 @@
     0 4px 12px rgba(0, 0, 0, 0.06);
   --sb-dock-active-bg: rgba(98, 41, 255, 0.08);
   --sb-dock-active-color: #5b21e6;
+  --sb-doc-tab-height: 32px;
+  --sb-doc-tab-flex: 1 1 0;
 }
 
 .dark {
@@ -30,14 +32,15 @@
     all: unset;
     box-sizing: border-box;
     position: relative;
-    flex: 1 1 0;
+    flex: var(--sb-doc-tab-flex);
     min-width: 0;
-    height: 32px;
+    height: var(--sb-doc-tab-height); 
     display: grid;
     place-items: center;
     border-radius: 9px;
     color: var(--sb-row-color);
     cursor: pointer;
+   
     transition:
       background 0.12s ease,
       color 0.12s ease;
@@ -53,6 +56,7 @@
 
     &.is-active {
       background: var(--sb-dock-active-bg);
+       box-shadow: var(--sb-dock-shadow);
       color: var(--sb-dock-active-color);
     }
 

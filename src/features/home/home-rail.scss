@@ -1,0 +1,40 @@
+// home-foryou
+:root[data-theme="retro"] {
+  .home-foryou{
+    border-radius: 5px;
+    border: 2px solid #111111 !important;
+    box-shadow:
+      3px 3px 0 0 var(--theme-accent),
+      6px 6px 0 0 #111111;
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.035em;
+
+    &__link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #ff168b;
+      font-weight: 700;
+      text-decoration: none;
+
+      .home-foryou__arrow {
+        flex-shrink: 0;
+        transition: transform 150ms ease;
+      }
+
+      &:hover .home-foryou__arrow {
+        transform: translateX(3px);
+      }
+
+      &:focus-visible {
+        outline: 2px solid #111111;
+        outline-offset: 3px;
+      }
+    }
+
+    &__label{
+      font-size: 16px;
+    }
+  }
+}
