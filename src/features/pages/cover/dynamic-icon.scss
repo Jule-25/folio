@@ -1,0 +1,8 @@
+// Retro: icons drawn in ink with a thicker stroke and a pink offset.
+:root[data-theme="retro"] {
+  .dynamic-icon {
+    stroke-width: 2.4;
+    color: var(--retro-ink);
+    filter: drop-shadow(1.5px 1.5px 0 var(--retro-pink));
+  }
+}

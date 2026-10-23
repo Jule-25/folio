@@ -1,0 +1,17 @@
+// Retro: emoji page icons get an ink drop shadow (the outlined tile around
+// them comes from themes.scss) and a little wiggle on hover.
+:root[data-theme="retro"] {
+  .page-icon--emoji {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    line-height: 1;
+    filter: drop-shadow(1px 1px 0 var(--retro-ink));
+    transition: transform 150ms ease;
+  }
+
+  .page-item:hover .page-icon--emoji {
+    transform: rotate(-6deg) scale(1.08);
+  }
+}

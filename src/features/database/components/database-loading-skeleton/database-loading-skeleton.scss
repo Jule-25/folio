@@ -143,3 +143,18 @@
 
   &__track { flex: 1 1 auto; min-width: 0; }
 }
+
+// Nested (in a callout, list, quote, column…): no page-level offsets. The
+// same rules are in database-node.scss, but that file arrives with the
+// database code (a lazy chunk), after this skeleton is already on screen,
+// so without these the skeleton starts out indented and full-width, then
+// jumps into place.
+.react-renderer.react-renderer.node-database[data-contained-in] {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+[data-contained-in] .db-skeleton.top-level-block {
+  width: 100%;
+  transform: none;
+}

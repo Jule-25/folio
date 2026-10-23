@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { NodeViewWrapper, type NodeViewProps } from "@tiptap/react";
 import type { JSONContent } from "@tiptap/core";
 import { useTranslation } from "react-i18next";
-import { ArrowUp } from "lucide-react";
+import { ArrowUp, Check, RotateCcw } from "lucide-react";
 import { useThreadsByPage } from "src/hooks/use-threads";
 import { useCommentsByThread } from "src/hooks/use-comments";
 import { useDeleteComment } from "src/hooks/use-delete-comment";
@@ -16,7 +16,8 @@ import { useCurrentPerson } from "src/hooks/use-session";
 import { usePersonNames } from "src/hooks/use-person-names";
 import { makeThread } from "src/utils/make-thread";
 import { makeComment } from "src/utils/make-comment";
-import { Avatar } from "src/components/tiptap-ui-primitive/avatar";
+import { Card } from "src/components/tiptap-ui-primitive/card";
+import { Button } from "src/components/tiptap-ui-primitive/button";
 import { CommentCard } from "src/features/comments/components/comment-card";
 import {
   CommentMentionEditor,
@@ -26,10 +27,11 @@ import { useActivePageState } from "src/features/pages/context/active-page-conte
 import type { Thread } from "src/types";
 import "./page-comment-view.scss";
 
-// Page-level comments (Notion style). Renders NOTHING until there's either an
-// existing page comment or the user explicitly opens the composer (via the
-// page-top "Comment" button, which fires a "folio:open-page-comment" event).
-// No empty thread is ever created — a thread is born only on submit.
+// Page-level comments. Each thread is a discussion card: a header
+// (Discussion · count, Resolve), the comments joined by a thread line, and a
+// filled reply field at the bottom. Renders NOTHING until there's an existing
+// page comment or the user opens the composer (the page-top "Comment" button
+// fires "folio:open-page-comment"). A thread is born only on submit.
 export function PageCommentView({ node }: NodeViewProps) {
   const { t } = useTranslation();
   const pageId = node.attrs.pageId as string;
@@ -43,8 +45,6 @@ export function PageCommentView({ node }: NodeViewProps) {
   const openThreads = pageThreads.filter((th) => th.status !== "resolved");
   const resolvedThreads = pageThreads.filter((th) => th.status === "resolved");
 
-  // The composer is hidden until the user asks for it. It's revealed by the
-  // page-top Comment button dispatching this event (see FloatingActions).
   const [composerOpen, setComposerOpen] = useState(false);
   useEffect(() => {
     const open = () => setComposerOpen(true);
@@ -52,8 +52,6 @@ export function PageCommentView({ node }: NodeViewProps) {
     return () => document.removeEventListener("folio:open-page-comment", open);
   }, []);
 
-  // Nothing to show → render nothing at all (the wrapper stays mounted so the
-  // event listener stays alive, but takes no visual space).
   const showAnything = pageThreads.length > 0 || composerOpen;
 
   return (
@@ -105,6 +103,7 @@ export function PageCommentView({ node }: NodeViewProps) {
 }
 
 function PageThread({ thread }: { thread: Thread }) {
+  const { t } = useTranslation();
   const { data: comments = [] } = useCommentsByThread(thread.id);
   const { person } = useCurrentPerson();
   const { activePage } = useActivePageState();
@@ -125,44 +124,70 @@ function PageThread({ thread }: { thread: Thread }) {
       patch: { status: resolved ? "open" : "resolved" },
     });
 
-  // A thread with no comments shouldn't exist; guard so we never render an
-  // orphaned reply box.
   if (comments.length === 0) return null;
 
   return (
-    <div className={`page-comment__thread${resolved ? " is-resolved" : ""}`}>
-      {comments.map((c, i) => (
-        <CommentCard
-          key={c.id}
-          name={resolveName(c.personId)}
-          content={c.body}
-          createdAt={c.createdAt}
-          deleted={false}
-          reactions={c.reactions}
-          authorId={c.personId}
-          commentId={c.id}
-          pageId={thread.pageId}
-          pageTitle={activePage?.title}
-          threadId={thread.id}
-          onReact={(next) =>
-            updateComment.mutate({ id: c.id, patch: { reactions: next } })
-          }
-          onEdit={(val) =>
-            updateComment.mutate({ id: c.id, patch: { body: val } })
-          }
-          onDelete={() => deleteComment.mutate(c.id)}
-          onResolve={i === 0 ? toggleResolved : undefined}
-          resolved={resolved}
-          showActions={c.personId === person?.id}
-        />
-      ))}
+    <Card
+      className={`page-comment__thread${resolved ? " is-resolved" : ""}`}
+      aria-label={t("comments.discussion", "Discussion")}
+    >
+      <div className="page-comment__head">
+        <span className="page-comment__title">
+          {t("comments.discussion", "Discussion")}
+        </span>
+        <span className="page-comment__count">{comments.length}</span>
+        <span className="page-comment__spacer" />
+        <Button
+          type="button"
+          variant="ghost"
+          size="small"
+          onClick={toggleResolved}
+        >
+          {resolved ? (
+            <RotateCcw className="tiptap-button-icon" size={14} />
+          ) : (
+            <Check className="tiptap-button-icon" size={14} />
+          )}
+          <span className="tiptap-button-text">
+            {resolved
+              ? t("comments.reopen", "Re-open")
+              : t("comments.resolve", "Resolve")}
+          </span>
+        </Button>
+      </div>
+
+      <div className="page-comment__list">
+        {comments.map((c) => (
+          <CommentCard
+            key={c.id}
+            name={resolveName(c.personId)}
+            content={c.body}
+            createdAt={c.createdAt}
+            deleted={false}
+            reactions={c.reactions}
+            authorId={c.personId}
+            commentId={c.id}
+            pageId={thread.pageId}
+            pageTitle={activePage?.title}
+            threadId={thread.id}
+            onReact={(next) =>
+              updateComment.mutate({ id: c.id, patch: { reactions: next } })
+            }
+            onEdit={(val) =>
+              updateComment.mutate({ id: c.id, patch: { body: val } })
+            }
+            onDelete={() => deleteComment.mutate(c.id)}
+            showActions={c.personId === person?.id}
+          />
+        ))}
+      </div>
+
       {!resolved && <PageCommentReply threadId={thread.id} />}
-    </div>
+    </Card>
   );
 }
 
-// "Add a comment…" row at the bottom of every open thread (always visible,
-// like Notion) — your avatar, the editor, and a send button once there's text.
+// The filled "Reply…" field at the bottom of an open discussion.
 function PageCommentReply({ threadId }: { threadId: string }) {
   const { t } = useTranslation();
   const { person } = useCurrentPerson();
@@ -184,23 +209,19 @@ function PageCommentReply({ threadId }: { threadId: string }) {
   };
 
   return (
-    <div className="page-comment__reply">
-      <Avatar
-        size="sm"
-        src={person?.avatarUrl ?? undefined}
-        name={person?.name ?? ""}
-      />
-      <CommentMentionEditor
-        ref={editorRef}
-        placeholder={t("comments.addComment", "Add a comment…")}
-        onSubmit={submit}
-        onEmptyChange={setIsEmpty}
-      />
-      {!isEmpty && (
+    <div className="page-comment__footer">
+      <div className="page-comment__field">
+        <CommentMentionEditor
+          ref={editorRef}
+          placeholder={t("comments.replyPlaceholder", "Reply…")}
+          onSubmit={submit}
+          onEmptyChange={setIsEmpty}
+        />
         <button
           type="button"
           className="page-comment__submit"
           aria-label={t("comments.send", "Send")}
+          disabled={isEmpty}
           onClick={() => {
             editorRef.current?.submit();
             editorRef.current?.clear();
@@ -208,11 +229,12 @@ function PageCommentReply({ threadId }: { threadId: string }) {
         >
           <ArrowUp size={15} />
         </button>
-      )}
+      </div>
     </div>
   );
 }
 
+// A new discussion: the same card, with only the field until it's sent.
 function PageCommentComposer({
   pageId,
   onDone,
@@ -229,7 +251,6 @@ function PageCommentComposer({
 
   const submit = async (json: JSONContent) => {
     if (!person) return;
-    // Thread born on submit, with its first comment — no empty threads.
     const thread = makeThread({ pageId, anchor: null, status: "open" });
     await createThread.mutateAsync(thread);
     createComment.mutate({
@@ -244,28 +265,27 @@ function PageCommentComposer({
   };
 
   return (
-    <div className="page-comment__composer">
-      <Avatar
-        size="sm"
-        src={person?.avatarUrl ?? undefined}
-        name={person?.name ?? ""}
-      />
-      <CommentMentionEditor
-        ref={editorRef}
-        autoFocus
-        placeholder={t("comments.addComment", "Add a comment…")}
-        onSubmit={submit}
-        onEmptyChange={setIsEmpty}
-      />
-      <button
-        type="button"
-        className="page-comment__submit"
-        aria-label={t("comments.send", "Send")}
-        disabled={isEmpty}
-        onClick={() => editorRef.current?.submit()}
-      >
-        <ArrowUp size={15} />
-      </button>
-    </div>
+    <Card className="page-comment__thread page-comment__thread--new">
+      <div className="page-comment__footer">
+        <div className="page-comment__field">
+          <CommentMentionEditor
+            ref={editorRef}
+            autoFocus
+            placeholder={t("comments.addComment", "Add a comment…")}
+            onSubmit={submit}
+            onEmptyChange={setIsEmpty}
+          />
+          <button
+            type="button"
+            className="page-comment__submit"
+            aria-label={t("comments.send", "Send")}
+            disabled={isEmpty}
+            onClick={() => editorRef.current?.submit()}
+          >
+            <ArrowUp size={15} />
+          </button>
+        </div>
+      </div>
+    </Card>
   );
 }

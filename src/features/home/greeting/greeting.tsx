@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useAppearance } from "src/features/shell/appearance/appearance";
+import "./greeting.scss";
 
 // Time-of-day greeting for the home page ("🌅 Good morning, Jule").
 // Set in the app's own UI font, bold with tight tracking, like Notion's home
@@ -32,6 +34,7 @@ interface GreetingProps {
 export function Greeting({ name, className, compact = false }: GreetingProps) {
   const { t } = useTranslation();
   const [period, setPeriod] = useState(getPeriod);
+  const [appearance] = useAppearance();
 
   // Re-check on each minute boundary so the greeting flips at 12:00, 18:00…
   useEffect(() => {
@@ -53,27 +56,21 @@ export function Greeting({ name, className, compact = false }: GreetingProps) {
 
   return (
     <h1
-      className={className}
-      style={{
-        margin: 0,
-        fontFamily: "inherit",
-        // 30px from ~600px wide up; scales down to 20px on phones
-        // (≈20px at 375px) so the greeting stays one calm line.
-        fontSize: compact ? 20 : "clamp(20px, 5vw, 30px)",
-        overflowWrap: "break-word",
-        maxWidth: "100%",
-        fontWeight: compact ? 600 : 700,
-        lineHeight: 1.2,
-        letterSpacing: compact ? "-0.01em" : "-0.02em",
-        color: "inherit",
-      }}
+      className={[
+        "greeting",
+        compact && "greeting--compact",
+        `greeting--${appearance}`,
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ")}
     >
-      {/* Decorative: screen readers just read the greeting. */}
       {!compact && (
-        <span aria-hidden="true" style={{ marginRight: "0.3em" }}>
+        <span className="greeting__emoji" aria-hidden="true">
           {EMOJI[period]}
         </span>
       )}
+
       {name ? t("greeting.withName", { greeting: text, name }) : text}
     </h1>
   );

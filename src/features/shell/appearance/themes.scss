@@ -1,0 +1,2106 @@
+// Personal themes, keyed on <html data-theme="…"> (set by useApplyTheme).
+// A theme restyles the WHOLE app: window, sidebar, top bar, page, cards and
+// menus, fonts, and the accent. Specificity notes:
+// - `:root[data-theme]` outranks `:root` and `.dark`;
+// - `html:root[data-theme]` outranks `:root.space-accent` (brand scale);
+// - `--space-accent` is set inline by SpaceAccentRoot and the sidebar, so
+//   the theme forces it with !important (a stylesheet !important beats a
+//   normal inline value);
+// - `body` and `.tiptap.ProseMirror` define their own variables and fonts,
+//   so those are overridden on the same elements.
+
+// ─── Shared machinery ──────────────────────────────────────────────────────
+
+@mixin theme-font($stack) {
+  --sb-font: #{$stack};
+
+  body,
+  #root,
+  .tiptap.ProseMirror,
+  .tiptap.ProseMirror p,
+  .sb-find .sb-search {
+    font-family: $stack;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font-family: inherit;
+  }
+}
+
+:root[data-theme] {
+  // The window: painted on <html> so the floating sheet (z-index -1) can
+  // sit between it and the page. body and #root go see-through.
+  background: var(--theme-window, var(--tt-bg-color));
+  background-attachment: fixed;
+
+  body,
+  #root {
+    background: transparent;
+  }
+
+  // Workspace / teamspace colours follow the theme.
+  --space-accent: var(--theme-accent) !important;
+
+  [style*="--space-accent"] {
+    --space-accent: var(--theme-accent) !important;
+  }
+
+  .sb-dock.space-accent {
+    background: var(--sb-dock-bg);
+    box-shadow: var(--sb-dock-shadow);
+    --sb-dock-active-bg: var(--theme-dock-active-bg);
+    --sb-dock-active-color: var(--theme-dock-active-color);
+  }
+
+  .sidebar--accent .page-item.active {
+    background: var(--sb-active-bg);
+    box-shadow: none;
+  }
+
+  // The sidebar's scrollbar stays invisible until the pointer is over the
+  // sidebar (or a row in it has keyboard focus); then it takes the theme's
+  // colour (--sb-scrlbr-color).
+  .sidebar-body-content {
+    scrollbar-color: transparent transparent;
+  }
+
+  .sidebar:hover .sidebar-body-content,
+  .sidebar-body-content:focus-within {
+    scrollbar-color: var(--sb-scrlbr-color);
+  }
+}
+
+// The floating sheet (theme-sheet.tsx): only some themes show it.
+.theme-sheet {
+  display: none;
+}
+
+:root[data-theme="aurora"],
+:root[data-theme="midnight"],
+:root[data-theme="retro"],
+:root[data-theme="wallpaper"] {
+  // The top bar sits on the sheet.
+  --tt-toolbar-bg-color: transparent;
+
+  // Everything is fitted inside the sheet: the top bar is inset, the editor
+  // stops above the sheet's bottom edge, and covers start at the sheet's
+  // left edge instead of running under the sidebar.
+  .tiptap-toolbar[data-variant="fixed"] {
+    padding: 20px 40px !important;
+  }
+
+  .simple-editor-wrapper {
+    height: 96vh;
+  }
+
+  .cover-header-wrapper {
+    position: relative;
+  }
+
+  .cover-image-root {
+    width: 100% !important;
+
+    img {
+      position: absolute !important;
+      right: 0px;
+      left: 168px !important;
+    }
+
+    img[data-collapsed="true"] {
+      left: 24px !important;
+    }
+  }
+
+  .gradient-cover {
+    position: absolute !important;
+    width: 100% !important;
+    height: inherit;
+    right: 0px;
+    left: 168px !important;
+  }
+
+  .gradient-cover[data-collapsed="true"] {
+    left: 24px !important;
+  }
+
+  .theme-sheet {
+    display: block;
+    position: fixed;
+    top: 8px;
+    right: 10px;
+    bottom: 10px;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: 16px;
+    transition: left 0.2s ease;
+
+    &--flush {
+      inset: 0;
+      border-radius: 0;
+      box-shadow: none;
+    }
+  }
+}
+
+:root[data-theme="wallpaper"],
+:root[data-theme="midnight"],
+:root[data-theme="aurora"]{
+  .tiptap-toolbar[data-variant="fixed"] {
+    padding: 30px 40px !important;
+  } 
+}
+
+// ─── Aurora: colour clouds, floating glass panels, violet → indigo ─────────
+// The window is five soft colour clouds and a light streak; the sidebar and
+// the page are two floating frosted panels; cards are a brighter glass on
+// top. Primary actions use the violet → indigo gradient.
+:root[data-theme="aurora"] {
+  @include theme-font(("Plus Jakarta Sans", system-ui, sans-serif));
+
+  --aurora-ink: #1f1b3a;
+  --aurora-ink-soft: #5f5a7a;
+  --aurora-violet: #6d4fe0;
+  --aurora-violet-deep: #5b3fd0;
+  --aurora-gradient: linear-gradient(135deg, #8b6cf6 0%, #6d4fe0 50%, #4f46e5 100%);
+  --aurora-glass: rgba(255, 255, 255, 0.55);
+  --aurora-glass-strong: rgba(255, 255, 255, 0.78);
+  --aurora-glass-edge: inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+  --aurora-lift: 0 14px 40px rgba(76, 57, 160, 0.12);
+  --aurora-blur: blur(28px) saturate(1.4);
+
+  --theme-accent: var(--aurora-violet);
+  --theme-window: radial-gradient(38% 50% at 6% 4%, rgba(196, 181, 253, 0.95) 0%, transparent 70%),
+    radial-gradient(34% 46% at 94% 2%, rgba(153, 246, 228, 0.85) 0%, transparent 70%),
+    radial-gradient(44% 56% at 78% 100%, rgba(253, 186, 206, 0.9) 0%, transparent 70%),
+    radial-gradient(40% 50% at 22% 100%, rgba(191, 219, 254, 0.9) 0%, transparent 70%),
+    radial-gradient(26% 34% at 52% 40%, rgba(253, 230, 138, 0.45) 0%, transparent 70%),
+    linear-gradient(115deg, transparent 32%, rgba(255, 255, 255, 0.45) 46%, transparent 60%),
+    #f3f0ff;
+  --tt-bg-color: #faf8ff;
+  --tiptap-card-bg-color: var(--aurora-glass-strong);
+  --tiptap-card-border-color: rgba(255, 255, 255, 0.8);
+  --tt-card-bg-color: var(--aurora-glass-strong);
+  --tt-border-color: rgba(76, 57, 160, 0.12);
+  --tt-border-color-tint: rgba(76, 57, 160, 0.06);
+  --tt-shadow-elevated-xs: 0 1px 2px rgba(76, 57, 160, 0.1);
+  --tt-shadow-elevated-sm: 0 4px 14px rgba(76, 57, 160, 0.1);
+  --tt-shadow-elevated-md: var(--aurora-glass-edge), 0 14px 40px rgba(76, 57, 160, 0.16);
+  --tt-shadow-elevated-lg: var(--aurora-glass-edge), 0 24px 70px rgba(76, 57, 160, 0.2);
+
+  // Sidebar: see-through; the glass panel is drawn by .sidebar::before.
+  --sidebar-bg-color: #f3f0ff;
+  --sidebar-surface: transparent;
+  --sidebar-fog-color: rgba(243, 240, 255, 0);
+  --sidebar-accent: var(--aurora-violet);
+  --sidebar-border-color: transparent;
+  --sidebar-edge-shadow: none;
+  --sidebar-text-color: var(--aurora-ink);
+  --sb-font: "Plus Jakarta Sans", system-ui, sans-serif;
+  --sb-row-color: #2c2748;
+  --sb-active-color: var(--aurora-ink);
+  --sb-icon-color: #4a4468;
+  --sb-label-color: #6b6590;
+  --sb-row-radius: 11px;
+  --sb-hover-bg: rgba(255, 255, 255, 0.55);
+  --sb-active-bg: rgba(255, 255, 255, 0.9);
+  --sb-count-bg: rgba(109, 79, 224, 0.1);
+  --sb-count-color: var(--aurora-violet-deep);
+  --sb-divider: rgba(76, 57, 160, 0.1);
+  --sb-dock-bg: rgba(255, 255, 255, 0.6);
+  --sb-dock-shadow: inset 0 1px 0 #ffffff, inset 0 0 0 1px rgba(255, 255, 255, 0.7), 0 8px 24px rgba(76, 57, 160, 0.1);
+  --theme-dock-active-bg: #ffffff;
+  --theme-dock-active-color: var(--aurora-violet-deep);
+  --sb-dock-active-bg: var(--theme-dock-active-bg);
+  --sb-dock-active-color: var(--theme-dock-active-color);
+  --sb-scrlbr-width: thin;
+  --sb-scrlbr-color: rgba(76, 57, 160, 0.2) transparent;
+
+  
+  // The page: a frosted panel floating on the clouds.
+  .theme-sheet {
+    top: 12px;
+    right: 14px;
+    bottom: 14px;
+    border-radius: 24px;
+    background: var(--aurora-glass);
+    backdrop-filter: blur(30px) saturate(1.4);
+    box-shadow: var(--aurora-glass-edge), 0 24px 70px rgba(76, 57, 160, 0.16);
+  }
+
+  // Menus, popovers, cards: brighter glass above the page.
+  .tiptap-card {
+    border: 0;
+    backdrop-filter: var(--aurora-blur);
+  }
+
+  // ── Sidebar: a floating glass panel ──
+  .sidebar:not(.sidebar-mobile) {
+    padding: 14px 10px 14px 18px;
+
+    &::before {
+      inset: 12px 6px 12px 12px;
+      filter: none;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.42);
+      backdrop-filter: var(--aurora-blur);
+      box-shadow: var(--aurora-glass-edge), 0 18px 50px rgba(76, 57, 160, 0.14);
+    }
+  }
+
+  // On a phone the sidebar is a drawer over the page: solid, not see-through.
+  .sidebar.sidebar-mobile,
+  .sidebar.sidebar--floating {
+    background: var(--theme-window) !important;
+  }
+
+  .sidebar-section__label {
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #6b6590;
+  }
+
+  // Page icons sit on a soft glass tile; they keep their own colour.
+  .sidebar .page-item:not(.is-teamspace-root) .page-item-icon {
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 7px;
+    background: rgba(255, 255, 255, 0.6);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+  }
+
+  .sidebar .page-item {
+    border-radius: 11px;
+  }
+
+  .sidebar .page-item.active {
+    background: rgba(255, 255, 255, 0.9);
+    font-weight: 700;
+    box-shadow: inset 0 1px 0 #ffffff, 0 0 0 1px rgba(255, 255, 255, 0.8), 0 6px 18px rgba(109, 79, 224, 0.16);
+  }
+
+  .sidebar .sb-search {
+    border: 0;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.62);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.9), 0 2px 8px rgba(76, 57, 160, 0.06);
+  }
+
+  .sidebar .sb-search__palette {
+    background: rgba(109, 79, 224, 0.1);
+    font-weight: 600;
+    color: var(--aurora-violet-deep);
+  }
+
+  .sb-dock {
+    border-radius: 16px;
+  }
+
+  .sb-dock__tab.is-active {
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.9), 0 4px 12px rgba(109, 79, 224, 0.18);
+  }
+
+  // ── Buttons ──
+  .tiptap-button {
+    --tt-button-hover-bg-color: rgba(255, 255, 255, 0.6);
+  }
+
+  .tiptap-button[data-style="primary"] {
+    background: var(--aurora-gradient) !important;
+    font-weight: 700;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 8px 20px rgba(109, 79, 224, 0.32);
+    transition: transform 0.15s ease, filter 0.15s ease;
+
+    &:hover {
+      filter: brightness(1.06);
+      transform: translateY(-1px);
+    }
+  }
+
+  // ── Home ──
+  .ts-hero.aurora {
+    position: relative;
+    border: 0;
+    border-radius: 22px;
+    background: var(--aurora-glass-strong);
+    box-shadow: var(--aurora-glass-edge), var(--aurora-lift);
+    overflow: hidden;
+
+    // A soft mint glow behind the page icon.
+    &::before {
+      content: "";
+      position: absolute;
+      left: -60px;
+      top: -80px;
+      width: 320px;
+      height: 260px;
+      border-radius: 50%;
+      background: radial-gradient(closest-side, rgba(94, 234, 212, 0.35), transparent);
+      pointer-events: none;
+    }
+
+    .ts-hero__pins-grid {
+      row-gap: 5px;
+    }
+
+    .ts-hero__icon {
+      border-radius: 16px;
+      background: linear-gradient(140deg, #ccfbf1 0%, #99f6e4 100%);
+      box-shadow: inset 0 1px 0 #ffffff, 0 8px 20px rgba(20, 184, 166, 0.25);
+    }
+
+    .ts-hero__btn {
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.6);
+      box-shadow: inset 0 0 0 1px rgba(109, 79, 224, 0.18);
+      color: #4c3d9e;
+      font-weight: 600;
+    }
+
+    .ts-hero__btn--primary {
+      background: var(--aurora-gradient);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 8px 20px rgba(109, 79, 224, 0.32);
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    .ts-hero__pins-label {
+      font-size: 11.5px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--aurora-violet);
+
+      &::before {
+        content: "✦ ";
+      }
+    }
+
+   
+
+    .ts-hero__pin {
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.7);
+      box-shadow: inset 0 1px 0 #ffffff, 0 0 0 1px rgba(255, 255, 255, 0.7), 0 4px 14px rgba(76, 57, 160, 0.07);
+      transition: background 0.15s ease, transform 0.15s ease;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.95);
+        transform: translateX(2px);
+      }
+    }
+  }
+
+  // The greeting in violet → teal; the emoji keeps its own colours.
+  .greeting {
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    background: linear-gradient(100deg, #6d4fe0 0%, #a855f7 45%, #14b8a6 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .greeting__emoji {
+    -webkit-text-fill-color: initial;
+    color: initial;
+    filter: drop-shadow(0 4px 10px rgba(245, 158, 11, 0.45));
+  }
+
+  .home-foryou {
+    border: 0;
+    border-radius: 22px;
+    background: var(--aurora-glass-strong);
+    box-shadow: var(--aurora-glass-edge), var(--aurora-lift);
+  }
+
+  .home-foryou__unread {
+    border-radius: 999px;
+    background: linear-gradient(135deg, #a78bfa, #6d4fe0);
+    box-shadow: 0 3px 10px rgba(109, 79, 224, 0.3);
+    color: #ffffff;
+  }
+
+  .home-foryou__link {
+    color: var(--aurora-violet-deep);
+    font-weight: 700;
+  }
+
+  .home-learn {
+    border-radius: 22px;
+    background: var(--aurora-glass-strong);
+    box-shadow: var(--aurora-glass-edge), var(--aurora-lift);
+  }
+
+  // Recent / Favorites / Created by me: a glass segmented control.
+  .home-dense__tabs.tab-list {
+    display: inline-flex;
+    align-self: flex-start;
+    gap: 2px;
+    padding: 4px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.45);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+
+    .tab-item {
+      padding: 7px 16px;
+      border-radius: 10px;
+      font-weight: 600;
+
+      &::after {
+        display: none;
+      }
+
+      &.is-active {
+        background: #ffffff;
+        color: var(--aurora-violet-deep);
+        font-weight: 700;
+        box-shadow: 0 2px 8px rgba(76, 57, 160, 0.12);
+      }
+    }
+  }
+
+  // ── Page content ──
+  .tiptap.ProseMirror {
+    --tt-checklist-border-color: rgba(109, 79, 224, 0.35);
+    --tt-checklist-border-active-color: transparent;
+    --tt-checklist-check-icon-color: #ffffff;
+    --tt-checklist-text-active: #7c7699;
+
+    h1,
+    h2,
+    h3,
+    h4 {
+      font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    ul[data-type="taskList"] li label span {
+      width: 19px;
+      height: 19px;
+      border-radius: 7px;
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    ul[data-type="taskList"] li label input[type="checkbox"]:checked + span {
+      background: linear-gradient(140deg, #8b6cf6, #4f46e5);
+      box-shadow: 0 3px 8px rgba(109, 79, 224, 0.3);
+    }
+
+    :not(pre) > code {
+      border-radius: 7px;
+      background: rgba(109, 79, 224, 0.1);
+      color: var(--aurora-violet-deep);
+    }
+
+    blockquote {
+      border-left: 3px solid var(--aurora-violet);
+    }
+
+    .callout-root {
+      border-color: transparent;
+      border-radius: 16px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+    }
+  }
+
+  .reaction-chip {
+    border: 0;
+    border-radius: 999px;
+    background: rgba(109, 79, 224, 0.08);
+    box-shadow: inset 0 0 0 1px rgba(109, 79, 224, 0.22);
+
+    &.is-reacted {
+      background: rgba(109, 79, 224, 0.14);
+      box-shadow: inset 0 0 0 1px rgba(109, 79, 224, 0.4);
+    }
+  }
+}
+
+html:root[data-theme="aurora"] {
+  --tt-brand-color-50: #f4f1ff;
+  --tt-brand-color-100: #e9e3ff;
+  --tt-brand-color-200: #d6caff;
+  --tt-brand-color-300: #b8a5fb;
+  --tt-brand-color-400: #8f72f0;
+  --tt-brand-color-500: #6d4fe0;
+  --tt-brand-color-600: #5b3fd0;
+  --tt-brand-color-700: #4c32b8;
+  --tt-brand-color-800: #3c2894;
+  --tt-brand-color-900: #2c1e6e;
+  --tt-brand-color-950: #1a1145;
+  --tt-selection-color: rgba(109, 79, 224, 0.18);
+}
+
+:root[data-theme="aurora"] body {
+  --tt-text-primary: #1f1b3a;
+  --tt-theme-text: #1f1b3a;
+  --tt-text-color: #4a4468;
+  --tt-text-secondary: #5f5a7a;
+}
+
+:root[data-theme="aurora"] .tiptap.ProseMirror {
+  --tt-paragraph-text-color: #1f1b3a;
+}
+
+// ─── Midnight: a night sky with a moon, smoked-glass page, lime light ──────
+// Stars, a violet and a teal glow and moonlight on the window; the sidebar
+// sits straight on the sky; the page is a smoked-glass sheet with a crescent
+// moon in its top corner. Lime marks what's active or primary, starlight
+// blue is for icons and links.
+:root[data-theme="midnight"] {
+  @include theme-font(("Inter", system-ui, sans-serif));
+
+  --mn-lime: #c4f25c;
+  --mn-lime-ink: #10140a;
+  --mn-lime-soft: rgba(196, 242, 92, 0.14);
+  --mn-lime-ring: rgba(196, 242, 92, 0.4);
+  --mn-lime-glow: 0 0 20px rgba(196, 242, 92, 0.3);
+  --mn-star: #9db4ff;
+  --mn-moon: #fff3cf;
+  --mn-text: #e8eaf6;
+  --mn-soft: #c9cde6;
+  --mn-muted: #9aa0c2;
+  --mn-faint: #7d84aa;
+  --mn-hair: rgba(157, 180, 255, 0.14);
+  --mn-glass: rgba(12, 16, 40, 0.7);
+  --mn-display: "Sora", "Inter", system-ui, sans-serif;
+
+  --theme-accent: var(--mn-lime);
+  --theme-window:
+    radial-gradient(260px 260px at calc(100% - 120px) 60px, rgba(255, 232, 163, 0.16), transparent 70%),
+    radial-gradient(40% 35% at 72% 18%, rgba(124, 92, 255, 0.16), transparent 70%),
+    radial-gradient(35% 30% at 30% 92%, rgba(45, 212, 191, 0.09), transparent 70%),
+    radial-gradient(1px 1px at 30px 40px, #ffffff 50%, transparent 51%) 0 0 / 160px 170px,
+    radial-gradient(1.5px 1.5px at 110px 120px, rgba(255, 255, 255, 0.8) 50%, transparent 51%) 0 0 / 160px 170px,
+    radial-gradient(1px 1px at 70px 150px, rgba(157, 180, 255, 0.9) 50%, transparent 51%) 0 0 / 230px 260px,
+    radial-gradient(1px 1px at 190px 60px, rgba(255, 255, 255, 0.6) 50%, transparent 51%) 0 0 / 230px 260px,
+    linear-gradient(180deg, #0c1233 0%, #070a1c 100%);
+  --tt-bg-color: #0d1126;
+  --tiptap-card-bg-color: rgba(16, 21, 50, 0.94);
+  --tiptap-card-border-color: var(--mn-hair);
+  --tt-card-bg-color: rgba(16, 21, 50, 0.94);
+  --tt-border-color: rgba(157, 180, 255, 0.12);
+  --tt-border-color-tint: rgba(157, 180, 255, 0.06);
+  --tt-shadow-elevated-sm: inset 0 0 0 1px var(--mn-hair), 0 6px 16px rgba(0, 0, 0, 0.35);
+  --tt-shadow-elevated-md: inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 0 0 1px var(--mn-hair), 0 20px 50px rgba(0, 0, 0, 0.5);
+  --tt-shadow-elevated-lg: inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 0 0 1px var(--mn-hair), 0 30px 80px rgba(0, 0, 0, 0.55);
+
+  // Sidebar: a darker tinted pane over the sky — the stars still show
+  // through, but it reads as its own surface, with a lit edge.
+  --sidebar-bg-color: #0b0e20;
+  --sidebar-surface: linear-gradient(180deg, rgba(22, 28, 66, 0.62) 0%, rgba(8, 11, 28, 0.72) 100%);
+  --sidebar-fog-color: rgba(11, 14, 32, 0.6);
+  --sidebar-accent: var(--mn-lime);
+  --sidebar-border-color: rgba(157, 180, 255, 0.22);
+  --sidebar-edge-shadow: 1px 0 0 rgba(157, 180, 255, 0.06), 12px 0 30px -14px rgba(0, 0, 0, 0.7);
+  --sidebar-text-color: var(--mn-soft);
+  --sb-row-color: var(--mn-soft);
+  --sb-active-color: #f4ffd9;
+  --sb-icon-color: var(--mn-star);
+  --sb-label-color: var(--mn-faint);
+  --sb-hover-bg: rgba(255, 255, 255, 0.05);
+  --sb-active-bg: linear-gradient(90deg, rgba(196, 242, 92, 0.14), rgba(196, 242, 92, 0.02));
+  --sb-count-bg: rgba(255, 255, 255, 0.06);
+  --sb-count-color: var(--mn-muted);
+  --sb-divider: rgba(157, 180, 255, 0.1);
+  --sb-dock-bg: rgba(255, 255, 255, 0.04);
+  --sb-dock-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 0 0 1px rgba(157, 180, 255, 0.12);
+  --theme-dock-active-bg: var(--mn-lime-soft);
+  --theme-dock-active-color: var(--mn-lime);
+  --sb-dock-active-bg: var(--theme-dock-active-bg);
+  --sb-dock-active-color: var(--theme-dock-active-color);
+  --sb-scrlbr-width: thin;
+  --sb-scrlbr-color: rgba(157, 180, 255, 0.2) transparent;
+  --app-scrollbar-thumb: rgba(157, 180, 255, 0.18);
+  --app-scrollbar-thumb-hover: rgba(157, 180, 255, 0.32);
+
+  // The page: smoked glass over the sky, with a crescent moon in its corner.
+  .theme-sheet {
+    top: 12px;
+    right: 14px;
+    bottom: 14px;
+    border-radius: 18px;
+    background: var(--mn-glass);
+    backdrop-filter: blur(18px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 0 0 1px rgba(157, 180, 255, 0.12), 0 30px 80px rgba(0, 0, 0, 0.45);
+
+    // The moon: a lit disc with two faint craters, and a disc of the sheet's
+    // colour laid over it, offset, to cut the crescent.
+    &::after {
+      content: "";
+      position: absolute;
+      top: 78px;
+      right: 64px;
+      width: 96px;
+      height: 96px;
+      opacity: 0.55;
+      background:
+        radial-gradient(circle at 64% 38%, #0c1036 0 36px, transparent 37px),
+        radial-gradient(circle at 30% 60%, rgba(120, 110, 80, 0.18) 0 6px, transparent 7px),
+        radial-gradient(circle at 40% 30%, rgba(120, 110, 80, 0.14) 0 4px, transparent 5px),
+        radial-gradient(circle at 50% 50%, var(--mn-moon) 0 40px, transparent 41px);
+      filter: drop-shadow(0 0 22px rgba(255, 232, 163, 0.45));
+      pointer-events: none;
+    }
+
+    &--flush::after {
+      display: none;
+    }
+  }
+
+  .tiptap-card {
+    border: 0;
+    backdrop-filter: blur(18px);
+  }
+
+  // ── Sidebar ──
+  // On a phone (drawer) and when it peeks out collapsed, the sidebar is
+  // over the page: give it the sky so it stays readable.
+  .sidebar.sidebar-mobile,
+  .sidebar.sidebar--floating {
+    background: var(--theme-window) !important;
+  }
+
+  .sidebar-section__label {
+    font-family: var(--mn-display) !important;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--mn-faint);
+  }
+
+  .sidebar .page-item:not(.is-teamspace-root) .page-item-icon {
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 7px;
+    background: rgba(255, 255, 255, 0.04);
+    box-shadow: inset 0 0 0 1px var(--mn-hair);
+    color: var(--mn-star);
+  }
+
+  // The open page: a lime wash with a glowing bar on its left edge.
+  .sidebar .page-item.active {
+    background: var(--sb-active-bg);
+    box-shadow: inset 2px 0 0 var(--mn-lime);
+    font-weight: 600;
+
+    .page-item-icon {
+      color: var(--mn-lime);
+      box-shadow: inset 0 0 0 1px var(--mn-lime-ring), 0 0 10px rgba(196, 242, 92, 0.25);
+    }
+  }
+
+  .page-item-face {
+    box-shadow: 0 0 0 2px #0a0e24;
+  }
+
+  .sidebar .sb-search {
+    border: 0;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.04);
+    box-shadow: inset 0 0 0 1px var(--mn-hair);
+  }
+
+  .sidebar .sb-search__palette {
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    color: var(--mn-muted);
+  }
+
+  .sb-dock {
+    border-radius: 14px;
+  }
+
+  .sb-dock__tab.is-active {
+    box-shadow: inset 0 0 0 1px var(--mn-lime-ring), 0 0 16px rgba(196, 242, 92, 0.2);
+  }
+
+  // ── Buttons ──
+  .tiptap-button {
+    --tt-button-hover-bg-color: rgba(255, 255, 255, 0.06);
+  }
+
+  .tiptap-button[data-style="primary"] {
+    --tt-button-default-bg-color: var(--mn-lime);
+    --tt-button-hover-bg-color: #d2f77a;
+    --tt-button-default-text-color: var(--mn-lime-ink);
+    --tt-button-hover-text-color: var(--mn-lime-ink);
+    --tt-button-default-icon-color: var(--mn-lime-ink);
+    --tt-button-hover-icon-color: var(--mn-lime-ink);
+    font-weight: 600;
+    box-shadow: 0 0 0 1px var(--mn-lime-ring), var(--mn-lime-glow);
+    transition: box-shadow 0.15s ease;
+
+    &:hover {
+      box-shadow: 0 0 0 1px rgba(196, 242, 92, 0.6), 0 0 26px rgba(196, 242, 92, 0.45);
+    }
+  }
+
+  // ── Home ──
+  .ts-hero.midnight {
+    position: relative;
+    border: 0;
+    border-radius: 18px;
+    background: linear-gradient(160deg, rgba(124, 92, 255, 0.1) 0%, rgba(255, 255, 255, 0.02) 45%), rgba(255, 255, 255, 0.025);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 0 0 1px var(--mn-hair);
+    overflow: hidden;
+
+    // A faint constellation behind the pinned pages.
+    &::after {
+      content: "";
+      position: absolute;
+      right: 18px;
+      top: 10px;
+      width: 300px;
+      height: 140px;
+      opacity: 0.35;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 140'%3E%3Cpath d='M20 90 L80 40 L140 70 L200 20 L270 55' fill='none' stroke='%239db4ff' stroke-dasharray='3 4'/%3E%3Ccircle cx='20' cy='90' r='2' fill='%23fff'/%3E%3Ccircle cx='80' cy='40' r='2.5' fill='%23fff'/%3E%3Ccircle cx='140' cy='70' r='1.8' fill='%23fff'/%3E%3Ccircle cx='200' cy='20' r='2.8' fill='%23c4f25c'/%3E%3Ccircle cx='270' cy='55' r='2' fill='%23fff'/%3E%3C/svg%3E") center / contain no-repeat;
+      pointer-events: none;
+    }
+
+    .ts-hero__pins-grid {
+      row-gap: 5px;
+    }
+
+    .ts-hero__icon {
+      border-radius: 14px;
+      background: rgba(196, 242, 92, 0.1);
+      box-shadow: inset 0 0 0 1px var(--mn-lime-ring), 0 0 30px rgba(196, 242, 92, 0.2);
+      color: var(--mn-lime);
+    }
+
+    .ts-hero__btn {
+      border-radius: 10px;
+      background: transparent;
+      box-shadow: inset 0 0 0 1px rgba(157, 180, 255, 0.25);
+      color: var(--mn-soft);
+    }
+
+    .ts-hero__btn--primary {
+      background: var(--mn-lime);
+      box-shadow: 0 0 0 1px var(--mn-lime-ring), var(--mn-lime-glow);
+      color: var(--mn-lime-ink);
+      font-weight: 600;
+    }
+
+    .ts-hero__pins-label {
+      font-family: var(--mn-display);
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--mn-lime);
+
+      &::before {
+        content: "✦ ";
+      }
+    }
+
+    .ts-hero__pin {
+      position: relative;
+      z-index: 1;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      box-shadow: inset 0 0 0 1px rgba(157, 180, 255, 0.12);
+      transition: background 0.15s ease, box-shadow 0.15s ease;
+
+      &:hover {
+        background: rgba(157, 180, 255, 0.08);
+        box-shadow: inset 0 0 0 1px rgba(157, 180, 255, 0.3);
+      }
+    }
+  }
+
+  .greeting {
+    font-family: var(--mn-display);
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    color: #ffffff;
+    text-shadow: 0 0 24px rgba(196, 242, 92, 0.25);
+  }
+
+  .home-foryou {
+    border: 0;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.025);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 0 0 1px var(--mn-hair);
+  }
+
+  .home-foryou__label {
+    font-family: var(--mn-display);
+    font-weight: 600;
+  }
+
+  .home-foryou__unread {
+    border-radius: 999px;
+    background: var(--mn-lime-soft);
+    box-shadow: inset 0 0 0 1px var(--mn-lime-ring);
+    color: var(--mn-lime);
+  }
+
+  .home-foryou__link {
+    color: var(--mn-star);
+    font-weight: 600;
+  }
+
+  .home-learn {
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.025);
+    box-shadow: inset 0 0 0 1px var(--mn-hair);
+  }
+
+  // Tabs: a thin lime underline that glows.
+  .home-dense__tabs.tab-list {
+    box-shadow: inset 0 -1px 0 rgba(157, 180, 255, 0.12);
+
+    .tab-item.is-active {
+      color: #f4ffd9;
+
+      &::after {
+        background: var(--mn-lime);
+        box-shadow: 0 0 10px rgba(196, 242, 92, 0.8);
+      }
+    }
+  }
+
+  // ── Page content ──
+  .tiptap.ProseMirror {
+    --tt-checklist-bg-active-color: var(--mn-lime);
+    --tt-checklist-border-color: rgba(157, 180, 255, 0.4);
+    --tt-checklist-border-active-color: var(--mn-lime);
+    --tt-checklist-check-icon-color: var(--mn-lime-ink);
+    --tt-checklist-text-active: var(--mn-faint);
+    --link-text-color: var(--mn-star);
+
+    h1,
+    h2,
+    h3,
+    h4 {
+      font-family: var(--mn-display);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: #ffffff;
+    }
+
+    ul[data-type="taskList"] li label span {
+      border-radius: 6px;
+    }
+
+    ul[data-type="taskList"] li label input[type="checkbox"]:checked + span {
+      box-shadow: 0 0 10px rgba(196, 242, 92, 0.45);
+    }
+
+    ul[data-type="taskList"] li[data-checked="true"] > div {
+      text-decoration-color: rgba(196, 242, 92, 0.6);
+    }
+
+    :not(pre) > code {
+      border-radius: 6px;
+      background: rgba(196, 242, 92, 0.08);
+      box-shadow: inset 0 0 0 1px rgba(196, 242, 92, 0.2);
+      color: #d9f99d;
+    }
+
+    blockquote {
+      border-left: 2px solid var(--mn-star);
+    }
+
+    .callout-root {
+      border-color: transparent;
+      border-radius: 14px;
+      box-shadow: inset 0 0 0 1px rgba(157, 180, 255, 0.18);
+    }
+  }
+
+  .reaction-chip {
+    border: 0;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: inset 0 0 0 1px var(--mn-hair);
+
+    &.is-reacted {
+      background: var(--mn-lime-soft);
+      box-shadow: inset 0 0 0 1px var(--mn-lime-ring);
+    }
+  }
+}
+
+html:root[data-theme="midnight"] {
+  --tt-brand-color-50: #f7fee7;
+  --tt-brand-color-100: #ecfccb;
+  --tt-brand-color-200: #d9f99d;
+  --tt-brand-color-300: #c4f25c;
+  --tt-brand-color-400: #c4f25c;
+  --tt-brand-color-500: #4d7c0f; // other filled brand surfaces: white text stays readable
+  --tt-brand-color-600: #3f6212;
+  --tt-brand-color-700: #365314;
+  --tt-brand-color-800: #2b420f;
+  --tt-brand-color-900: #1f300b;
+  --tt-brand-color-950: #111c05;
+  --tt-selection-color: rgba(196, 242, 92, 0.2);
+}
+
+:root[data-theme="midnight"] body {
+  --tt-text-primary: #e8eaf6;
+  --tt-theme-text: #e8eaf6;
+  --tt-text-color: #c9cde6;
+  --tt-text-secondary: #9aa0c2;
+  --tt-text-tertiary: #7d84aa;
+}
+
+:root[data-theme="midnight"] .tiptap.ProseMirror {
+  --tt-paragraph-text-color: #e8eaf6;
+}
+
+// ─── Notebook: an open notebook — kraft left page, cream right page ───────
+// The sidebar is the left page (kraft paper, stitched edge); the page is the
+// right one (cream paper, binder holes, a red margin line, a soft shadow in
+// the fold). Fraunces for titles, Newsreader for text, Caveat handwriting
+// for labels, dates and notes — never for what people type.
+:root[data-theme="notebook"] {
+  @include theme-font(("Newsreader", Georgia, serif));
+
+  --nb-ink: #24324f;
+  --nb-blue: #2b4c8c;
+  --nb-pencil: #6b6658;
+  --nb-red: #c2410c;
+  --nb-paper: #fbf7ee;
+  --nb-card: #fffef9;
+  --nb-kraft: #efe5cf;
+  --nb-desk: #e9dfc8;
+  --nb-highlight: rgba(255, 213, 79, 0.85);
+  --nb-marker: linear-gradient(180deg, transparent 48%, var(--nb-highlight) 48%, var(--nb-highlight) 90%, transparent 90%);
+  --nb-sticky: linear-gradient(180deg, #fff3b0 0%, #ffeb8a 100%);
+  --nb-tape: rgba(255, 250, 235, 0.7);
+  --nb-rules: repeating-linear-gradient(180deg, transparent 0 27px, rgba(70, 110, 170, 0.14) 27px 28px);
+  --nb-display: "Fraunces", Georgia, serif;
+  --nb-hand: "Caveat", cursive;
+  --nb-mono: "Courier Prime", "Courier New", monospace;
+  --nb-lift: 0 1px 2px rgba(36, 50, 79, 0.12), 0 10px 26px rgba(36, 50, 79, 0.09);
+
+  --theme-accent: var(--nb-blue);
+  --theme-window: var(--nb-desk);
+  --tt-bg-color: var(--nb-paper);
+  --tt-toolbar-bg-color: transparent;
+  --tiptap-card-bg-color: var(--nb-card);
+  --tiptap-card-border-color: rgba(36, 50, 79, 0.14);
+  --tt-card-bg-color: var(--nb-card);
+  --tt-border-color: rgba(36, 50, 79, 0.15);
+  --tt-border-color-tint: rgba(36, 50, 79, 0.07);
+  --tt-shadow-elevated-sm: 0 1px 2px rgba(36, 50, 79, 0.1), 0 4px 12px rgba(36, 50, 79, 0.07);
+  --tt-shadow-elevated-md: var(--nb-lift);
+  --tt-shadow-elevated-lg: 0 2px 4px rgba(36, 50, 79, 0.12), 0 18px 40px rgba(36, 50, 79, 0.14);
+
+  // Sidebar: kraft paper with a faint grain.
+  --sidebar-bg-color: var(--nb-kraft);
+  --sidebar-surface: repeating-linear-gradient(90deg, rgba(120, 90, 40, 0.025) 0 2px, transparent 2px 5px),
+    repeating-linear-gradient(0deg, rgba(120, 90, 40, 0.02) 0 1px, transparent 1px 4px), var(--nb-kraft);
+  --sidebar-fog-color: rgba(239, 229, 207, 0.9);
+  --sidebar-accent: var(--nb-blue);
+  --sidebar-border-color: rgba(36, 50, 79, 0.25);
+  --sidebar-edge-shadow: none;
+  --sidebar-text-color: var(--nb-ink);
+  --sb-font: "Newsreader", Georgia, serif;
+  --sb-font-size: 15px;
+  --sb-row-color: var(--nb-ink);
+  --sb-active-color: var(--nb-ink);
+  --sb-icon-color: var(--nb-blue);
+  --sb-label-color: var(--nb-blue);
+  --sb-hover-bg: rgba(43, 76, 140, 0.06);
+  --sb-active-bg: transparent;
+  --sb-count-bg: transparent;
+  --sb-count-color: var(--nb-pencil);
+  --sb-divider: rgba(36, 50, 79, 0.12);
+  --sb-dock-bg: transparent;
+  --sb-dock-shadow: none;
+  --theme-dock-active-bg: #ffd54f;
+  --theme-dock-active-color: var(--nb-ink);
+  --sb-dock-active-bg: var(--theme-dock-active-bg);
+  --sb-dock-active-color: var(--theme-dock-active-color);
+  --sb-scrlbr-width: thin;
+  --sb-scrlbr-color: rgba(36, 50, 79, 0.2) transparent;
+
+  // The right page: flush against the sidebar (theme-sheet.tsx adds 24px
+  // for the floating themes), a shadow in the fold, binder holes and a red
+  // margin line along its left edge.
+  .theme-sheet {
+    display: block;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    margin-left: -24px;
+    z-index: -1;
+    pointer-events: none;
+    transition: left 0.2s ease;
+    background:
+      linear-gradient(90deg, rgba(36, 50, 79, 0.1) 0px, rgba(36, 50, 79, 0.03) 18px, transparent 40px),
+      var(--nb-paper);
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 18px;
+      width: 14px;
+      background: radial-gradient(circle at 7px 7px, var(--nb-desk) 0 5px, rgba(36, 50, 79, 0.25) 5px 6px, transparent 6.5px) 0 20px / 14px 44px repeat-y;
+    }
+
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 64px;
+      width: 1.5px;
+      background: rgba(214, 90, 90, 0.45);
+    }
+
+    &--flush {
+      inset: 0;
+      margin-left: 0;
+
+      &::before,
+      &::after {
+        display: none;
+      }
+    }
+  }
+
+  // The page's top bar starts past the margin line, with a hairline under it.
+  .tiptap-toolbar[data-variant="fixed"] {
+    padding-left: 84px !important;
+    box-shadow: inset 0 -1px 0 rgba(36, 50, 79, 0.1);
+  }
+
+  // Menus and popovers are index cards.
+  .tiptap-card {
+    border-radius: 6px;
+  }
+
+  // ── Sidebar ──
+  // A stitched line along its edge (the accent glow is off in this theme).
+  .sidebar::before {
+    display: block;
+    inset: 0 7px 0 auto;
+    width: 0;
+    filter: none;
+    background: none;
+    border-right: 1.5px dashed rgba(36, 50, 79, 0.3);
+  }
+
+  .sidebar-section__label {
+    font-family: var(--nb-hand) !important;
+    font-size: 21px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--nb-blue);
+  }
+
+  // The open page: a highlighter stroke under its title.
+  .sidebar .page-item.active {
+    background: transparent;
+    box-shadow: none;
+    font-weight: 600;
+
+    .page-item-title {
+      padding: 0 3px;
+      margin: 0 -3px;
+      background: var(--nb-marker);
+    }
+  }
+
+  // Teamspace members: small tilted ink stamps.
+  .page-item-face {
+    background: var(--nb-paper);
+    box-shadow: inset 0 0 0 1.5px var(--nb-blue);
+    color: var(--nb-blue);
+    font-family: var(--nb-display);
+    transform: rotate(-6deg);
+
+    &:nth-child(even) {
+      box-shadow: inset 0 0 0 1.5px #b4532a;
+      color: #b4532a;
+      transform: rotate(5deg);
+    }
+  }
+
+  // Search: written on a line.
+  .sidebar .sb-search {
+    border: 0;
+    border-bottom: 1.5px solid rgba(36, 50, 79, 0.45);
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .sidebar .sb-search__input::placeholder {
+    font-style: italic;
+  }
+
+  .sidebar .sb-search__palette {
+    background: transparent;
+    font-family: var(--nb-display);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    font-variant: small-caps;
+    text-transform: lowercase;
+    color: var(--nb-pencil);
+  }
+
+  // Dock: paper index tabs; the open one is yellow and sticks up.
+  .sb-dock {
+    align-items: flex-end;
+    gap: 4px;
+    padding: 0 2px;
+  }
+
+  .sb-dock__tab {
+    border-radius: 8px 8px 0 0;
+    background: var(--nb-paper);
+    box-shadow: inset 0 0 0 1px rgba(36, 50, 79, 0.28), 0 -2px 6px rgba(36, 50, 79, 0.06);
+    transition: transform 0.12s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+    }
+
+    &.is-active {
+      background: #ffd54f;
+      box-shadow: inset 0 0 0 1px rgba(36, 50, 79, 0.3), 0 -2px 6px rgba(36, 50, 79, 0.08);
+      transform: translateY(-6px);
+    }
+  }
+
+  // ── Buttons ──
+  .tiptap-button {
+    --tt-button-hover-bg-color: rgba(43, 76, 140, 0.07);
+  }
+
+  .tiptap-button[data-style="primary"] {
+    --tt-button-default-bg-color: var(--nb-blue);
+    --tt-button-hover-bg-color: #23407a;
+    border-radius: 5px;
+    font-family: var(--nb-display);
+    font-weight: 600;
+    box-shadow: 0 2px 0 #1c3260;
+  }
+
+  // ── Home ──
+  // The hero: an index card, taped down at two corners.
+  .ts-hero.notebook {
+    position: relative;
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    background:
+      linear-gradient(180deg, transparent 0 52px, rgba(214, 90, 90, 0.5) 52px 53.5px, transparent 53.5px),
+      var(--nb-rules) 0 53px / 100% calc(100% - 53px) no-repeat,
+      var(--nb-card);
+    box-shadow: var(--nb-lift);
+    transform: rotate(-0.3deg);
+
+    &::before,
+    &::after {
+      content: "";
+      position: absolute;
+      top: -12px;
+      width: 90px;
+      height: 26px;
+      background: var(--nb-tape);
+      box-shadow: inset 0 0 0 1px rgba(36, 50, 79, 0.08);
+    }
+
+    &::before {
+      left: 40px;
+      transform: rotate(-6deg);
+    }
+
+    &::after {
+      right: 54px;
+      transform: rotate(5deg);
+    }
+
+    .ts-hero__icon {
+      background: transparent;
+      box-shadow: none;
+      color: var(--nb-blue);
+    }
+
+    .ts-hero__btn {
+      border-radius: 5px;
+      background: transparent;
+      box-shadow: inset 0 0 0 1.5px var(--nb-blue);
+      color: var(--nb-blue);
+      font-family: var(--nb-display);
+      font-weight: 600;
+    }
+
+    .ts-hero__btn--primary {
+      background: var(--nb-blue);
+      box-shadow: 0 2px 0 #1c3260;
+      color: var(--nb-paper);
+    }
+
+    .ts-hero__pins-label {
+      font-family: var(--nb-hand);
+      font-size: 25px;
+      font-weight: 700;
+      letter-spacing: 0;
+      text-transform: none;
+      color: var(--nb-blue);
+    }
+
+    // Pinned pages read like a table of contents.
+    .ts-hero__pin {
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      border-bottom: 2px dotted rgba(36, 50, 79, 0.3);
+
+      &:hover {
+        background: rgba(255, 213, 79, 0.25);
+      }
+    }
+
+    .ts-hero__pin-when {
+      font-family: var(--nb-hand);
+      font-size: 19px;
+      color: var(--nb-pencil);
+    }
+  }
+
+  // The greeting, handwritten in blue ink with a pen underline.
+  .greeting {
+    position: relative;
+    display: table;
+    font-family: var(--nb-hand);
+    font-size: 42px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: 0;
+    color: var(--nb-blue);
+
+    &::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 10%;
+      bottom: -10px;
+      height: 14px;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 14' preserveAspectRatio='none'%3E%3Cpath d='M4 8c40-5 90-6 140-3s100 4 150-2' fill='none' stroke='%232b4c8c' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    }
+
+    &--compact::after {
+      display: none;
+    }
+  }
+
+  // "For you": a sticky note, taped at the top.
+  .home-foryou {
+    position: relative;
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    background: var(--nb-sticky);
+    box-shadow: 0 2px 2px rgba(36, 50, 79, 0.08), 0 14px 24px rgba(36, 50, 79, 0.12);
+    transform: rotate(-0.6deg);
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: -11px;
+      left: 50%;
+      width: 96px;
+      height: 24px;
+      margin-left: -48px;
+      background: var(--nb-tape);
+      box-shadow: inset 0 0 0 1px rgba(36, 50, 79, 0.08);
+      transform: rotate(3deg);
+    }
+  }
+
+  .home-foryou__label {
+    font-family: var(--nb-hand);
+    font-size: 30px;
+    font-weight: 700;
+  }
+
+  // "3 new", circled in red pen.
+  .home-foryou__unread {
+    padding: 0 9px;
+    border-radius: 50%;
+    background: transparent;
+    box-shadow: inset 0 0 0 2px var(--nb-red);
+    transform: rotate(-4deg);
+    font-family: var(--nb-hand);
+    font-size: 21px;
+    font-weight: 700;
+    color: var(--nb-red);
+  }
+
+  .home-foryou__link,
+  .home-foryou__time,
+  .home-foryou__read {
+    font-family: var(--nb-hand);
+    font-size: 19px;
+  }
+
+  .home-foryou__link {
+    font-weight: 700;
+    color: var(--nb-blue);
+  }
+
+  .home-learn {
+    border-radius: 0;
+    background: var(--nb-card);
+    box-shadow: var(--nb-lift);
+  }
+
+  // Recent / Favorites / Created by me: coloured paper index tabs.
+  .home-dense__tabs.tab-list {
+    gap: 4px;
+    padding-left: 8px;
+    align-items: flex-end;
+    box-shadow: inset 0 -1.5px 0 rgba(36, 50, 79, 0.4);
+
+    .tab-item {
+      padding: 7px 18px;
+      border-radius: 8px 8px 0 0;
+      background: #dfe8f6;
+      box-shadow: inset 0 0 0 1px rgba(36, 50, 79, 0.2);
+      font-family: var(--nb-display);
+      color: #34405e;
+
+      &:nth-child(3n) {
+        background: #f3dfd6;
+      }
+
+      &::after {
+        display: none;
+      }
+
+      &.is-active {
+        padding-top: 10px;
+        background: #ffd54f;
+        color: var(--nb-ink);
+        font-weight: 600;
+        box-shadow: inset 0 0 0 1px rgba(36, 50, 79, 0.3);
+      }
+    }
+  }
+
+  // ── Page content ──
+  .tiptap.ProseMirror {
+    --tt-checklist-border-color: var(--nb-ink);
+    --tt-checklist-border-active-color: var(--nb-ink);
+    --tt-checklist-bg-active-color: transparent;
+    --tt-checklist-check-icon-color: var(--nb-blue);
+    --tt-checklist-text-active: #7a7563;
+
+    h1,
+    h2,
+    h3,
+    h4 {
+      font-family: var(--nb-display);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    // A highlighter stroke under the words of a ## heading.
+    h2 {
+      text-decoration: underline;
+      text-decoration-color: var(--nb-highlight);
+      text-decoration-thickness: 0.42em;
+      text-underline-offset: -0.2em;
+      text-decoration-skip-ink: none;
+    }
+
+    // Hand-drawn boxes; the tick runs out of the box, in blue ink.
+    ul[data-type="taskList"] li label span {
+      border-width: 1.5px;
+      border-radius: 3px 5px 4px 6px / 5px 3px 6px 4px;
+      background: transparent;
+    }
+
+    ul[data-type="taskList"] li label input[type="checkbox"]:checked + span {
+      background: transparent;
+
+      &::before {
+        width: 1.15em;
+        height: 1.15em;
+        transform: translate(-35%, -65%) rotate(-6deg);
+      }
+    }
+
+    // Done items are crossed out in blue pen.
+    ul[data-type="taskList"] li[data-checked="true"] > div {
+      text-decoration-color: var(--nb-blue);
+      text-decoration-thickness: 2px;
+    }
+
+    :not(pre) > code {
+      border-radius: 2px;
+      background: rgba(36, 50, 79, 0.06);
+      color: var(--nb-ink);
+      font-family: var(--nb-mono);
+    }
+
+    blockquote {
+      border-left: 2px solid var(--nb-blue);
+      font-style: italic;
+    }
+
+    // Callouts keep their colour but sit like a taped note.
+    .callout-root {
+      position: relative;
+      border-color: transparent;
+      border-radius: 0;
+      box-shadow: 0 2px 2px rgba(36, 50, 79, 0.08), 0 12px 22px rgba(36, 50, 79, 0.1);
+      transform: rotate(-0.4deg);
+
+      &::before {
+        content: "";
+        position: absolute;
+        top: -10px;
+        left: 24px;
+        width: 70px;
+        height: 22px;
+        background: var(--nb-tape);
+        box-shadow: inset 0 0 0 1px rgba(36, 50, 79, 0.08);
+        transform: rotate(-4deg);
+        pointer-events: none;
+      }
+    }
+  }
+
+  // Page comments: a ruled index card; names handwritten.
+  .page-comment__thread.tiptap-card {
+    border-radius: 0;
+    background: var(--nb-rules) 0 44px / 100% calc(100% - 44px) no-repeat, var(--nb-card);
+  }
+
+  .page-comment__head {
+    border-bottom: 1.5px solid rgba(214, 90, 90, 0.5);
+  }
+
+  .page-comment__title {
+    font-family: var(--nb-hand);
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  .comment__name {
+    font-family: var(--nb-hand);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--nb-blue);
+  }
+
+  .comment__time {
+    font-style: italic;
+  }
+
+  .reaction-chip {
+    border-radius: 3px;
+    border-color: rgba(36, 50, 79, 0.25);
+
+    &.is-reacted {
+      background: rgba(255, 213, 79, 0.6);
+      border-color: rgba(36, 50, 79, 0.3);
+    }
+  }
+}
+
+html:root[data-theme="notebook"] {
+  --tt-brand-color-50: #eef2fa;
+  --tt-brand-color-100: #dce4f4;
+  --tt-brand-color-200: #b8c8e8;
+  --tt-brand-color-300: #8aa3d4;
+  --tt-brand-color-400: #4f72b5;
+  --tt-brand-color-500: #2b4c8c;
+  --tt-brand-color-600: #233f76;
+  --tt-brand-color-700: #1c3260;
+  --tt-brand-color-800: #15264a;
+  --tt-brand-color-900: #0f1b35;
+  --tt-brand-color-950: #080f1f;
+  --tt-selection-color: rgba(255, 212, 84, 0.45);
+}
+
+:root[data-theme="notebook"] body {
+  --tt-text-primary: #24324f;
+  --tt-theme-text: #24324f;
+  --tt-text-color: #34405e;
+  --tt-text-secondary: #6b6658;
+}
+
+:root[data-theme="notebook"] .tiptap.ProseMirror {
+  --tt-paragraph-text-color: #24324f;
+}
+
+// ─── Retro: cream dot grid, navy outlines + hard shadows, hot pink ─────────
+// Tokens other files use too (greeting, home rail, teamspace hero, icons).
+:root[data-theme="retro"] {
+  @include theme-font(("Space Grotesk", system-ui, sans-serif));
+
+  --retro-ink: #1d1a2b;
+  --retro-ink-soft: #57506b;
+  --retro-ground: #f4ecdf;
+  --retro-paper: #fffaf1;
+  --retro-pink: #ff4f8b;
+  --retro-pink-soft: #ffd3e2;
+  --retro-lilac: #e3d5ff;
+  --retro-mint: #c8f1e4;
+  --retro-blue: #d6defc;
+  --retro-peach: #ffe2c4;
+  --retro-dots: radial-gradient(rgba(29, 26, 43, 0.09) 1px, transparent 1.4px) 0 0 / 16px 16px;
+  --retro-pixel: "Silkscreen", "Space Grotesk", monospace;
+
+  --theme-accent: var(--retro-pink);
+  --theme-window: var(--retro-dots), var(--retro-ground);
+  --tt-bg-color: var(--retro-paper);
+  --tt-toolbar-bg-color: transparent;
+  --tiptap-card-bg-color: #ffffff;
+  --tiptap-card-border-color: var(--retro-ink);
+  --tt-card-bg-color: #ffffff;
+  --tt-border-color: rgba(29, 26, 43, 0.22);
+  --tt-border-color-tint: rgba(29, 26, 43, 0.1);
+  --tt-shadow-elevated-xs: 0 0 0 1.5px var(--retro-ink), 2px 2px 0 var(--retro-ink);
+  --tt-shadow-elevated-sm: 0 0 0 2px var(--retro-ink), 3px 3px 0 var(--retro-ink);
+  --tt-shadow-elevated-md: 0 0 0 2px var(--retro-ink), 4px 4px 0 var(--retro-ink);
+  --tt-shadow-elevated-lg: 0 0 0 2px var(--retro-ink), 6px 6px 0 var(--retro-ink);
+
+  // Sidebar: the same cream ground, a navy edge.
+  --sidebar-bg-color: var(--retro-ground);
+  --sidebar-surface: var(--retro-dots), var(--retro-ground);
+  --sidebar-fog-color: rgba(244, 236, 223, 0.92);
+  --sidebar-accent: var(--retro-pink);
+  --sidebar-border-color: var(--retro-ink);
+  --sidebar-edge-shadow: none;
+  --sidebar-text-color: var(--retro-ink);
+  --sb-row-color: var(--retro-ink);
+  --sb-active-color: var(--retro-ink);
+  --sb-icon-color: var(--retro-ink);
+  --sb-label-color: var(--retro-ink-soft);
+  --sb-hover-bg: rgba(29, 26, 43, 0.07);
+  --sb-active-bg: var(--retro-pink);
+  --sb-count-bg: var(--retro-paper);
+  --sb-count-color: var(--retro-ink);
+  --sb-divider: rgba(29, 26, 43, 0.18);
+  --sb-dock-bg: var(--retro-paper);
+  --sb-dock-shadow: inset 0 0 0 2px var(--retro-ink), 4px 4px 0 var(--retro-ink);
+  --theme-dock-active-bg: var(--retro-pink);
+  --theme-dock-active-color: var(--retro-ink);
+  --sb-doc-tab-height: 32px;
+  --sb-dock-active-bg: var(--theme-dock-active-bg);
+  --sb-dock-active-color: var(--theme-dock-active-color);
+  --sb-scrlbr-width: thin;
+  --sb-scrlbr-color: rgba(29, 26, 43, 0.2) transparent;
+
+  // The page: an outlined paper card on the dots.
+  .theme-sheet {
+    right: 20px;
+    bottom: 20px;
+    border-radius: 16px;
+    background: var(--retro-paper);
+    box-shadow: 0 0 0 2px var(--retro-ink), 6px 6px 0 var(--retro-ink);
+  }
+
+  .tiptap-card {
+    border: 0;
+  }
+
+  // ── Sidebar ──
+  .sidebar-section__label {
+    font-family: var(--retro-pixel) !important;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--retro-ink-soft);
+  }
+
+  // Every page icon sits in a small outlined tile.
+  .sidebar .page-item:not(.is-teamspace-root) .page-item-icon {
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    background: #ffffff;
+    box-shadow: inset 0 0 0 1.5px var(--retro-ink);
+    color: var(--retro-ink);
+  }
+
+  .sidebar .page-item.active {
+    background: var(--retro-pink);
+    font-weight: 700;
+    box-shadow: inset 0 0 0 2px var(--retro-ink), 3px 3px 0 var(--retro-ink);
+  }
+
+  .sidebar .sb-search {
+    border: 0;
+    border-radius: 10px;
+    background: var(--retro-paper);
+    box-shadow: inset 0 0 0 2px var(--retro-ink), 3px 3px 0 var(--retro-ink);
+  }
+
+  .sidebar .sb-search__palette {
+    background: var(--retro-pink-soft);
+    box-shadow: inset 0 0 0 1.5px var(--retro-ink);
+    font-family: var(--retro-pixel);
+    font-size: 10px;
+    color: var(--retro-ink);
+  }
+
+  .sb-dock__tab.is-active {
+    box-shadow: inset 0 0 0 2px var(--retro-ink);
+  }
+
+  // ── Buttons ──
+  .tiptap-button {
+    --tt-button-hover-bg-color: rgba(29, 26, 43, 0.07);
+  }
+
+  .tiptap-button[data-style="primary"] {
+    --tt-button-default-bg-color: var(--retro-pink);
+    --tt-button-hover-bg-color: #ff6b9d;
+    --tt-button-default-text-color: var(--retro-ink);
+    --tt-button-hover-text-color: var(--retro-ink);
+    --tt-button-default-icon-color: var(--retro-ink);
+    --tt-button-hover-icon-color: var(--retro-ink);
+    font-weight: 700;
+    box-shadow: inset 0 0 0 2px var(--retro-ink), 3px 3px 0 var(--retro-ink);
+    transition: transform 0.08s ease;
+
+    &:hover {
+      transform: translate(-1px, -1px);
+    }
+
+    &:active {
+      transform: translate(2px, 2px);
+    }
+  }
+
+  // ── Home tabs (Recent / Favorites / Created by me): folder tabs ──
+  .home-dense__tabs.tab-list {
+    box-shadow: inset 0 -2px 0 var(--retro-ink);
+
+    .tab-item {
+      border-radius: 8px 8px 0 0;
+      font-weight: 600;
+
+      &::after {
+        display: none;
+      }
+
+      &.is-active {
+        background: var(--retro-pink);
+        color: var(--retro-ink);
+        font-weight: 700;
+        box-shadow: inset 0 0 0 2px var(--retro-ink);
+      }
+    }
+  }
+
+  // ── Page content ──
+  .tiptap.ProseMirror {
+    --tt-checklist-bg-active-color: var(--retro-pink);
+    --tt-checklist-border-color: var(--retro-ink);
+    --tt-checklist-border-active-color: var(--retro-ink);
+    --tt-checklist-check-icon-color: var(--retro-ink);
+    --tt-checklist-text-active: #6b6482;
+
+    h1,
+    h2,
+    h3,
+    h4 {
+      font-family: "Space Grotesk", system-ui, sans-serif;
+      letter-spacing: -0.02em;
+    }
+
+    // Chunky checkboxes.
+    ul[data-type="taskList"] li label span {
+      width: 18px;
+      height: 18px;
+      border-width: 2px;
+      border-radius: 5px;
+      background: #ffffff;
+      box-shadow: 2px 2px 0 var(--retro-ink);
+    }
+
+    ul[data-type="taskList"] li label input[type="checkbox"]:checked + span {
+      background: var(--retro-pink);
+    }
+
+    // Inline code: a lilac outlined chip.
+    :not(pre) > code {
+      background: var(--retro-lilac);
+      color: var(--retro-ink);
+      box-shadow: inset 0 0 0 1.5px var(--retro-ink);
+    }
+
+    blockquote {
+      border-left: 4px solid var(--retro-pink);
+    }
+
+    .callout-root {
+      border-color: transparent;
+      box-shadow: inset 0 0 0 2px var(--retro-ink), 4px 4px 0 var(--retro-ink);
+    }
+  }
+
+  // Comment reactions.
+  .reaction-chip {
+    border: 0;
+    box-shadow: inset 0 0 0 1.5px var(--retro-ink);
+
+    &.is-reacted {
+      background: var(--retro-pink-soft);
+    }
+  }
+}
+
+html:root[data-theme="retro"] {
+  --tt-brand-color-50: #fff0f5;
+  --tt-brand-color-100: #ffe0ea;
+  --tt-brand-color-200: #ffc2d5;
+  --tt-brand-color-300: #ff94b4;
+  --tt-brand-color-400: #ff4f8b;
+  --tt-brand-color-500: #d81b60;
+  --tt-brand-color-600: #b0154e;
+  --tt-brand-color-700: #8e113f;
+  --tt-brand-color-800: #6d0d30;
+  --tt-brand-color-900: #4d0922;
+  --tt-brand-color-950: #2e0514;
+  --tt-selection-color: rgba(255, 79, 139, 0.22);
+}
+
+:root[data-theme="retro"] body {
+  --tt-text-primary: #1d1a2b;
+  --tt-theme-text: #1d1a2b;
+  --tt-text-color: #2a2540;
+  --tt-text-secondary: #57506b;
+}
+
+:root[data-theme="retro"] .tiptap.ProseMirror {
+  --tt-paragraph-text-color: #1d1a2b;
+}
+
+// ─── Wallpaper: your picture behind the app, glass tinted from it ──────────
+// Values come from wallpaper.ts through useApplyTheme as --wp-* variables on
+// <html>: the picture, blur, dim, the glass colour (tint + opacity) and the
+// accent. The picture also decides light or dark mode, so the text colours
+// below have a light version and a `.dark` one.
+:root[data-theme="wallpaper"] {
+  // Defaults until useApplyTheme sets the real ones (the dusk preset).
+  --wp-image: radial-gradient(70px 70px at 72% 58%, #fff1cc 0 30px, rgba(255, 214, 150, 0.45) 32px, transparent 70px),
+    radial-gradient(75% 30% at 18% 100%, #24133f 0 60%, transparent 61%),
+    radial-gradient(60% 26% at 88% 100%, #341c58 0 60%, transparent 61%),
+    radial-gradient(95% 36% at 55% 110%, #170c2a 0 60%, transparent 61%),
+    linear-gradient(180deg, #1d1a4f 0%, #4b2d7a 30%, #a24c86 52%, #f0896b 66%, #ffc58a 76%, #ffd9a6 100%);
+  --wp-blur: 22px;
+  --wp-dim: 0.1;
+  --wp-tint: 30, 18, 58;
+  --wp-glass: rgba(30, 18, 58, 0.58);
+  --wp-accent: #ffb27a;
+  --wp-accent-ink: #2a1630;
+
+  // Light picture: dark text on pale glass.
+  --wp-ink: #1c1f2a;
+  --wp-muted: #4a5163;
+  --wp-line: rgba(28, 31, 42, 0.12);
+  --wp-hair: rgba(255, 255, 255, 0.7);
+  --wp-card: rgba(255, 255, 255, 0.55);
+  --wp-hover: rgba(255, 255, 255, 0.45);
+
+  --theme-accent: var(--wp-accent);
+  --theme-window: linear-gradient(rgba(0, 0, 0, var(--wp-dim)), rgba(0, 0, 0, var(--wp-dim))), var(--wp-image);
+  --tt-bg-color: rgb(var(--wp-tint));
+  --tiptap-card-bg-color: rgba(var(--wp-tint), 0.94);
+  --tiptap-card-border-color: var(--wp-hair);
+  --tt-card-bg-color: rgba(var(--wp-tint), 0.94);
+  --tt-border-color: var(--wp-line);
+  --tt-border-color-tint: var(--wp-line);
+  --tt-shadow-elevated-md: inset 0 1px 0 var(--wp-hair), 0 18px 50px rgba(0, 0, 0, 0.25);
+  --tt-shadow-elevated-lg: inset 0 1px 0 var(--wp-hair), 0 28px 70px rgba(0, 0, 0, 0.3);
+
+  // Sidebar: see-through; its glass panel is drawn by .sidebar::before.
+  --sidebar-bg-color: rgb(var(--wp-tint));
+  --sidebar-surface: transparent;
+  --sidebar-fog-color: rgba(var(--wp-tint), 0);
+  --sidebar-accent: var(--wp-accent);
+  --sidebar-border-color: transparent;
+  --sidebar-edge-shadow: none;
+  --sidebar-text-color: var(--wp-ink);
+  --sb-row-color: var(--wp-ink);
+  --sb-active-color: var(--wp-ink);
+  --sb-icon-color: var(--wp-ink);
+  --sb-label-color: var(--wp-muted);
+  --sb-row-radius: 10px;
+  --sb-hover-bg: var(--wp-hover);
+  --sb-active-bg: var(--wp-card);
+  --sb-count-bg: var(--wp-card);
+  --sb-count-color: var(--wp-muted);
+  --sb-divider: var(--wp-line);
+  --sb-dock-bg: var(--wp-card);
+  --sb-dock-shadow: inset 0 0 0 1px var(--wp-hair);
+  --theme-dock-active-bg: var(--wp-accent);
+  --theme-dock-active-color: var(--wp-accent-ink);
+  --sb-dock-active-bg: var(--theme-dock-active-bg);
+  --sb-dock-active-color: var(--theme-dock-active-color);
+  --sb-scrlbr-width: thin;
+  --sb-scrlbr-color: var(--wp-line) transparent;
+  --sp-surface: var(--tt-card-bg-color);
+  --sb-card: var(--wp-glass);
+  --tt-combobox-bg-color: var(--tt-card-bg-color);
+  
+
+  // The page: glass in the picture's colour.
+  .theme-sheet {
+    top: 12px;
+    right: 14px;
+    bottom: 14px;
+    border-radius: 22px;
+    background: var(--wp-glass);
+    backdrop-filter: blur(var(--wp-blur)) saturate(1.3);
+    box-shadow: inset 0 1px 0 var(--wp-hair), inset 0 0 0 1px var(--wp-hair), 0 24px 70px rgba(0, 0, 0, 0.28);
+  }
+
+  .tiptap-card {
+    border: 0;
+    backdrop-filter: blur(var(--wp-blur));
+  }
+
+  // ── Sidebar: a floating glass panel ──
+  .sidebar:not(.sidebar-mobile) {
+    padding: 14px 10px 14px 18px;
+
+    &::before {
+      inset: 12px 6px 12px 12px;
+      filter: none;
+      border-radius: 20px;
+      background: var(--wp-glass);
+      backdrop-filter: blur(var(--wp-blur)) saturate(1.3);
+      box-shadow: inset 0 1px 0 var(--wp-hair), inset 0 0 0 1px var(--wp-hair), 0 18px 50px rgba(0, 0, 0, 0.25);
+    }
+  }
+
+  // Over the page (phone drawer, collapsed peek): the solid glass colour.
+  .sidebar.sidebar-mobile,
+  .sidebar.sidebar--floating {
+    background: rgb(var(--wp-tint)) !important;
+  }
+
+  .sidebar-section__label {
+    font-weight: 700;
+    color: var(--wp-muted);
+  }
+
+  .sidebar .page-item.active {
+    background: var(--wp-card);
+    font-weight: 700;
+    box-shadow: inset 0 0 0 1px var(--wp-hair), 0 4px 14px rgba(0, 0, 0, 0.12);
+  }
+
+  .sidebar .sb-search {
+    border: 0;
+    border-radius: 11px;
+    background: var(--wp-card);
+    box-shadow: inset 0 0 0 1px var(--wp-hair);
+  }
+
+  .sidebar .sb-search__palette {
+    background: var(--wp-hover);
+    color: var(--wp-muted);
+  }
+
+  .sb-dock {
+    border-radius: 14px;
+  }
+
+  // ── Buttons ──
+  .tiptap-button {
+    --tt-button-hover-bg-color: var(--wp-hover);
+  }
+
+  .tiptap-button[data-style="primary"] {
+    --tt-button-default-bg-color: var(--wp-accent);
+    --tt-button-hover-bg-color: var(--wp-accent);
+    --tt-button-default-text-color: var(--wp-accent-ink);
+    --tt-button-hover-text-color: var(--wp-accent-ink);
+    --tt-button-default-icon-color: var(--wp-accent-ink);
+    --tt-button-hover-icon-color: var(--wp-accent-ink);
+    font-weight: 700;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+
+    &:hover {
+      filter: brightness(1.06);
+    }
+  }
+
+  // ── Home ──
+  .ts-hero.wallpaper,
+  .home-foryou,
+  .home-learn {
+    border: 0;
+    border-radius: 20px;
+    background: var(--wp-card);
+    box-shadow: inset 0 1px 0 var(--wp-hair), inset 0 0 0 1px var(--wp-hair);
+  }
+
+  .home-foryou{
+    background: var(--wp-card) !important;
+  }
+
+  .ts-hero__pins-grid {
+    row-gap: 5px;
+  }
+
+  .ts-hero.wallpaper {
+    .ts-hero__icon {
+      border-radius: 15px;
+      background: var(--wp-accent);
+      color: var(--wp-accent-ink);
+    }
+
+    .ts-hero__btn {
+      border-radius: 11px;
+      background: var(--wp-card);
+      box-shadow: inset 0 0 0 1px var(--wp-hair);
+      color: var(--wp-ink);
+    }
+
+    .ts-hero__btn--primary {
+      background: var(--wp-accent);
+      color: var(--wp-accent-ink);
+      font-weight: 700;
+    }
+
+    .ts-hero__pins-label {
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--wp-accent);
+    }
+
+    .ts-hero__pin {
+      border-radius: 13px;
+      background: var(--wp-card);
+      box-shadow: inset 0 0 0 1px var(--wp-hair);
+    }
+  }
+
+  .greeting {
+    font-weight: 800;
+    letter-spacing: -0.025em;
+  }
+
+  .home-foryou__unread {
+    border-radius: 999px;
+    background: var(--wp-accent);
+    color: var(--wp-accent-ink);
+  }
+
+  .home-foryou__link {
+    color: var(--wp-accent);
+    font-weight: 700;
+  }
+
+  .home-dense__tabs.tab-list .tab-item.is-active::after {
+    background: var(--wp-accent);
+  }
+
+  // ── Page content ──
+  .tiptap.ProseMirror {
+    --tt-checklist-bg-active-color: var(--wp-accent);
+    --tt-checklist-border-color: var(--wp-muted);
+    --tt-checklist-border-active-color: var(--wp-accent);
+    --tt-checklist-check-icon-color: var(--wp-accent-ink);
+    --link-text-color: var(--wp-accent);
+
+    :not(pre) > code {
+      border-radius: 6px;
+      background: var(--wp-card);
+      color: var(--wp-ink);
+    }
+
+    blockquote {
+      border-left: 3px solid var(--wp-accent);
+    }
+
+    .callout-root {
+      border-color: transparent;
+      border-radius: 16px;
+      box-shadow: inset 0 0 0 1px var(--wp-hair);
+    }
+  }
+
+  .reaction-chip {
+    border: 0;
+    border-radius: 999px;
+    background: var(--wp-card);
+    box-shadow: inset 0 0 0 1px var(--wp-hair);
+
+    &.is-reacted {
+      box-shadow: inset 0 0 0 1.5px var(--wp-accent);
+    }
+  }
+}
+
+// Dark picture: light text on deep glass.
+:root[data-theme="wallpaper"].dark {
+  --wp-ink: #f7f5fb;
+  --wp-muted: rgba(247, 245, 251, 0.72);
+  --wp-line: rgba(255, 255, 255, 0.14);
+  --wp-hair: rgba(255, 255, 255, 0.16);
+  --wp-card: rgba(255, 255, 255, 0.09);
+  --wp-hover: rgba(255, 255, 255, 0.12);
+}
+
+// Brand shades from the accent (links, focus rings, selection, cursor).
+html:root[data-theme="wallpaper"] {
+  --tt-brand-color-50: color-mix(in srgb, var(--wp-accent) 8%, #fff);
+  --tt-brand-color-100: color-mix(in srgb, var(--wp-accent) 16%, #fff);
+  --tt-brand-color-200: color-mix(in srgb, var(--wp-accent) 32%, #fff);
+  --tt-brand-color-300: color-mix(in srgb, var(--wp-accent) 55%, #fff);
+  --tt-brand-color-400: var(--wp-accent);
+  --tt-brand-color-500: color-mix(in srgb, var(--wp-accent) 85%, #000);
+  --tt-brand-color-600: color-mix(in srgb, var(--wp-accent) 72%, #000);
+  --tt-brand-color-700: color-mix(in srgb, var(--wp-accent) 60%, #000);
+  --tt-brand-color-800: color-mix(in srgb, var(--wp-accent) 48%, #000);
+  --tt-brand-color-900: color-mix(in srgb, var(--wp-accent) 36%, #000);
+  --tt-brand-color-950: color-mix(in srgb, var(--wp-accent) 22%, #000);
+  --tt-selection-color: color-mix(in srgb, var(--wp-accent) 24%, transparent);
+}
+
+:root[data-theme="wallpaper"] body {
+  --tt-text-primary: var(--wp-ink);
+  --tt-theme-text: var(--wp-ink);
+  --tt-text-color: var(--wp-ink);
+  --tt-text-secondary: var(--wp-muted);
+  --tt-text-tertiary: var(--wp-muted);
+}
+
+:root[data-theme="wallpaper"] .tiptap.ProseMirror {
+  --tt-paragraph-text-color: var(--wp-ink);
+}
+
+// The accent glow at the foot of the sidebar fights a pattern: off there.
+:root[data-theme="retro"] .sidebar::before {
+  display: none;
+}

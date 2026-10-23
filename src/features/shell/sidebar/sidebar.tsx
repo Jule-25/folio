@@ -13,6 +13,7 @@ import { createPortal } from "react-dom";
 import "./sidebar.scss";
 import { SidebarResizeHandle } from "./sidebar-resize-handle";
 import { useSpaceAccent } from "../space-accent/space-accent";
+import { ThemeSheet } from "../appearance/theme-sheet";
 
 export const Sidebar = memo(() => {
   const {
@@ -132,14 +133,26 @@ export const Sidebar = memo(() => {
       onClick={() => onCollapsedChange(true)}
     />
   );
+  // Drawn outside the sidebar card: the card's z-index would trap it.
+  const sheet = (
+    <ThemeSheet left={collapsed ? 0 : sidebarWidth} flush={isMobile} />
+  );
 
-  return mode === "mobile"
-    ? createPortal(
+  return mode === "mobile" ? (
+    <>
+      {createPortal(
         <>
           {backdrop}
           {sidebarCard}
         </>,
         document.body,
-      )
-    : sidebarCard;
+      )}
+      {sheet}
+    </>
+  ) : (
+    <>
+      {sidebarCard}
+      {sheet}
+    </>
+  );
 });

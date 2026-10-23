@@ -5,6 +5,7 @@ import { usePatchPage } from "src/hooks/use-patch-page";
 import { patchPage } from "src/api/pages";
 import { Bone } from "src/components/tiptap-ui-primitive/bone";
 import { usePageCapabilities } from "src/hooks/use-page-role";
+import { useEditorLayout } from "src/features/shell/context/editor-layout-context";
 
 export const CoverImage = memo(function CoverImage({
   page,
@@ -26,6 +27,8 @@ export const CoverImage = memo(function CoverImage({
 
   const coverImage = pendingCoverImage ?? page.cover.coverImage;
   const positionY = localPositionY ?? page.cover?.positionY ?? 50;
+
+  const { collapsed } = useEditorLayout();
 
   // The <img> renders immediately but paints nothing until its bytes arrive —
   // 260px of blank while a full-width photo downloads. A bone fills the band in
@@ -109,6 +112,7 @@ export const CoverImage = memo(function CoverImage({
         src={coverImage ?? ""}
         alt="cover"
         draggable={false}
+        data-collapsed={collapsed ? "true" : undefined}
         onLoad={() => setLoaded(true)}
         // A broken URL must not leave the bone shimmering forever.
         onError={() => setLoaded(true)}

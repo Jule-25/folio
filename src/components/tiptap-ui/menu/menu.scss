@@ -1,12 +1,12 @@
 :root{
   --tt-combobox-bg-color: var(--white);
-  --tt-combobox-border-color: var(--tt-gray-light-a-100);
+  --tt-combobox-border-color: var(--tt-card-bg-color);
   --tt-combobox-text-color: var(--tt-gray-light-a-600);
 }
 
 .dark{
   --tt-combobox-border-color: var(--tt-border-color);
-  --tt-combobox-bg-color: #1f1f1f;
+  --tt-combobox-bg-color: var(--tt-card-bg-color);
   --tt-combobox-text-color: var(--tt-gray-dark-a-600);
 }
 

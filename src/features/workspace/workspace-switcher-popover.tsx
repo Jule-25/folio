@@ -33,6 +33,7 @@ import {
 } from "src/types";
 import { DynamicIcon } from "src/features/pages/cover/dynamic-icon";
 import { PageItemIcon } from "../pages/page-item/page-item-icon";
+import { Card } from "src/components/tiptap-ui-primitive/card";
 
 function Row({
   icon,
@@ -260,7 +261,7 @@ export function WorkspaceSwitcherPopover({
     );
 
   return createPortal(
-    <div
+    <Card
       ref={ref}
       className="ws-switch"
       style={{ top: pos.top, left: pos.left }}
@@ -354,7 +355,7 @@ export function WorkspaceSwitcherPopover({
         label={t("workspace.logout", "Log out")}
         onClick={logout}
       />
-    </div>,
+    </Card>,
     document.body,
   );
 }

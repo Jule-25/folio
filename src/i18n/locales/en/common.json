@@ -272,7 +272,9 @@
     "addComment": "Add a comment…",
     "showResolved_one": "{{count}} resolved comment",
     "showResolved_other": "{{count}} resolved comments",
-    "hideResolved": "Hide resolved comments"
+    "hideResolved": "Hide resolved comments",
+    "discussion": "Discussion",
+    "replyPlaceholder": "Reply…"
   },
   "quickOpen": {
     "placeholder": "Search pages…"
@@ -818,6 +820,40 @@
     "modalAria": "Workspace settings",
     "closeAria": "Close",
     "getUnlimitedAi": "Get unlimited AI",
+    "appearanceNames": {
+      "default": "Default",
+      "aurora": "Aurora",
+      "midnight": "Midnight",
+      "notebook": "Notebook",
+      "retro": "Retro",
+      "wallpaper": "Wallpaper"
+    },
+    "wallpaper": {
+      "source": {
+        "preset": "Presets",
+        "cover": "Page covers",
+        "upload": "Upload"
+      },
+      "preset": {
+        "dusk": "Dusk",
+        "ocean": "Ocean",
+        "dunes": "Dunes",
+        "forest": "Forest"
+      },
+      "choose": "Choose an image",
+      "formats": "JPG, PNG or WebP, up to 10 MB",
+      "uploading": "Uploading…",
+      "uploadFailed": "Upload failed. Try again.",
+      "notImage": "That file isn't an image.",
+      "tooBig": "That image is larger than 10 MB.",
+      "noCovers": "None of your pages has a cover yet.",
+      "readFailed": "Couldn't read this picture's colours, so the glass keeps its previous tint.",
+      "blur": "Blur",
+      "dim": "Dim",
+      "glass": "Glass",
+      "darkNote": "Dark picture: the glass is tinted from it, with light text.",
+      "lightNote": "Light picture: the glass is tinted from it, with dark text."
+    },
     "workspace": {
       "banner": "Home banner",
       "bannerDesc": "A page shown at the top of everyone's Home: its cover, first lines and pages.",
@@ -847,7 +883,9 @@
       "offlineFavoritesDesc": "Your favorite pages are downloaded to this device and kept up to date, so they open without a connection.",
       "offlineStorage": "Offline storage",
       "offlineStorageDesc": "Pages and images saved on this device so they open without a connection. Clearing keeps edits that haven't been sent yet.",
-      "offlineStorageClear": "Clear"
+      "offlineStorageClear": "Clear",
+      "appearance": "Appearance",
+      "appearanceDesc": "Restyle the whole app. Only you see it, on this device."
     },
     "nav": {
       "account": "Account",
@@ -1250,7 +1288,9 @@
   },
   "dragHandle": {
     "add": "Add a block",
-    "addHint": "Click to add below · Alt-click to add above"
+    "addTip": "<b>Click</b> to add below<br/><b>Alt-click</b> to add above",
+    "grip": "Drag to move, click to open the menu",
+    "gripTip": "<b>Drag</b> to move<br/><b>Click</b> to open menu"
   },
   "moveTo": {
     "label": "Move to",

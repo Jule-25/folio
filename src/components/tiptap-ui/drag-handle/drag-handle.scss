@@ -1,35 +1,88 @@
-.drag-handle{
+.drag-handle {
   position: absolute;
   pointer-events: auto;
   transform: translateX(-15px);
   gap: 0px;
-  transition: top 0.25s ease-out, left 0.25s ease-out, visibility 0.15s ease;
- 
-   &.is-record {
-    // Nudge left to clear the row's selection checkbox.
-    transform: translateX(-28px);   // tune: -28px minus ~checkbox width+gap
-    margin-top: 4px;   
+  opacity: 1;
+  transition:
+    opacity 150ms ease,
+    visibility 0s;
+
+  // The extension hides the handle with an inline visibility: hidden. Fade
+  // it first, then hide it (visibility waits for the fade).
+  &[style*="visibility: hidden"] {
+    opacity: 0;
+    transition:
+      opacity 150ms ease,
+      visibility 0s linear 150ms;
   }
 
-  &.hide{
+  // Each move to another block restarts the fade-in: the handle switches
+  // between two identical animations (fadeFlip in drag-handle.tsx).
+  &.fade-a {
+    animation: drag-handle-in-a 150ms ease;
+  }
+  &.fade-b {
+    animation: drag-handle-in-b 150ms ease;
+  }
+
+  &.is-record {
+    // Nudge left to clear the row's selection checkbox.
+    transform: translateX(-28px);
+    margin-top: 4px;
+  }
+
+  &.hide {
     visibility: hidden;
   }
-  &.show{
+  &.show {
     visibility: visible;
   }
 
-  .plus-button,
-  .grip-button{
-    min-width: 15px;
-    width: 15px;
-    min-height: 20px;
-    height: 25px;
+  .tiptap-button.plus-button,
+  .tiptap-button.grip-button {
+    display: grid;
+    place-items: center;
+    min-width: 0;
+    height: 28px !important;
+    min-height: 28px !important;
+    padding: 0 !important;
+    border-radius: 4px;
     align-self: center;
-    opacity: 0.6;
-    color: var(--tt-color-text-gray);
+
+    --tt-button-default-icon-color: rgba(55, 53, 47, 0.35);
+    --tt-button-hover-icon-color: rgba(55, 53, 47, 0.6);
+    --tt-button-default-bg-color: transparent;
+    --tt-button-hover-bg-color: rgba(55, 53, 47, 0.08);
+    --tt-button-active-bg-color: rgba(55, 53, 47, 0.08);
+
+    .dark & {
+      --tt-button-default-icon-color: rgba(255, 255, 255, 0.28);
+      --tt-button-hover-icon-color: rgba(255, 255, 255, 0.5);
+      --tt-button-hover-bg-color: rgba(255, 255, 255, 0.055);
+      --tt-button-active-bg-color: rgba(255, 255, 255, 0.055);
+    }
   }
 
-  &.adjust-pos{
+  .plus-button {
+    width: 24px;
+
+    .tiptap-button-icon {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  .grip-button {
+    width: 18px;
+
+    .tiptap-button-icon {
+      width: 10px;
+      height: 16px;
+    }
+  }
+
+  &.adjust-pos {
     transform: translateX(28px);
   }
 
@@ -44,11 +97,36 @@
     box-shadow:
       0 0 0 1px var(--tt-border-color),
       0 2px 6px rgba(0, 0, 0, 0.12);
+  }
+}
 
-    .plus-button,
-    .grip-button {
-      opacity: 0.9;
-    }
+@keyframes drag-handle-in-a {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes drag-handle-in-b {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drag-handle,
+  .drag-handle[style*="visibility: hidden"] {
+    transition: none;
+    animation: none;
+  }
+}
+
+// The handle's tooltips: the action word in bold, two lines.
+.drag-handle-tip {
+  display: block;
+  line-height: 1.5;
+  text-align: center;
+
+  b {
+    font-weight: 600;
   }
 }
 

@@ -105,8 +105,8 @@ const IconButton = memo(function IconButton({
               variant="ghost"
               className="cover-icon-btn"
               style={{
-                fontSize: 60,
-                marginTop: hasCover ? -60 : 0,
+                fontSize: 78,
+                marginTop: hasCover ? -72 : 0,
                 color: iconColor,
               }}
             >
@@ -114,13 +114,13 @@ const IconButton = memo(function IconButton({
               {cover.target === "Icons" && cover.iconName && (
                 <DynamicIcon
                   name={cover.iconName}
-                  size={95}
+                  size={118}
                   weight={500}
                   style={{ color: iconColor }}
                 />
               )}
               {cover.target === "Upload" && cover.iconName && (
-                <UploadedIcon src={cover.iconName} size={85} />
+                <UploadedIcon src={cover.iconName} size={104} />
               )}
             </Button>
           </PopoverTrigger>
@@ -145,8 +145,8 @@ const IconButton = memo(function IconButton({
           variant="ghost"
           className="cover-icon-btn"
           style={{
-            fontSize: 60,
-            marginTop: hasCover ? -60 : 0,
+            fontSize: 78,
+            marginTop: hasCover ? -72 : 0,
             color: iconColor,
           }}
         >
@@ -154,13 +154,13 @@ const IconButton = memo(function IconButton({
           {cover.target === "Icons" && cover.iconName && (
             <DynamicIcon
               name={cover.iconName}
-              size={95}
+              size={118}
               weight={500}
               style={{ color: iconColor }}
             />
           )}
           {cover.target === "Upload" && cover.iconName && (
-            <UploadedIcon src={cover.iconName} size={85} />
+            <UploadedIcon src={cover.iconName} size={104} />
           )}
         </Button>
       )}

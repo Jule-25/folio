@@ -7,6 +7,7 @@ import {
   useManageWorkspace,
 } from "src/hooks/use-workspaces";
 import { useCurrentPerson } from "src/hooks/use-session";
+import { useAppearance } from "./appearance/appearance";
 
 const isDark = () => document.documentElement.classList.contains("dark");
 
@@ -20,6 +21,7 @@ export function ThemeToggle() {
   const { person } = useCurrentPerson();
   const { setSettingAsync } = useManageWorkspace();
   const [dark, setDark] = useState(isDark);
+  const [appearance] = useAppearance();
 
   // Follow the workspace theme when it changes (or the OS, for "system").
   useEffect(() => {
@@ -42,6 +44,8 @@ export function ThemeToggle() {
       );
     }
   };
+
+  if (appearance !== "default") return null;
 
   return (
     <Button

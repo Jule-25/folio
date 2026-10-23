@@ -154,6 +154,7 @@ function HomeActions({ compact }: { compact: boolean }) {
         aria-label={compact ? newLabel : undefined}
         tooltip={compact ? newLabel : undefined}
         onClick={() => newPage()}
+        className="home-tlbr-new-page-button"
       >
         <Plus className="tiptap-button-icon" />
         {!compact && <span className="tiptap-button-text">{newLabel}</span>}

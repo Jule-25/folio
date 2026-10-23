@@ -1,4 +1,5 @@
 // copy-toast.tsx
+import { Card } from "src/components/tiptap-ui-primitive/card";
 import "./copy-toast.scss";
 
 interface CopyToastProps {
@@ -7,7 +8,7 @@ interface CopyToastProps {
 
 export function CopyToast({ visible }: CopyToastProps) {
   return (
-    <div className={`copy-toast ${visible ? "copy-toast--visible" : ""}`}>
+    <Card className={`copy-toast ${visible ? "copy-toast--visible" : ""}`}>
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
         <path
           d="M3 8l3.5 3.5L13 4.5"
@@ -18,6 +19,6 @@ export function CopyToast({ visible }: CopyToastProps) {
         />
       </svg>
       Copied to clipboard
-    </div>
+    </Card>
   );
 }

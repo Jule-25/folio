@@ -1,6 +1,13 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Check, ChevronDown, ChevronUp, Hash, Lock } from "lucide-react";
+import {
+  ArrowRight,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Hash,
+  Lock,
+} from "lucide-react";
 import { Card } from "src/components/tiptap-ui-primitive/card";
 import type { ChatRoom, Notification } from "src/types";
 import { useNotificationState } from "src/features/inbox/notification/notification-context";
@@ -17,6 +24,8 @@ import {
 } from "src/hooks/use-chat";
 import { useCurrentPerson } from "src/hooks/use-session";
 import { homeWhen } from "./home-time";
+import "./home-rail.scss";
+import { useAppearance } from "../shell/appearance/appearance";
 
 // "For you": what's waiting, in a card — notifications (mentions, comments,
 // reminders…) and the chat rooms with unread messages, newest first. It shows
@@ -102,6 +111,8 @@ export function HomeForYou({ onOpenInbox }: { onOpenInbox: () => void }) {
     [people],
   );
 
+  const [appearance] = useAppearance();
+
   const ago = (at: number) => homeWhen(at, t, i18n.language);
 
   // Status line: "New · 12m ago" or "✓ Read · 2h ago".
@@ -137,6 +148,14 @@ export function HomeForYou({ onOpenInbox }: { onOpenInbox: () => void }) {
           onClick={onOpenInbox}
         >
           {t("home.openInbox")}
+          {appearance === "retro" && (
+            <ArrowRight
+              className="home-foryou__arrow"
+              size={18}
+              strokeWidth={3}
+              aria-hidden="true"
+            />
+          )}
         </button>
       </div>
 

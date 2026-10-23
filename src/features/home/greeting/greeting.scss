@@ -1,0 +1,57 @@
+// Retro greeting: bold, tight, with a hand-drawn pink stroke under it and the
+// emoji tilted with an ink drop shadow. Tokens: appearance/themes.scss.
+:root[data-theme="retro"] {
+  .greeting {
+    position: relative;
+    display: table;
+    max-width: 100%;
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--retro-ink);
+
+    &::after {
+      content: "";
+      position: absolute;
+      left: 2.5rem;
+      bottom: -7px;
+      width: 150px;
+      height: 8px;
+      background-color: var(--retro-pink);
+      clip-path: polygon(
+        0 55%,
+        18% 30%,
+        42% 40%,
+        65% 20%,
+        83% 35%,
+        100% 15%,
+        98% 55%,
+        75% 60%,
+        48% 68%,
+        23% 65%,
+        0 85%
+      );
+      transform: rotate(-2deg);
+    }
+
+    &--compact::after {
+      display: none;
+    }
+  }
+
+  .greeting__emoji {
+    display: inline-block;
+    margin-right: 0.3em;
+    transform: rotate(-8deg) scale(1.12);
+    transform-origin: center;
+    vertical-align: -0.05em;
+    filter:
+      saturate(1.3)
+      drop-shadow(1px 1px 0 #ffffff)
+      drop-shadow(2px 2px 0 var(--retro-ink));
+  }
+
+  .greeting--compact .greeting__emoji {
+    display: none;
+  }
+}

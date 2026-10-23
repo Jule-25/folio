@@ -171,7 +171,9 @@
     "addComment": "Ajoute un commentaire…",
     "showResolved_one": "{{count}} commentaire résolu",
     "showResolved_other": "{{count}} commentaires résolus",
-    "hideResolved": "Masquer les commentaires résolus"
+    "hideResolved": "Masquer les commentaires résolus",
+    "discussion": "Discussion",
+    "replyPlaceholder": "Répondre…"
   },
   "showcase": {
     "defaultName": "Vitrine",
@@ -736,7 +738,9 @@
       "offlineFavoritesDesc": "Vos pages favorites sont téléchargées sur cet appareil et tenues à jour, pour s'ouvrir sans connexion.",
       "offlineStorage": "Stockage hors ligne",
       "offlineStorageDesc": "Pages et images enregistrées sur cet appareil pour s'ouvrir sans connexion. Vider garde les modifications pas encore envoyées.",
-      "offlineStorageClear": "Vider"
+      "offlineStorageClear": "Vider",
+      "appearance": "Apparence",
+      "appearanceDesc": "Change le style de toute l'app. Toi seul le vois, sur cet appareil."
     },
     "title": "Paramètres",
     "appearance": "Apparence",
@@ -748,6 +752,40 @@
     "modalAria": "Paramètres de l’espace de travail",
     "closeAria": "Fermer",
     "getUnlimitedAi": "Passer à l’IA illimitée",
+    "appearanceNames": {
+      "default": "Par défaut",
+      "aurora": "Aurore",
+      "midnight": "Minuit",
+      "notebook": "Carnet",
+      "retro": "Rétro",
+      "wallpaper": "Fond d'écran"
+    },
+    "wallpaper": {
+      "source": {
+        "preset": "Modèles",
+        "cover": "Couvertures",
+        "upload": "Importer"
+      },
+      "preset": {
+        "dusk": "Crépuscule",
+        "ocean": "Océan",
+        "dunes": "Dunes",
+        "forest": "Forêt"
+      },
+      "choose": "Choisis une image",
+      "formats": "JPG, PNG ou WebP, 10 Mo maximum",
+      "uploading": "Import en cours…",
+      "uploadFailed": "L'import a échoué. Réessaie.",
+      "notImage": "Ce fichier n'est pas une image.",
+      "tooBig": "Cette image dépasse 10 Mo.",
+      "noCovers": "Aucune de tes pages n'a encore de couverture.",
+      "readFailed": "Impossible de lire les couleurs de cette image : le verre garde sa teinte précédente.",
+      "blur": "Flou",
+      "dim": "Assombrir",
+      "glass": "Verre",
+      "darkNote": "Image sombre : le verre en prend la teinte, avec un texte clair.",
+      "lightNote": "Image claire : le verre en prend la teinte, avec un texte sombre."
+    },
     "workspace": {
       "banner": "Bannière d’accueil",
       "bannerDesc": "Une page affichée en haut de l’accueil de tout le monde : sa couverture, ses premières lignes et ses pages.",
@@ -1250,7 +1288,9 @@
   },
   "dragHandle": {
     "add": "Ajouter un bloc",
-    "addHint": "Cliquer pour ajouter en dessous · Alt+clic pour ajouter au-dessus"
+    "addTip": "<b>Cliquez</b> pour ajouter en dessous<br/><b>Alt-clic</b> pour ajouter au-dessus",
+    "grip": "Glisser pour déplacer, cliquer pour ouvrir le menu",
+    "gripTip": "<b>Glissez</b> pour déplacer<br/><b>Cliquez</b> pour ouvrir le menu"
   },
   "moveTo": {
     "label": "Déplacer vers",
