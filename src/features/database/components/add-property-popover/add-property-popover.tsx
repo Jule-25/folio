@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Plus } from "lucide-react";
 import { chunk } from "lodash";
 import {
@@ -57,9 +58,18 @@ export interface AddPropertyPopoverProps {
     icon?: string,
     iconColor?: string,
   ) => void;
+  /** The collapsed button's text. Defaults to "Add property". */
+  label?: string;
+  /** Extra class on the collapsed button. */
+  className?: string;
 }
 
-export function AddPropertyPopover({ onAddProperty }: AddPropertyPopoverProps) {
+export function AddPropertyPopover({
+  onAddProperty,
+  label,
+  className,
+}: AddPropertyPopoverProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = React.useState(false);
   const [name, setName] = React.useState("");
   const [icon, setIcon] = React.useState<string | undefined>(undefined);
@@ -149,6 +159,7 @@ export function AddPropertyPopover({ onAddProperty }: AddPropertyPopoverProps) {
       <Button
         ref={triggerRef}
         variant="ghost"
+        className={className}
         style={{ background: "transparent" }}
         onMouseDown={(e) => {
           e.preventDefault();
@@ -162,7 +173,7 @@ export function AddPropertyPopover({ onAddProperty }: AddPropertyPopoverProps) {
       >
         <Plus className="tiptap-button-icon" />
         <span className="tiptap-button-text" style={{ fontWeight: 400 }}>
-          Add Property
+          {label ?? t("database.picker.addProperty")}
         </span>
       </Button>
     );

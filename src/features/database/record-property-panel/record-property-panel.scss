@@ -1,56 +1,110 @@
+// The properties at the top of a database row's page: the name on the left
+// (muted, with its icon), the value on the right, then "Add a property" and a
+// hairline before the page body.
 .record-prop-panel {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 8px 0 16px 0;
-  padding-left: 0;
+  gap: 1px;
   width: 100%;
+  margin-bottom: 14px;
+  padding: 2px 0 10px;
+  border-bottom: 1px solid var(--tt-border-color);
   font-size: 14px;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 .record-prop-panel__row {
   display: grid;
-  grid-template-columns: 160px 1fr;
-  align-items: center;
+  grid-template-columns: minmax(120px, 168px) minmax(0, 1fr);
+  // Top-aligned, so a long text value can wrap onto several lines while
+  // its name stays level with the first one.
+  align-items: start;
+  gap: 4px;
   min-height: 34px;
-  border-radius: var(--tt-radius-sm);
-  padding: 0;
-  transition: background 0.1s ease;
-
-  &:hover {
-    background: var(--tt-bg-hover);
-  }
 }
 
 .record-prop-panel__label {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  min-width: 0;
+  height: 34px;
+  padding: 0 6px;
+  border-radius: 6px;
   font-size: 14px;
-  line-height: 1.4;
-  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
-  -webkit-font-smoothing: auto;
-  color: var(--tt-text-primary);
-  // padding: 4px 8px 4px 4px;
+  color: var(--tt-text-secondary);
   user-select: none;
 }
 
 .record-prop-panel__label-icon {
-  flex-shrink: 0;
+  flex: none;
+  opacity: 0.85;
 }
 
+.record-prop-panel__label-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// The value gets its own hover box, so it reads as the thing you click.
 .record-prop-panel__value-wrapper {
   display: flex;
   align-items: center;
-  min-height: 32px;
+  min-width: 0;
+  min-height: 34px;
+  padding: 0 6px;
+  border-radius: 6px;
   font-size: 14px;
-  line-height: 1.4;
+  line-height: 1.5;
+  transition: background 0.1s ease;
+
+  &:hover {
+    background: var(--tt-button-hover-bg-color);
+  }
+
+  // Text values wrap here instead of being cut with an ellipsis, as there's
+  // room for the whole thing.
+  .db-cell-text__display {
+    padding: 6px 0;
+    overflow: visible;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
 }
 
 .record-prop-panel__value--text {
-  color: var(--tt-text-primary);
   padding: 0;
   font-size: 14px;
-  line-height: 1.4;
+  line-height: 1.5;
+  color: var(--tt-text-primary);
+}
+
+// "+ Add a property": a muted row lined up with the property names.
+.record-prop-panel__add {
+  display: flex;
+  align-items: center;
+  min-height: 34px;
+
+  .record-prop-panel__add-button.tiptap-button {
+    gap: 8px;
+    height: 34px;
+    min-height: 34px;
+    padding: 0 8px 0 6px;
+    border-radius: 6px;
+    font-size: 14px;
+    color: var(--tt-text-secondary);
+
+    .tiptap-button-icon {
+      width: 18px;
+      height: 18px;
+      color: inherit;
+    }
+
+    &:hover {
+      background: var(--tt-button-hover-bg-color) !important;
+      color: var(--tt-text-primary);
+    }
+  }
 }

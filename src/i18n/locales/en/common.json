@@ -1301,6 +1301,9 @@
     "failed": "Couldn't move to {{title}}. The blocks are still here."
   },
   "database": {
+    "recordPanel": {
+      "addProperty": "Add a property"
+    },
     "toolbar": {
       "new": "New",
       "search": "Search",

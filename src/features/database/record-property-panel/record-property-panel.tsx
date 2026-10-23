@@ -7,8 +7,12 @@ import type {
 import { useDataSource } from "src/hooks/use-data-sources";
 import { usePatchPage } from "src/hooks/use-patch-page";
 import { patchPage as patchPageApi } from "src/api/pages";
+import { DEFAULT_CONFIGS, getTypeMeta, type PropertyConfig } from "src/types";
 import { PROPERTY_TYPE_ICONS } from "src/types/property-type-meta";
-import { DynamicIcon } from "src/features/pages/cover/dynamic-icon";
+import { usePageCapabilities } from "src/hooks/use-page-role";
+import { PropertyIcon } from "src/features/database/components/property-header/property-icon";
+import { AddPropertyPopover } from "src/features/database/components/add-property-popover";
+import { useDataSource as useSourceEditor } from "src/features/database/hooks/use-data-source";
 import { TextCellDisplay } from "src/features/database/primitives/text-cell-display";
 import { NumberCellDisplay } from "src/features/database/primitives/number-cell-display";
 import { SelectCellDisplay } from "src/features/database/primitives/select-cell-display";
@@ -37,6 +41,7 @@ import { useFormulaEngineReady } from "../components/formula-editor/formula-engi
 export function RecordPropertyPanel({ page }: { page: Page }) {
   const { data: source } = useDataSource(page.sourceId);
   const patchPage = usePatchPage(({ id, patch }) => patchPageApi(id, patch));
+  const { canEditContent } = usePageCapabilities(page.id);
 
   // not a row, or schema not loaded → nothing to show
   if (page.sourceId == null || page.values == null || !source) return null;
@@ -53,7 +58,7 @@ export function RecordPropertyPanel({ page }: { page: Page }) {
   // Title is excluded: it's the page's own title, shown at the top of the page,
   // not a property row.
   const properties = source.properties.filter((p) => p.config.type !== "title");
-  if (properties.length === 0) return null;
+  if (properties.length === 0 && !canEditContent) return null;
 
   return (
     <div className="record-prop-panel">
@@ -67,6 +72,46 @@ export function RecordPropertyPanel({ page }: { page: Page }) {
           allProperties={source.properties}
         />
       ))}
+      {canEditContent && <AddPropertyRow sourceId={source.id} />}
+    </div>
+  );
+}
+
+type PropertyType = PropertyConfig["type"];
+
+// "+ Add a property" under the rows: names the property, picks its type (and
+// an icon), and appends it to the database, so every row gets it.
+function AddPropertyRow({ sourceId }: { sourceId: string }) {
+  const { t } = useTranslation();
+  const { source, updatePropertiesAsync } = useSourceEditor(sourceId);
+
+  const addProperty = (
+    type: PropertyType,
+    name?: string,
+    icon?: string,
+    iconColor?: string,
+  ) => {
+    if (!source) return;
+    void updatePropertiesAsync([
+      ...source.properties,
+      {
+        id: crypto.randomUUID(),
+        name: name ?? getTypeMeta(type).label,
+        config: DEFAULT_CONFIGS[type],
+        width: 160,
+        ...(icon ? { icon } : {}),
+        ...(iconColor ? { iconColor } : {}),
+      },
+    ]);
+  };
+
+  return (
+    <div className="record-prop-panel__add">
+      <AddPropertyPopover
+        onAddProperty={addProperty}
+        label={t("database.recordPanel.addProperty")}
+        className="record-prop-panel__add-button"
+      />
     </div>
   );
 }
@@ -85,8 +130,7 @@ function PropertyRow({
   /** the whole schema — a rollup resolves its relation through it */
   allProperties: DatabaseProperty[];
 }) {
-  // PROPERTY_TYPE_ICONS holds Material Symbols NAME STRINGS now — not icon
-  // components — so it's rendered through DynamicIcon rather than as <Icon />.
+  // The property's own icon when it has one, else its type's.
   const iconName = PROPERTY_TYPE_ICONS[prop.config.type];
   const { t } = useTranslation();
   const people = useWorkspacePeople();
@@ -295,14 +339,16 @@ function PropertyRow({
 
   return (
     <div className="record-prop-panel__row">
-      <div className="record-prop-panel__label">
-        <DynamicIcon
-          name={iconName}
-          size={20}
+      <div className="record-prop-panel__label" title={prop.name}>
+        <PropertyIcon
+          iconName={prop.icon}
+          fallback={iconName}
+          color={prop.iconColor}
+          size={18}
           filled={false}
           className="record-prop-panel__label-icon"
         />
-        <span>{prop.name}</span>
+        <span className="record-prop-panel__label-text">{prop.name}</span>
       </div>
       <div className="record-prop-panel__value-wrapper">{rendered}</div>
     </div>

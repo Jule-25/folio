@@ -1301,6 +1301,9 @@
     "failed": "Impossible de déplacer vers {{title}}. Les blocs sont toujours ici."
   },
   "database": {
+    "recordPanel": {
+      "addProperty": "Ajouter une propriété"
+    },
     "toolbar": {
       "new": "Nouveau",
       "search": "Rechercher",
