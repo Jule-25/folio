@@ -74,7 +74,7 @@
   // Everything is fitted inside the sheet: the top bar is inset, the editor
   // stops above the sheet's bottom edge, and covers start at the sheet's
   // left edge instead of running under the sidebar.
-  .tiptap-toolbar {
+  .tiptap-toolbar[data-variant="fixed"] {
     padding: 20px 40px !important;
   }
 
@@ -241,8 +241,7 @@
   }
 
   // Page icons sit on a soft glass tile; they keep their own colour.
-  .sidebar .page-item > .page-icon,
-  .sidebar .page-item > .page-icon-wrap > .page-icon {
+  .sidebar .page-item:not(.is-teamspace-root) .page-item-icon {
     display: grid;
     place-items: center;
     width: 22px;
@@ -591,36 +590,568 @@ html:root[data-theme="midnight"] {
   --tt-paragraph-text-color: #e8eaf6;
 }
 
-// ─── Notebook: cream paper, serif everywhere, ink blue + highlighter ───────
+// ─── Notebook: an open notebook — kraft left page, cream right page ───────
+// The sidebar is the left page (kraft paper, stitched edge); the page is the
+// right one (cream paper, binder holes, a red margin line, a soft shadow in
+// the fold). Fraunces for titles, Newsreader for text, Caveat handwriting
+// for labels, dates and notes — never for what people type.
 :root[data-theme="notebook"] {
-  @include theme-font(("Fraunces", Georgia, serif));
+  @include theme-font(("Newsreader", Georgia, serif));
 
-  --theme-accent: #2b4c8c;
-  --tt-bg-color: #fffdf7;
-  --tt-toolbar-bg-color: #fffdf7;
-  --tiptap-card-bg-color: #fffdf6;
-  --tiptap-card-border-color: rgba(43, 42, 51, 0.12);
-  --tt-card-bg-color: #fffdf6;
-  --tt-border-color: rgba(43, 42, 51, 0.14);
-  --tt-border-color-tint: rgba(43, 42, 51, 0.07);
+  --nb-ink: #24324f;
+  --nb-blue: #2b4c8c;
+  --nb-pencil: #6b6658;
+  --nb-red: #c2410c;
+  --nb-paper: #fbf7ee;
+  --nb-card: #fffef9;
+  --nb-kraft: #efe5cf;
+  --nb-desk: #e9dfc8;
+  --nb-highlight: rgba(255, 213, 79, 0.85);
+  --nb-marker: linear-gradient(180deg, transparent 48%, var(--nb-highlight) 48%, var(--nb-highlight) 90%, transparent 90%);
+  --nb-sticky: linear-gradient(180deg, #fff3b0 0%, #ffeb8a 100%);
+  --nb-tape: rgba(255, 250, 235, 0.7);
+  --nb-rules: repeating-linear-gradient(180deg, transparent 0 27px, rgba(70, 110, 170, 0.14) 27px 28px);
+  --nb-display: "Fraunces", Georgia, serif;
+  --nb-hand: "Caveat", cursive;
+  --nb-mono: "Courier Prime", "Courier New", monospace;
+  --nb-lift: 0 1px 2px rgba(36, 50, 79, 0.12), 0 10px 26px rgba(36, 50, 79, 0.09);
 
-  --sidebar-bg-color: #f8f3e6;
-  --sidebar-fog-color: rgba(248, 243, 230, 0.9);
-  --sidebar-accent: #2b4c8c;
-  --sidebar-border-color: rgba(43, 42, 51, 0.12);
-  --sidebar-text-color: #2b2a33;
-  --sb-row-color: #3a3843;
-  --sb-active-color: #1d1c24;
-  --sb-icon-color: #2b4c8c;
-  --sb-label-color: #6a6659;
-  --sb-hover-bg: rgba(43, 42, 51, 0.05);
-  --sb-active-bg: rgba(255, 212, 84, 0.45);
-  --sb-divider: rgba(43, 42, 51, 0.1);
-  --sb-dock-bg: #fffdf6;
-  --theme-dock-active-bg: rgba(255, 212, 84, 0.55);
-  --theme-dock-active-color: #1d1c24;
+  --theme-accent: var(--nb-blue);
+  --theme-window: var(--nb-desk);
+  --tt-bg-color: var(--nb-paper);
+  --tt-toolbar-bg-color: transparent;
+  --tiptap-card-bg-color: var(--nb-card);
+  --tiptap-card-border-color: rgba(36, 50, 79, 0.14);
+  --tt-card-bg-color: var(--nb-card);
+  --tt-border-color: rgba(36, 50, 79, 0.15);
+  --tt-border-color-tint: rgba(36, 50, 79, 0.07);
+  --tt-shadow-elevated-sm: 0 1px 2px rgba(36, 50, 79, 0.1), 0 4px 12px rgba(36, 50, 79, 0.07);
+  --tt-shadow-elevated-md: var(--nb-lift);
+  --tt-shadow-elevated-lg: 0 2px 4px rgba(36, 50, 79, 0.12), 0 18px 40px rgba(36, 50, 79, 0.14);
+
+  // Sidebar: kraft paper with a faint grain.
+  --sidebar-bg-color: var(--nb-kraft);
+  --sidebar-surface: repeating-linear-gradient(90deg, rgba(120, 90, 40, 0.025) 0 2px, transparent 2px 5px),
+    repeating-linear-gradient(0deg, rgba(120, 90, 40, 0.02) 0 1px, transparent 1px 4px), var(--nb-kraft);
+  --sidebar-fog-color: rgba(239, 229, 207, 0.9);
+  --sidebar-accent: var(--nb-blue);
+  --sidebar-border-color: rgba(36, 50, 79, 0.25);
+  --sidebar-edge-shadow: none;
+  --sidebar-text-color: var(--nb-ink);
+  --sb-font: "Newsreader", Georgia, serif;
+  --sb-font-size: 15px;
+  --sb-row-color: var(--nb-ink);
+  --sb-active-color: var(--nb-ink);
+  --sb-icon-color: var(--nb-blue);
+  --sb-label-color: var(--nb-blue);
+  --sb-hover-bg: rgba(43, 76, 140, 0.06);
+  --sb-active-bg: transparent;
+  --sb-count-bg: transparent;
+  --sb-count-color: var(--nb-pencil);
+  --sb-divider: rgba(36, 50, 79, 0.12);
+  --sb-dock-bg: transparent;
+  --sb-dock-shadow: none;
+  --theme-dock-active-bg: #ffd54f;
+  --theme-dock-active-color: var(--nb-ink);
   --sb-dock-active-bg: var(--theme-dock-active-bg);
   --sb-dock-active-color: var(--theme-dock-active-color);
+  --sb-scrlbr-width: thin;
+  --sb-scrlbr-color: rgba(36, 50, 79, 0.2) transparent;
+
+  // The right page: flush against the sidebar (theme-sheet.tsx adds 24px
+  // for the floating themes), a shadow in the fold, binder holes and a red
+  // margin line along its left edge.
+  .theme-sheet {
+    display: block;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    margin-left: -24px;
+    z-index: -1;
+    pointer-events: none;
+    transition: left 0.2s ease;
+    background:
+      linear-gradient(90deg, rgba(36, 50, 79, 0.1) 0px, rgba(36, 50, 79, 0.03) 18px, transparent 40px),
+      var(--nb-paper);
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 18px;
+      width: 14px;
+      background: radial-gradient(circle at 7px 7px, var(--nb-desk) 0 5px, rgba(36, 50, 79, 0.25) 5px 6px, transparent 6.5px) 0 20px / 14px 44px repeat-y;
+    }
+
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 64px;
+      width: 1.5px;
+      background: rgba(214, 90, 90, 0.45);
+    }
+
+    &--flush {
+      inset: 0;
+      margin-left: 0;
+
+      &::before,
+      &::after {
+        display: none;
+      }
+    }
+  }
+
+  // The page's top bar starts past the margin line, with a hairline under it.
+  .tiptap-toolbar[data-variant="fixed"] {
+    padding-left: 84px !important;
+    box-shadow: inset 0 -1px 0 rgba(36, 50, 79, 0.1);
+  }
+
+  // Menus and popovers are index cards.
+  .tiptap-card {
+    border-radius: 6px;
+  }
+
+  // ── Sidebar ──
+  // A stitched line along its edge (the accent glow is off in this theme).
+  .sidebar::before {
+    display: block;
+    inset: 0 7px 0 auto;
+    width: 0;
+    filter: none;
+    background: none;
+    border-right: 1.5px dashed rgba(36, 50, 79, 0.3);
+  }
+
+  .sidebar-section__label {
+    font-family: var(--nb-hand) !important;
+    font-size: 21px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--nb-blue);
+  }
+
+  // The open page: a highlighter stroke under its title.
+  .sidebar .page-item.active {
+    background: transparent;
+    box-shadow: none;
+    font-weight: 600;
+
+    .page-item-title {
+      padding: 0 3px;
+      margin: 0 -3px;
+      background: var(--nb-marker);
+    }
+  }
+
+  // Teamspace members: small tilted ink stamps.
+  .page-item-face {
+    background: var(--nb-paper);
+    box-shadow: inset 0 0 0 1.5px var(--nb-blue);
+    color: var(--nb-blue);
+    font-family: var(--nb-display);
+    transform: rotate(-6deg);
+
+    &:nth-child(even) {
+      box-shadow: inset 0 0 0 1.5px #b4532a;
+      color: #b4532a;
+      transform: rotate(5deg);
+    }
+  }
+
+  // Search: written on a line.
+  .sidebar .sb-search {
+    border: 0;
+    border-bottom: 1.5px solid rgba(36, 50, 79, 0.45);
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .sidebar .sb-search__input::placeholder {
+    font-style: italic;
+  }
+
+  .sidebar .sb-search__palette {
+    background: transparent;
+    font-family: var(--nb-display);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    font-variant: small-caps;
+    text-transform: lowercase;
+    color: var(--nb-pencil);
+  }
+
+  // Dock: paper index tabs; the open one is yellow and sticks up.
+  .sb-dock {
+    align-items: flex-end;
+    gap: 4px;
+    padding: 0 2px;
+  }
+
+  .sb-dock__tab {
+    border-radius: 8px 8px 0 0;
+    background: var(--nb-paper);
+    box-shadow: inset 0 0 0 1px rgba(36, 50, 79, 0.28), 0 -2px 6px rgba(36, 50, 79, 0.06);
+    transition: transform 0.12s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+    }
+
+    &.is-active {
+      background: #ffd54f;
+      box-shadow: inset 0 0 0 1px rgba(36, 50, 79, 0.3), 0 -2px 6px rgba(36, 50, 79, 0.08);
+      transform: translateY(-6px);
+    }
+  }
+
+  // ── Buttons ──
+  .tiptap-button {
+    --tt-button-hover-bg-color: rgba(43, 76, 140, 0.07);
+  }
+
+  .tiptap-button[data-style="primary"] {
+    --tt-button-default-bg-color: var(--nb-blue);
+    --tt-button-hover-bg-color: #23407a;
+    border-radius: 5px;
+    font-family: var(--nb-display);
+    font-weight: 600;
+    box-shadow: 0 2px 0 #1c3260;
+  }
+
+  // ── Home ──
+  // The hero: an index card, taped down at two corners.
+  .ts-hero.notebook {
+    position: relative;
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    background:
+      linear-gradient(180deg, transparent 0 52px, rgba(214, 90, 90, 0.5) 52px 53.5px, transparent 53.5px),
+      var(--nb-rules) 0 53px / 100% calc(100% - 53px) no-repeat,
+      var(--nb-card);
+    box-shadow: var(--nb-lift);
+    transform: rotate(-0.3deg);
+
+    &::before,
+    &::after {
+      content: "";
+      position: absolute;
+      top: -12px;
+      width: 90px;
+      height: 26px;
+      background: var(--nb-tape);
+      box-shadow: inset 0 0 0 1px rgba(36, 50, 79, 0.08);
+    }
+
+    &::before {
+      left: 40px;
+      transform: rotate(-6deg);
+    }
+
+    &::after {
+      right: 54px;
+      transform: rotate(5deg);
+    }
+
+    .ts-hero__icon {
+      background: transparent;
+      box-shadow: none;
+      color: var(--nb-blue);
+    }
+
+    .ts-hero__btn {
+      border-radius: 5px;
+      background: transparent;
+      box-shadow: inset 0 0 0 1.5px var(--nb-blue);
+      color: var(--nb-blue);
+      font-family: var(--nb-display);
+      font-weight: 600;
+    }
+
+    .ts-hero__btn--primary {
+      background: var(--nb-blue);
+      box-shadow: 0 2px 0 #1c3260;
+      color: var(--nb-paper);
+    }
+
+    .ts-hero__pins-label {
+      font-family: var(--nb-hand);
+      font-size: 25px;
+      font-weight: 700;
+      letter-spacing: 0;
+      text-transform: none;
+      color: var(--nb-blue);
+    }
+
+    // Pinned pages read like a table of contents.
+    .ts-hero__pin {
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      border-bottom: 2px dotted rgba(36, 50, 79, 0.3);
+
+      &:hover {
+        background: rgba(255, 213, 79, 0.25);
+      }
+    }
+
+    .ts-hero__pin-when {
+      font-family: var(--nb-hand);
+      font-size: 19px;
+      color: var(--nb-pencil);
+    }
+  }
+
+  // The greeting, handwritten in blue ink with a pen underline.
+  .greeting {
+    position: relative;
+    display: table;
+    font-family: var(--nb-hand);
+    font-size: 42px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: 0;
+    color: var(--nb-blue);
+
+    &::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 10%;
+      bottom: -10px;
+      height: 14px;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 14' preserveAspectRatio='none'%3E%3Cpath d='M4 8c40-5 90-6 140-3s100 4 150-2' fill='none' stroke='%232b4c8c' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    }
+
+    &--compact::after {
+      display: none;
+    }
+  }
+
+  // "For you": a sticky note, taped at the top.
+  .home-foryou {
+    position: relative;
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    background: var(--nb-sticky);
+    box-shadow: 0 2px 2px rgba(36, 50, 79, 0.08), 0 14px 24px rgba(36, 50, 79, 0.12);
+    transform: rotate(-0.6deg);
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: -11px;
+      left: 50%;
+      width: 96px;
+      height: 24px;
+      margin-left: -48px;
+      background: var(--nb-tape);
+      box-shadow: inset 0 0 0 1px rgba(36, 50, 79, 0.08);
+      transform: rotate(3deg);
+    }
+  }
+
+  .home-foryou__label {
+    font-family: var(--nb-hand);
+    font-size: 30px;
+    font-weight: 700;
+  }
+
+  // "3 new", circled in red pen.
+  .home-foryou__unread {
+    padding: 0 9px;
+    border-radius: 50%;
+    background: transparent;
+    box-shadow: inset 0 0 0 2px var(--nb-red);
+    transform: rotate(-4deg);
+    font-family: var(--nb-hand);
+    font-size: 21px;
+    font-weight: 700;
+    color: var(--nb-red);
+  }
+
+  .home-foryou__link,
+  .home-foryou__time,
+  .home-foryou__read {
+    font-family: var(--nb-hand);
+    font-size: 19px;
+  }
+
+  .home-foryou__link {
+    font-weight: 700;
+    color: var(--nb-blue);
+  }
+
+  .home-learn {
+    border-radius: 0;
+    background: var(--nb-card);
+    box-shadow: var(--nb-lift);
+  }
+
+  // Recent / Favorites / Created by me: coloured paper index tabs.
+  .home-dense__tabs.tab-list {
+    gap: 4px;
+    padding-left: 8px;
+    align-items: flex-end;
+    box-shadow: inset 0 -1.5px 0 rgba(36, 50, 79, 0.4);
+
+    .tab-item {
+      padding: 7px 18px;
+      border-radius: 8px 8px 0 0;
+      background: #dfe8f6;
+      box-shadow: inset 0 0 0 1px rgba(36, 50, 79, 0.2);
+      font-family: var(--nb-display);
+      color: #34405e;
+
+      &:nth-child(3n) {
+        background: #f3dfd6;
+      }
+
+      &::after {
+        display: none;
+      }
+
+      &.is-active {
+        padding-top: 10px;
+        background: #ffd54f;
+        color: var(--nb-ink);
+        font-weight: 600;
+        box-shadow: inset 0 0 0 1px rgba(36, 50, 79, 0.3);
+      }
+    }
+  }
+
+  // ── Page content ──
+  .tiptap.ProseMirror {
+    --tt-checklist-border-color: var(--nb-ink);
+    --tt-checklist-border-active-color: var(--nb-ink);
+    --tt-checklist-bg-active-color: transparent;
+    --tt-checklist-check-icon-color: var(--nb-blue);
+    --tt-checklist-text-active: #7a7563;
+
+    h1,
+    h2,
+    h3,
+    h4 {
+      font-family: var(--nb-display);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    // A highlighter stroke under the words of a ## heading.
+    h2 {
+      text-decoration: underline;
+      text-decoration-color: var(--nb-highlight);
+      text-decoration-thickness: 0.42em;
+      text-underline-offset: -0.2em;
+      text-decoration-skip-ink: none;
+    }
+
+    // Hand-drawn boxes; the tick runs out of the box, in blue ink.
+    ul[data-type="taskList"] li label span {
+      border-width: 1.5px;
+      border-radius: 3px 5px 4px 6px / 5px 3px 6px 4px;
+      background: transparent;
+    }
+
+    ul[data-type="taskList"] li label input[type="checkbox"]:checked + span {
+      background: transparent;
+
+      &::before {
+        width: 1.15em;
+        height: 1.15em;
+        transform: translate(-35%, -65%) rotate(-6deg);
+      }
+    }
+
+    // Done items are crossed out in blue pen.
+    ul[data-type="taskList"] li[data-checked="true"] > div {
+      text-decoration-color: var(--nb-blue);
+      text-decoration-thickness: 2px;
+    }
+
+    :not(pre) > code {
+      border-radius: 2px;
+      background: rgba(36, 50, 79, 0.06);
+      color: var(--nb-ink);
+      font-family: var(--nb-mono);
+    }
+
+    blockquote {
+      border-left: 2px solid var(--nb-blue);
+      font-style: italic;
+    }
+
+    // Callouts keep their colour but sit like a taped note.
+    .callout-root {
+      position: relative;
+      border-color: transparent;
+      border-radius: 0;
+      box-shadow: 0 2px 2px rgba(36, 50, 79, 0.08), 0 12px 22px rgba(36, 50, 79, 0.1);
+      transform: rotate(-0.4deg);
+
+      &::before {
+        content: "";
+        position: absolute;
+        top: -10px;
+        left: 24px;
+        width: 70px;
+        height: 22px;
+        background: var(--nb-tape);
+        box-shadow: inset 0 0 0 1px rgba(36, 50, 79, 0.08);
+        transform: rotate(-4deg);
+        pointer-events: none;
+      }
+    }
+  }
+
+  // Page comments: a ruled index card; names handwritten.
+  .page-comment__thread.tiptap-card {
+    border-radius: 0;
+    background: var(--nb-rules) 0 44px / 100% calc(100% - 44px) no-repeat, var(--nb-card);
+  }
+
+  .page-comment__head {
+    border-bottom: 1.5px solid rgba(214, 90, 90, 0.5);
+  }
+
+  .page-comment__title {
+    font-family: var(--nb-hand);
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  .comment__name {
+    font-family: var(--nb-hand);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--nb-blue);
+  }
+
+  .comment__time {
+    font-style: italic;
+  }
+
+  .reaction-chip {
+    border-radius: 3px;
+    border-color: rgba(36, 50, 79, 0.25);
+
+    &.is-reacted {
+      background: rgba(255, 213, 79, 0.6);
+      border-color: rgba(36, 50, 79, 0.3);
+    }
+  }
 }
 
 html:root[data-theme="notebook"] {
@@ -639,30 +1170,14 @@ html:root[data-theme="notebook"] {
 }
 
 :root[data-theme="notebook"] body {
-  --tt-text-primary: #2b2a33;
-  --tt-theme-text: #2b2a33;
-  --tt-text-color: #4a4752;
-  --tt-text-secondary: #6a6659;
+  --tt-text-primary: #24324f;
+  --tt-theme-text: #24324f;
+  --tt-text-color: #34405e;
+  --tt-text-secondary: #6b6658;
 }
 
 :root[data-theme="notebook"] .tiptap.ProseMirror {
-  --tt-paragraph-text-color: #2b2a33;
-
-  h1,
-  h2,
-  h3,
-  h4 {
-    font-family: "Fraunces", Georgia, serif;
-  }
-
-  // A highlighter stroke under the words of a ## heading.
-  h2 {
-    text-decoration: underline;
-    text-decoration-color: rgba(255, 212, 84, 0.85);
-    text-decoration-thickness: 0.38em;
-    text-underline-offset: -0.18em;
-    text-decoration-skip-ink: none;
-  }
+  --tt-paragraph-text-color: #24324f;
 }
 
 // ─── Retro: cream dot grid, navy outlines + hard shadows, hot pink ─────────
@@ -748,8 +1263,7 @@ html:root[data-theme="notebook"] {
   }
 
   // Every page icon sits in a small outlined tile.
-  .sidebar .page-item > .page-icon,
-  .sidebar .page-item > .page-icon-wrap > .page-icon {
+  .sidebar .page-item:not(.is-teamspace-root) .page-item-icon {
     display: grid;
     place-items: center;
     width: 22px;
@@ -916,7 +1430,6 @@ html:root[data-theme="retro"] {
 }
 
 // The accent glow at the foot of the sidebar fights a pattern: off there.
-:root[data-theme="notebook"] .sidebar::before,
 :root[data-theme="retro"] .sidebar::before {
   display: none;
 }
