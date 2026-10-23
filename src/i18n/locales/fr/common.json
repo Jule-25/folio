@@ -714,9 +714,7 @@
       "teamspace": "Espace d’équipe",
       "access": "Accès",
       "members": "Membres"
-    },
-    "memberCount_one": "{{count}} membre",
-    "memberCount_other": "{{count}} membres"
+    }
   },
   "settings": {
     "notifications": {
@@ -754,12 +752,39 @@
     "modalAria": "Paramètres de l’espace de travail",
     "closeAria": "Fermer",
     "getUnlimitedAi": "Passer à l’IA illimitée",
-    "appearance": {
+    "appearanceNames": {
       "default": "Par défaut",
       "aurora": "Aurore",
       "midnight": "Minuit",
       "notebook": "Carnet",
-      "retro": "Rétro"
+      "retro": "Rétro",
+      "wallpaper": "Fond d'écran"
+    },
+    "wallpaper": {
+      "source": {
+        "preset": "Modèles",
+        "cover": "Couvertures",
+        "upload": "Importer"
+      },
+      "preset": {
+        "dusk": "Crépuscule",
+        "ocean": "Océan",
+        "dunes": "Dunes",
+        "forest": "Forêt"
+      },
+      "choose": "Choisis une image",
+      "formats": "JPG, PNG ou WebP, 10 Mo maximum",
+      "uploading": "Import en cours…",
+      "uploadFailed": "L'import a échoué. Réessaie.",
+      "notImage": "Ce fichier n'est pas une image.",
+      "tooBig": "Cette image dépasse 10 Mo.",
+      "noCovers": "Aucune de tes pages n'a encore de couverture.",
+      "readFailed": "Impossible de lire les couleurs de cette image : le verre garde sa teinte précédente.",
+      "blur": "Flou",
+      "dim": "Assombrir",
+      "glass": "Verre",
+      "darkNote": "Image sombre : le verre en prend la teinte, avec un texte clair.",
+      "lightNote": "Image claire : le verre en prend la teinte, avec un texte sombre."
     },
     "workspace": {
       "banner": "Bannière d’accueil",

@@ -12,18 +12,21 @@ export const APPEARANCES = [
   "midnight",
   "notebook",
   "retro",
+  "wallpaper",
 ] as const;
 
 export type Appearance = (typeof APPEARANCES)[number];
 
-// The mode each theme is built on. null = follows the workspace light/dark.
-// Keep in step with the no-flash script in index.html.
+// The mode each theme is built on. null = follows the workspace light/dark,
+// except "wallpaper", whose mode comes from the picture (wallpaper.ts →
+// useApplyTheme). Keep in step with the no-flash script in index.html.
 export const APPEARANCE_BASE: Record<Appearance, "light" | "dark" | null> = {
   default: null,
   aurora: "light",
   midnight: "dark",
   notebook: "light",
   retro: "light",
+  wallpaper: null,
 };
 
 export function isAppearance(value: unknown): value is Appearance {

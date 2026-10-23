@@ -3,10 +3,12 @@ import {
   APPEARANCES,
   useAppearance,
 } from "src/features/shell/appearance/appearance";
+import { WallpaperSettings } from "./wallpaper-settings";
 import "./appearance-picker.scss";
 
 // My settings › Appearance: a card per theme with a tiny preview; picking
 // one restyles the whole app straight away (useApplyTheme follows it).
+// Wallpaper adds its own options (picture, blur, dim, glass) under the cards.
 export function AppearancePicker() {
   const { t } = useTranslation();
   const [appearance, setAppearance] = useAppearance();
@@ -47,11 +49,13 @@ export function AppearancePicker() {
               <span />
             </span>
             <span className="appearance-option__name">
-              {t(`settings.appearance.${id}`)}
+              {t(`settings.appearanceNames.${id}`)}
             </span>
           </button>
         ))}
       </div>
+
+      {appearance === "wallpaper" && <WallpaperSettings />}
     </div>
   );
 }

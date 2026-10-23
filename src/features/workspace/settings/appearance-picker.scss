@@ -99,4 +99,13 @@
     --sw-bar: rgba(29, 26, 43, 0.25);
     --sw-on: #ff4f8b;
   }
+
+  &--wallpaper {
+    background: radial-gradient(10px 10px at 72% 58%, #fff1cc 0 5px, transparent 10px),
+      radial-gradient(75% 30% at 18% 100%, #24133f 0 60%, transparent 61%),
+      radial-gradient(95% 36% at 55% 110%, #170c2a 0 60%, transparent 61%),
+      linear-gradient(180deg, #1d1a4f 0%, #4b2d7a 30%, #a24c86 52%, #f0896b 66%, #ffc58a 100%);
+    --sw-bar: rgba(255, 255, 255, 0.35);
+    --sw-on: rgba(255, 255, 255, 0.8);
+  }
 }

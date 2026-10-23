@@ -807,9 +807,7 @@
       "teamspace": "Teamspace",
       "access": "Access",
       "members": "Members"
-    },
-    "memberCount_one": "{{count}} member",
-    "memberCount_other": "{{count}} members"
+    }
   },
   "settings": {
     "title": "Settings",
@@ -822,12 +820,39 @@
     "modalAria": "Workspace settings",
     "closeAria": "Close",
     "getUnlimitedAi": "Get unlimited AI",
-    "appearance": {
+    "appearanceNames": {
       "default": "Default",
       "aurora": "Aurora",
       "midnight": "Midnight",
       "notebook": "Notebook",
-      "retro": "Retro"
+      "retro": "Retro",
+      "wallpaper": "Wallpaper"
+    },
+    "wallpaper": {
+      "source": {
+        "preset": "Presets",
+        "cover": "Page covers",
+        "upload": "Upload"
+      },
+      "preset": {
+        "dusk": "Dusk",
+        "ocean": "Ocean",
+        "dunes": "Dunes",
+        "forest": "Forest"
+      },
+      "choose": "Choose an image",
+      "formats": "JPG, PNG or WebP, up to 10 MB",
+      "uploading": "Uploading…",
+      "uploadFailed": "Upload failed. Try again.",
+      "notImage": "That file isn't an image.",
+      "tooBig": "That image is larger than 10 MB.",
+      "noCovers": "None of your pages has a cover yet.",
+      "readFailed": "Couldn't read this picture's colours, so the glass keeps its previous tint.",
+      "blur": "Blur",
+      "dim": "Dim",
+      "glass": "Glass",
+      "darkNote": "Dark picture: the glass is tinted from it, with light text.",
+      "lightNote": "Light picture: the glass is tinted from it, with dark text."
     },
     "workspace": {
       "banner": "Home banner",

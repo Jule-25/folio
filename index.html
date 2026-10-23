@@ -11,6 +11,26 @@
       var a = localStorage.getItem("folio-appearance");
       // Keep in step with APPEARANCE_BASE (appearance.ts).
       var base = { aurora: "light", midnight: "dark", notebook: "light", retro: "light" }[a];
+      // Wallpaper: the mode and the picture come from its saved settings
+      // (wallpaper.ts), so the first paint already shows it.
+      if (a === "wallpaper") {
+        try {
+          var w = JSON.parse(localStorage.getItem("folio-wallpaper") || "{}");
+          base = w.dark === false ? "light" : "dark";
+          var s = document.documentElement.style;
+          if (w.image) s.setProperty("--wp-image", w.image);
+          if (w.tint) {
+            s.setProperty("--wp-tint", w.tint);
+            s.setProperty("--wp-glass", "rgba(" + w.tint + ", " + (w.glass || 58) / 100 + ")");
+          }
+          if (w.blur != null) s.setProperty("--wp-blur", w.blur + "px");
+          if (w.dim != null) s.setProperty("--wp-dim", String(w.dim / 100));
+          if (w.accent) s.setProperty("--wp-accent", w.accent);
+          if (w.accentInk) s.setProperty("--wp-accent-ink", w.accentInk);
+        } catch (e) {
+          base = "dark";
+        }
+      }
       var dark = base
         ? base === "dark"
         : t === "dark" || (!t && matchMedia("(prefers-color-scheme: dark)").matches);

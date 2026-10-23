@@ -68,7 +68,8 @@
 
 :root[data-theme="aurora"],
 :root[data-theme="midnight"],
-:root[data-theme="retro"] {
+:root[data-theme="retro"],
+:root[data-theme="wallpaper"] {
   // The top bar sits on the sheet.
   --tt-toolbar-bg-color: transparent;
 
@@ -1767,6 +1768,293 @@ html:root[data-theme="retro"] {
 
 :root[data-theme="retro"] .tiptap.ProseMirror {
   --tt-paragraph-text-color: #1d1a2b;
+}
+
+// ─── Wallpaper: your picture behind the app, glass tinted from it ──────────
+// Values come from wallpaper.ts through useApplyTheme as --wp-* variables on
+// <html>: the picture, blur, dim, the glass colour (tint + opacity) and the
+// accent. The picture also decides light or dark mode, so the text colours
+// below have a light version and a `.dark` one.
+:root[data-theme="wallpaper"] {
+  // Defaults until useApplyTheme sets the real ones (the dusk preset).
+  --wp-image: radial-gradient(70px 70px at 72% 58%, #fff1cc 0 30px, rgba(255, 214, 150, 0.45) 32px, transparent 70px),
+    radial-gradient(75% 30% at 18% 100%, #24133f 0 60%, transparent 61%),
+    radial-gradient(60% 26% at 88% 100%, #341c58 0 60%, transparent 61%),
+    radial-gradient(95% 36% at 55% 110%, #170c2a 0 60%, transparent 61%),
+    linear-gradient(180deg, #1d1a4f 0%, #4b2d7a 30%, #a24c86 52%, #f0896b 66%, #ffc58a 76%, #ffd9a6 100%);
+  --wp-blur: 22px;
+  --wp-dim: 0.1;
+  --wp-tint: 30, 18, 58;
+  --wp-glass: rgba(30, 18, 58, 0.58);
+  --wp-accent: #ffb27a;
+  --wp-accent-ink: #2a1630;
+
+  // Light picture: dark text on pale glass.
+  --wp-ink: #1c1f2a;
+  --wp-muted: #4a5163;
+  --wp-line: rgba(28, 31, 42, 0.12);
+  --wp-hair: rgba(255, 255, 255, 0.7);
+  --wp-card: rgba(255, 255, 255, 0.55);
+  --wp-hover: rgba(255, 255, 255, 0.45);
+
+  --theme-accent: var(--wp-accent);
+  --theme-window: linear-gradient(rgba(0, 0, 0, var(--wp-dim)), rgba(0, 0, 0, var(--wp-dim))), var(--wp-image);
+  --tt-bg-color: rgb(var(--wp-tint));
+  --tiptap-card-bg-color: rgba(var(--wp-tint), 0.94);
+  --tiptap-card-border-color: var(--wp-hair);
+  --tt-card-bg-color: rgba(var(--wp-tint), 0.94);
+  --tt-border-color: var(--wp-line);
+  --tt-border-color-tint: var(--wp-line);
+  --tt-shadow-elevated-md: inset 0 1px 0 var(--wp-hair), 0 18px 50px rgba(0, 0, 0, 0.25);
+  --tt-shadow-elevated-lg: inset 0 1px 0 var(--wp-hair), 0 28px 70px rgba(0, 0, 0, 0.3);
+
+  // Sidebar: see-through; its glass panel is drawn by .sidebar::before.
+  --sidebar-bg-color: rgb(var(--wp-tint));
+  --sidebar-surface: transparent;
+  --sidebar-fog-color: rgba(var(--wp-tint), 0);
+  --sidebar-accent: var(--wp-accent);
+  --sidebar-border-color: transparent;
+  --sidebar-edge-shadow: none;
+  --sidebar-text-color: var(--wp-ink);
+  --sb-row-color: var(--wp-ink);
+  --sb-active-color: var(--wp-ink);
+  --sb-icon-color: var(--wp-ink);
+  --sb-label-color: var(--wp-muted);
+  --sb-row-radius: 10px;
+  --sb-hover-bg: var(--wp-hover);
+  --sb-active-bg: var(--wp-card);
+  --sb-count-bg: var(--wp-card);
+  --sb-count-color: var(--wp-muted);
+  --sb-divider: var(--wp-line);
+  --sb-dock-bg: var(--wp-card);
+  --sb-dock-shadow: inset 0 0 0 1px var(--wp-hair);
+  --theme-dock-active-bg: var(--wp-accent);
+  --theme-dock-active-color: var(--wp-accent-ink);
+  --sb-dock-active-bg: var(--theme-dock-active-bg);
+  --sb-dock-active-color: var(--theme-dock-active-color);
+  --sb-scrlbr-width: thin;
+  --sb-scrlbr-color: var(--wp-line) transparent;
+
+  // The page: glass in the picture's colour.
+  .theme-sheet {
+    top: 12px;
+    right: 14px;
+    bottom: 14px;
+    border-radius: 22px;
+    background: var(--wp-glass);
+    backdrop-filter: blur(var(--wp-blur)) saturate(1.3);
+    box-shadow: inset 0 1px 0 var(--wp-hair), inset 0 0 0 1px var(--wp-hair), 0 24px 70px rgba(0, 0, 0, 0.28);
+  }
+
+  .tiptap-card {
+    border: 0;
+    backdrop-filter: blur(var(--wp-blur));
+  }
+
+  // ── Sidebar: a floating glass panel ──
+  .sidebar:not(.sidebar-mobile) {
+    padding: 14px 10px 14px 18px;
+
+    &::before {
+      inset: 12px 6px 12px 12px;
+      filter: none;
+      border-radius: 20px;
+      background: var(--wp-glass);
+      backdrop-filter: blur(var(--wp-blur)) saturate(1.3);
+      box-shadow: inset 0 1px 0 var(--wp-hair), inset 0 0 0 1px var(--wp-hair), 0 18px 50px rgba(0, 0, 0, 0.25);
+    }
+  }
+
+  // Over the page (phone drawer, collapsed peek): the solid glass colour.
+  .sidebar.sidebar-mobile,
+  .sidebar.sidebar--floating {
+    background: rgb(var(--wp-tint)) !important;
+  }
+
+  .sidebar-section__label {
+    font-weight: 700;
+    color: var(--wp-muted);
+  }
+
+  .sidebar .page-item.active {
+    background: var(--wp-card);
+    font-weight: 700;
+    box-shadow: inset 0 0 0 1px var(--wp-hair), 0 4px 14px rgba(0, 0, 0, 0.12);
+  }
+
+  .sidebar .sb-search {
+    border: 0;
+    border-radius: 11px;
+    background: var(--wp-card);
+    box-shadow: inset 0 0 0 1px var(--wp-hair);
+  }
+
+  .sidebar .sb-search__palette {
+    background: var(--wp-hover);
+    color: var(--wp-muted);
+  }
+
+  .sb-dock {
+    border-radius: 14px;
+  }
+
+  // ── Buttons ──
+  .tiptap-button {
+    --tt-button-hover-bg-color: var(--wp-hover);
+  }
+
+  .tiptap-button[data-style="primary"] {
+    --tt-button-default-bg-color: var(--wp-accent);
+    --tt-button-hover-bg-color: var(--wp-accent);
+    --tt-button-default-text-color: var(--wp-accent-ink);
+    --tt-button-hover-text-color: var(--wp-accent-ink);
+    --tt-button-default-icon-color: var(--wp-accent-ink);
+    --tt-button-hover-icon-color: var(--wp-accent-ink);
+    font-weight: 700;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+
+    &:hover {
+      filter: brightness(1.06);
+    }
+  }
+
+  // ── Home ──
+  .ts-hero.wallpaper,
+  .home-foryou,
+  .home-learn {
+    border: 0;
+    border-radius: 20px;
+    background: var(--wp-card);
+    box-shadow: inset 0 1px 0 var(--wp-hair), inset 0 0 0 1px var(--wp-hair);
+  }
+
+  .ts-hero.wallpaper {
+    .ts-hero__icon {
+      border-radius: 15px;
+      background: var(--wp-accent);
+      color: var(--wp-accent-ink);
+    }
+
+    .ts-hero__btn {
+      border-radius: 11px;
+      background: var(--wp-card);
+      box-shadow: inset 0 0 0 1px var(--wp-hair);
+      color: var(--wp-ink);
+    }
+
+    .ts-hero__btn--primary {
+      background: var(--wp-accent);
+      color: var(--wp-accent-ink);
+      font-weight: 700;
+    }
+
+    .ts-hero__pins-label {
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--wp-accent);
+    }
+
+    .ts-hero__pin {
+      border-radius: 13px;
+      background: var(--wp-card);
+      box-shadow: inset 0 0 0 1px var(--wp-hair);
+    }
+  }
+
+  .greeting {
+    font-weight: 800;
+    letter-spacing: -0.025em;
+  }
+
+  .home-foryou__unread {
+    border-radius: 999px;
+    background: var(--wp-accent);
+    color: var(--wp-accent-ink);
+  }
+
+  .home-foryou__link {
+    color: var(--wp-accent);
+    font-weight: 700;
+  }
+
+  .home-dense__tabs.tab-list .tab-item.is-active::after {
+    background: var(--wp-accent);
+  }
+
+  // ── Page content ──
+  .tiptap.ProseMirror {
+    --tt-checklist-bg-active-color: var(--wp-accent);
+    --tt-checklist-border-color: var(--wp-muted);
+    --tt-checklist-border-active-color: var(--wp-accent);
+    --tt-checklist-check-icon-color: var(--wp-accent-ink);
+    --link-text-color: var(--wp-accent);
+
+    :not(pre) > code {
+      border-radius: 6px;
+      background: var(--wp-card);
+      color: var(--wp-ink);
+    }
+
+    blockquote {
+      border-left: 3px solid var(--wp-accent);
+    }
+
+    .callout-root {
+      border-color: transparent;
+      border-radius: 16px;
+      box-shadow: inset 0 0 0 1px var(--wp-hair);
+    }
+  }
+
+  .reaction-chip {
+    border: 0;
+    border-radius: 999px;
+    background: var(--wp-card);
+    box-shadow: inset 0 0 0 1px var(--wp-hair);
+
+    &.is-reacted {
+      box-shadow: inset 0 0 0 1.5px var(--wp-accent);
+    }
+  }
+}
+
+// Dark picture: light text on deep glass.
+:root[data-theme="wallpaper"].dark {
+  --wp-ink: #f7f5fb;
+  --wp-muted: rgba(247, 245, 251, 0.72);
+  --wp-line: rgba(255, 255, 255, 0.14);
+  --wp-hair: rgba(255, 255, 255, 0.16);
+  --wp-card: rgba(255, 255, 255, 0.09);
+  --wp-hover: rgba(255, 255, 255, 0.12);
+}
+
+// Brand shades from the accent (links, focus rings, selection, cursor).
+html:root[data-theme="wallpaper"] {
+  --tt-brand-color-50: color-mix(in srgb, var(--wp-accent) 8%, #fff);
+  --tt-brand-color-100: color-mix(in srgb, var(--wp-accent) 16%, #fff);
+  --tt-brand-color-200: color-mix(in srgb, var(--wp-accent) 32%, #fff);
+  --tt-brand-color-300: color-mix(in srgb, var(--wp-accent) 55%, #fff);
+  --tt-brand-color-400: var(--wp-accent);
+  --tt-brand-color-500: color-mix(in srgb, var(--wp-accent) 85%, #000);
+  --tt-brand-color-600: color-mix(in srgb, var(--wp-accent) 72%, #000);
+  --tt-brand-color-700: color-mix(in srgb, var(--wp-accent) 60%, #000);
+  --tt-brand-color-800: color-mix(in srgb, var(--wp-accent) 48%, #000);
+  --tt-brand-color-900: color-mix(in srgb, var(--wp-accent) 36%, #000);
+  --tt-brand-color-950: color-mix(in srgb, var(--wp-accent) 22%, #000);
+  --tt-selection-color: color-mix(in srgb, var(--wp-accent) 24%, transparent);
+}
+
+:root[data-theme="wallpaper"] body {
+  --tt-text-primary: var(--wp-ink);
+  --tt-theme-text: var(--wp-ink);
+  --tt-text-color: var(--wp-ink);
+  --tt-text-secondary: var(--wp-muted);
+  --tt-text-tertiary: var(--wp-muted);
+}
+
+:root[data-theme="wallpaper"] .tiptap.ProseMirror {
+  --tt-paragraph-text-color: var(--wp-ink);
 }
 
 // The accent glow at the foot of the sidebar fights a pattern: off there.
