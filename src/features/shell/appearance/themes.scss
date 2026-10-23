@@ -306,105 +306,258 @@ html:root[data-theme="notebook"] {
   }
 }
 
-// ─── Retro: yellow dot grid, the page is an outlined card, pink accent ─────
+// ─── Retro: cream dot grid, navy outlines + hard shadows, hot pink ─────────
+// Tokens other files use too (greeting, home rail, teamspace hero, icons).
 :root[data-theme="retro"] {
   @include theme-font(("Space Grotesk", system-ui, sans-serif));
 
-  --theme-accent: #ff5c8a;
-  --theme-window: radial-gradient(rgba(17, 17, 17, 0.14) 1px, transparent 1.6px) 0 0 / 14px 14px, #ffd43b;
-  --tt-bg-color: #ffffff;
-  --tiptap-card-bg-color: #ffffff;
-  --tiptap-card-border-color: #111111;
-  --tt-card-bg-color: #ffffff;
-  --tt-border-color: rgba(17, 17, 17, 0.22);
-  --tt-border-color-tint: rgba(17, 17, 17, 0.1);
-  --tt-shadow-elevated-md: 0 0 0 2px #111111, 4px 4px 0 #111111;
-  --tt-shadow-elevated-xs: 0 0 0 1px #111111, 2px 2px 0 #111111;
-  --tt-shadow-elevated-sm: 0 0 0 1.5px #111111, 3px 3px 0 #111111;
-  --tt-shadow-elevated-md: 0 0 0 2px #111111, 4px 4px 0 #111111;
-  --tt-shadow-elevated-lg: 0 0 0 3px #111111, 6px 6px 0 #111111;
+  --retro-ink: #1d1a2b;
+  --retro-ink-soft: #57506b;
+  --retro-ground: #f4ecdf;
+  --retro-paper: #fffaf1;
+  --retro-pink: #ff4f8b;
+  --retro-pink-soft: #ffd3e2;
+  --retro-lilac: #e3d5ff;
+  --retro-mint: #c8f1e4;
+  --retro-blue: #d6defc;
+  --retro-peach: #ffe2c4;
+  --retro-dots: radial-gradient(rgba(29, 26, 43, 0.09) 1px, transparent 1.4px) 0 0 / 16px 16px;
+  --retro-pixel: "Silkscreen", "Space Grotesk", monospace;
 
-  --sidebar-bg-color: #ffd43b;
-  --sidebar-surface: radial-gradient(rgba(17, 17, 17, 0.14) 1px, transparent 1.6px) 0 0 / 14px 14px, #ffd43b;
-  --sidebar-fog-color: rgba(255, 212, 59, 0.92);
-  --sidebar-accent: #111111;
-  --sidebar-border-color: transparent;
+  --theme-accent: var(--retro-pink);
+  --theme-window: var(--retro-dots), var(--retro-ground);
+  --tt-bg-color: var(--retro-paper);
+  --tt-toolbar-bg-color: transparent;
+  --tiptap-card-bg-color: #ffffff;
+  --tiptap-card-border-color: var(--retro-ink);
+  --tt-card-bg-color: #ffffff;
+  --tt-border-color: rgba(29, 26, 43, 0.22);
+  --tt-border-color-tint: rgba(29, 26, 43, 0.1);
+  --tt-shadow-elevated-xs: 0 0 0 1.5px var(--retro-ink), 2px 2px 0 var(--retro-ink);
+  --tt-shadow-elevated-sm: 0 0 0 2px var(--retro-ink), 3px 3px 0 var(--retro-ink);
+  --tt-shadow-elevated-md: 0 0 0 2px var(--retro-ink), 4px 4px 0 var(--retro-ink);
+  --tt-shadow-elevated-lg: 0 0 0 2px var(--retro-ink), 6px 6px 0 var(--retro-ink);
+
+  // Sidebar: the same cream ground, a navy edge.
+  --sidebar-bg-color: var(--retro-ground);
+  --sidebar-surface: var(--retro-dots), var(--retro-ground);
+  --sidebar-fog-color: rgba(244, 236, 223, 0.92);
+  --sidebar-accent: var(--retro-pink);
+  --sidebar-border-color: var(--retro-ink);
   --sidebar-edge-shadow: none;
-  --sidebar-text-color: #111111;
-  --sb-row-color: #111111;
-  --sb-active-color: #111111;
-  --sb-icon-color: #3a3200;
-  --sb-label-color: #3a3200;
-  --sb-hover-bg: rgba(255, 255, 255, 0.55);
-  --sb-active-bg: #ffffff;
-  --sb-count-bg: #ffffff;
-  --sb-count-color: #111111;
-  --sb-divider: rgba(17, 17, 17, 0.2);
-  --sb-dock-bg: #ffffff;
-  --sb-dock-shadow: 0 0 0 2px #111111, 3px 3px 0 #111111;
-  --theme-dock-active-bg: var(--theme-accent);
-  --theme-dock-active-color: #111111;
-  --sb-doc-tab-height: 28px;
+  --sidebar-text-color: var(--retro-ink);
+  --sb-row-color: var(--retro-ink);
+  --sb-active-color: var(--retro-ink);
+  --sb-icon-color: var(--retro-ink);
+  --sb-label-color: var(--retro-ink-soft);
+  --sb-hover-bg: rgba(29, 26, 43, 0.07);
+  --sb-active-bg: var(--retro-pink);
+  --sb-count-bg: var(--retro-paper);
+  --sb-count-color: var(--retro-ink);
+  --sb-divider: rgba(29, 26, 43, 0.18);
+  --sb-dock-bg: var(--retro-paper);
+  --sb-dock-shadow: inset 0 0 0 2px var(--retro-ink), 4px 4px 0 var(--retro-ink);
+  --theme-dock-active-bg: var(--retro-pink);
+  --theme-dock-active-color: var(--retro-ink);
+  --sb-doc-tab-height: 32px;
   --sb-dock-active-bg: var(--theme-dock-active-bg);
   --sb-dock-active-color: var(--theme-dock-active-color);
   --sb-scrlbr-width: thin;
-  --sb-scrlbr-color: rgba(201, 199, 201, 0.1) transparent;
+  --sb-scrlbr-color: rgba(29, 26, 43, 0.2) transparent;
 
-  // .tiptap-button{
-  //   box-shadow: var(--tt-shadow-elevated-md);
-  // }
- 
-  
-  .simple-editor-wrapper{
+  .simple-editor-wrapper {
     height: 96vh;
   }
 
-  .cover-header-wrapper{
+  // Covers start inside the sheet, not under the sidebar.
+  .cover-header-wrapper {
     position: relative;
   }
-  .cover-image-root{
+  .cover-image-root {
     width: 100% !important;
 
-    img{
+    img {
       position: absolute !important;
       right: 0px;
       left: 168px !important;
     }
-    img[data-collapsed="true"]{
+    img[data-collapsed="true"] {
       left: 24px !important;
     }
   }
-  .gradient-cover{
+  .gradient-cover {
     position: absolute !important;
     width: 100% !important;
     height: inherit;
     right: 0px;
     left: 168px !important;
   }
-  .gradient-cover[data-collapsed="true"]{
-     left: 24px !important;
+  .gradient-cover[data-collapsed="true"] {
+    left: 24px !important;
   }
+
+  // The page: an outlined paper card on the dots.
   .theme-sheet {
-    right: 16px;
-    bottom: 16px;
-    border-radius: 14px;
-    background: #ffffff;
-    box-shadow: 0 0 0 2px #111111, 6px 6px 0 #111111;
+    right: 20px;
+    bottom: 20px;
+    border-radius: 16px;
+    background: var(--retro-paper);
+    box-shadow: 0 0 0 2px var(--retro-ink), 6px 6px 0 var(--retro-ink);
   }
 
   .tiptap-card {
     border: 0;
   }
 
-  .sidebar .page-item.active {
+  // ── Sidebar ──
+  .sidebar-section__label {
+    font-family: var(--retro-pixel) !important;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--retro-ink-soft);
+  }
+
+  // Every page icon sits in a small outlined tile.
+  .sidebar .page-item > .page-icon,
+  .sidebar .page-item > .page-icon-wrap > .page-icon {
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
     background: #ffffff;
-    box-shadow: 0 0 0 2px #111111, 2px 2px 0 #111111;
+    box-shadow: inset 0 0 0 1.5px var(--retro-ink);
+    color: var(--retro-ink);
+  }
+
+  .sidebar .page-item.active {
+    background: var(--retro-pink);
+    font-weight: 700;
+    box-shadow: inset 0 0 0 2px var(--retro-ink), 3px 3px 0 var(--retro-ink);
   }
 
   .sidebar .sb-search {
     border: 0;
-    background: #ffffff;
-    box-shadow: inset 0 0 0 2px #111111, 2px 2px 0 #111111;
+    border-radius: 10px;
+    background: var(--retro-paper);
+    box-shadow: inset 0 0 0 2px var(--retro-ink), 3px 3px 0 var(--retro-ink);
+  }
+
+  .sidebar .sb-search__palette {
+    background: var(--retro-pink-soft);
+    box-shadow: inset 0 0 0 1.5px var(--retro-ink);
+    font-family: var(--retro-pixel);
+    font-size: 10px;
+    color: var(--retro-ink);
+  }
+
+  .sb-dock__tab.is-active {
+    box-shadow: inset 0 0 0 2px var(--retro-ink);
+  }
+
+  // ── Buttons ──
+  .tiptap-button {
+    --tt-button-hover-bg-color: rgba(29, 26, 43, 0.07);
+  }
+
+  .tiptap-button[data-style="primary"] {
+    --tt-button-default-bg-color: var(--retro-pink);
+    --tt-button-hover-bg-color: #ff6b9d;
+    --tt-button-default-text-color: var(--retro-ink);
+    --tt-button-hover-text-color: var(--retro-ink);
+    --tt-button-default-icon-color: var(--retro-ink);
+    --tt-button-hover-icon-color: var(--retro-ink);
+    font-weight: 700;
+    box-shadow: inset 0 0 0 2px var(--retro-ink), 3px 3px 0 var(--retro-ink);
+    transition: transform 0.08s ease;
+
+    &:hover {
+      transform: translate(-1px, -1px);
+    }
+
+    &:active {
+      transform: translate(2px, 2px);
+    }
+  }
+
+  // ── Home tabs (Recent / Favorites / Created by me): folder tabs ──
+  .home-dense__tabs.tab-list {
+    box-shadow: inset 0 -2px 0 var(--retro-ink);
+
+    .tab-item {
+      border-radius: 8px 8px 0 0;
+      font-weight: 600;
+
+      &::after {
+        display: none;
+      }
+
+      &.is-active {
+        background: var(--retro-pink);
+        color: var(--retro-ink);
+        font-weight: 700;
+        box-shadow: inset 0 0 0 2px var(--retro-ink);
+      }
+    }
+  }
+
+  // ── Page content ──
+  .tiptap.ProseMirror {
+    --tt-checklist-bg-active-color: var(--retro-pink);
+    --tt-checklist-border-color: var(--retro-ink);
+    --tt-checklist-border-active-color: var(--retro-ink);
+    --tt-checklist-check-icon-color: var(--retro-ink);
+    --tt-checklist-text-active: #6b6482;
+
+    h1,
+    h2,
+    h3,
+    h4 {
+      font-family: "Space Grotesk", system-ui, sans-serif;
+      letter-spacing: -0.02em;
+    }
+
+    // Chunky checkboxes.
+    ul[data-type="taskList"] li label span {
+      width: 18px;
+      height: 18px;
+      border-width: 2px;
+      border-radius: 5px;
+      background: #ffffff;
+      box-shadow: 2px 2px 0 var(--retro-ink);
+    }
+
+    ul[data-type="taskList"] li label input[type="checkbox"]:checked + span {
+      background: var(--retro-pink);
+    }
+
+    // Inline code: a lilac outlined chip.
+    :not(pre) > code {
+      background: var(--retro-lilac);
+      color: var(--retro-ink);
+      box-shadow: inset 0 0 0 1.5px var(--retro-ink);
+    }
+
+    blockquote {
+      border-left: 4px solid var(--retro-pink);
+    }
+
+    .callout-root {
+      border-color: transparent;
+      box-shadow: inset 0 0 0 2px var(--retro-ink), 4px 4px 0 var(--retro-ink);
+    }
+  }
+
+  // Comment reactions.
+  .reaction-chip {
+    border: 0;
+    box-shadow: inset 0 0 0 1.5px var(--retro-ink);
+
+    &.is-reacted {
+      background: var(--retro-pink-soft);
+    }
   }
 }
 
@@ -413,25 +566,25 @@ html:root[data-theme="retro"] {
   --tt-brand-color-100: #ffe0ea;
   --tt-brand-color-200: #ffc2d5;
   --tt-brand-color-300: #ff94b4;
-  --tt-brand-color-400: #ff5c8a;
-  --tt-brand-color-500: #e11d63;
-  --tt-brand-color-600: #be124f;
-  --tt-brand-color-700: #9d1043;
-  --tt-brand-color-800: #7a0d35;
-  --tt-brand-color-900: #580a27;
-  --tt-brand-color-950: #330516;
-  --tt-selection-color: rgba(255, 92, 138, 0.22);
+  --tt-brand-color-400: #ff4f8b;
+  --tt-brand-color-500: #d81b60;
+  --tt-brand-color-600: #b0154e;
+  --tt-brand-color-700: #8e113f;
+  --tt-brand-color-800: #6d0d30;
+  --tt-brand-color-900: #4d0922;
+  --tt-brand-color-950: #2e0514;
+  --tt-selection-color: rgba(255, 79, 139, 0.22);
 }
 
 :root[data-theme="retro"] body {
-  --tt-text-primary: #111111;
-  --tt-theme-text: #111111;
-  --tt-text-color: #2b2b2b;
-  --tt-text-secondary: #4a4a4a;
+  --tt-text-primary: #1d1a2b;
+  --tt-theme-text: #1d1a2b;
+  --tt-text-color: #2a2540;
+  --tt-text-secondary: #57506b;
 }
 
 :root[data-theme="retro"] .tiptap.ProseMirror {
-  --tt-paragraph-text-color: #111111;
+  --tt-paragraph-text-color: #1d1a2b;
 }
 
 // The accent glow at the foot of the sidebar fights a pattern: off there.
