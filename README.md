@@ -1,6 +1,6 @@
 # Folio
 
-A collaborative workspace for teams, schools and communities: a block editor, nested pages, inline databases, comments and chat, with real-time collaboration built in. Folio speaks English and French today, and more languages are coming: [help translate it](#translating-folio).
+A collaborative workspace for teams, schools and communities: a block editor, nested pages, inline databases, comments and chat, with real-time collaboration built in. Folio speaks English and French today, and more languages are coming: [help translate it](#translating-folio). Make it yours with [themes](#features), from frosted glass to an open notebook.
 
 <table>
   <tr>
@@ -42,22 +42,51 @@ I wanted a tool where collaboration and notes actually stick around instead of g
 
 **Pages and workspaces**
 
-- Sidebar with nested pages, recents, pinned pages, trash; quick open (`Ctrl+P`) and find in pages (`Ctrl+Shift+F`)
+- Sidebar with nested pages, recents, pinned pages, trash; a search bar, quick open (`Ctrl+P`) and find in pages (`Ctrl+Shift+F`)
 - Workspaces and teamspaces with members, guests and roles; access enforced in Postgres (RLS)
 - Templates, page covers and icons, version history
 - Works offline: pages you've opened are kept on the device and sync when you're back online
 
 **Databases**
 
-- Inline databases with six views: table, board, gallery, list, calendar, timeline
+- Inline databases with six views: table, board, gallery, list, calendar, timeline; a new database previews the view it was inserted as
 - Filtering, sorting and grouping; column freezing, hiding and reordering
+- Tables that work like a spreadsheet: arrow keys and Tab between cells, copy and paste (blocks from a spreadsheet fill down and right), cell ranges by dragging the corner dot or Shift+click
+- Big tables and lists load the first 50 rows, then "Load more"; any view exports to CSV (its rows and visible columns, Excel-ready)
 - Drag and drop across views: board columns, gallery cards, rescheduling on the calendar, moving and resizing timeline bars
 
 **Together**
 
 - Real-time collaborative editing with live cursors (Yjs + Hocuspocus)
-- Comments and suggestions on pages and blocks, an inbox with notifications
+- Comments and suggestions on pages and blocks; page discussions with replies and Resolve; an inbox with notifications
 - Chat rooms with replies, reactions, attachments and study sessions
+
+**Appearance**
+
+Personal themes that restyle the whole app, chosen in My settings › Appearance and seen only by you. The default look also has light and dark modes.
+
+<table>
+  <tr>
+    <td width="33%"><img src="./docs/screenshots/default.png" alt="Folio in the default theme" /></td>
+    <td width="33%"><img src="./docs/screenshots/aurora.png" alt="Folio in the Aurora theme" /></td>
+    <td width="33%"><img src="./docs/screenshots/midnight.png" alt="Folio in the Midnight theme" /></td>
+  </tr>
+  <tr>
+    <td align="center"><sub><b>Default</b>: clean and quiet, light or dark</sub></td>
+    <td align="center"><sub><b>Aurora</b>: colour clouds behind frosted glass panels</sub></td>
+    <td align="center"><sub><b>Midnight</b>: a night sky with a moon and lime accents</sub></td>
+  </tr>
+  <tr>
+    <td width="33%"><img src="./docs/screenshots/notebook.png" alt="Folio in the Notebook theme" /></td>
+    <td width="33%"><img src="./docs/screenshots/retro.png" alt="Folio in the Retro theme" /></td>
+    <td width="33%"><img src="./docs/screenshots/cover.png" alt="Folio in the Wallpaper theme" /></td>
+  </tr>
+  <tr>
+    <td align="center"><sub><b>Notebook</b>: handwritten labels, index cards and sticky notes</sub></td>
+    <td align="center"><sub><b>Retro</b>: a cream dot grid with outlines and hard shadows</sub></td>
+    <td align="center"><sub><b>Wallpaper</b>: your own picture; the glass, text colour and accent are picked from it</sub></td>
+  </tr>
+</table>
 
 **Home and landing**
 
@@ -75,7 +104,8 @@ I wanted a tool where collaboration and notes actually stick around instead of g
 | Backend                 | Supabase: Postgres, Auth, Row Level Security, Storage, Edge Functions |
 | Real-time collaboration | Yjs, Hocuspocus                                                       |
 | Languages               | i18next (English and French so far; more welcome)                     |
-| Deployment              | Vercel                                                                |
+| Tests                   | Vitest                                                                |
+| Deployment              | Vercel (app), Render (collaboration server)                           |
 
 ## Getting started
 
@@ -140,9 +170,11 @@ Create `hocuspocus-server/.env`:
 
 ```bash
 SUPABASE_URL=https://<your-project>.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=<your service role key>   # server only, never in the frontend
+SUPABASE_SERVICE_ROLE_KEY=<your secret key>   # server only, never in the frontend
 PORT=1234
 ```
+
+Use a **secret key** (`sb_secret_…`) from Supabase › Project Settings › API Keys. It bypasses Row Level Security, so keep it only on the server, never commit it, and if it may have leaked, create a new one, deploy it, then delete the old one.
 
 Then start it:
 
@@ -162,12 +194,17 @@ The app opens on Vite's dev server (http://localhost:5173). The script also star
 
 ### Other scripts
 
-| Command                                 | What it does                |
-| --------------------------------------- | --------------------------- |
-| `npm run build`                         | Production build to `dist/` |
-| `npm run preview`                       | Serve the production build  |
-| `npm run lint`                          | ESLint                      |
-| `npx tsc -p tsconfig.app.json --noEmit` | Type check                  |
+| Command                                 | What it does                                              |
+| --------------------------------------- | --------------------------------------------------------- |
+| `npm run build`                         | Production build to `dist/`                               |
+| `npm run preview`                       | Serve the production build                                |
+| `npm run lint`                          | ESLint                                                    |
+| `npm test`                              | Unit tests (Vitest)                                       |
+| `npx tsc -p tsconfig.app.json --noEmit` | Type check                                                |
+| `node scripts/check-i18n.mjs`           | Translations: no duplicate keys, English and French match |
+| `node scripts/check-slash-items.mjs`    | Every slash-menu item in the translations is in the menu  |
+
+CI runs the type check, the tests, both checks and the build on every pull request.
 
 ## A few architecture notes
 
@@ -175,13 +212,14 @@ The app opens on Vite's dev server (http://localhost:5173). The script also star
 - **Database records live outside the ProseMirror document.** They're pages with a `sourceId` and a `values` map, resolved through a data source registry instead of stored inline, so the same record shows up consistently in every view.
 - **A data bridge across node views.** Cell and record node views are separate React roots and can't share context. The database's top-level view publishes its computed layout into editor storage, and each node view subscribes with `useSyncExternalStore`.
 - **One editor across navigation.** `EditorProvider` sits above the router, so moving between pages never remounts the editor shell. Loading states are skeletons drawn over the live editor.
+- **Themes are CSS variables.** A personal theme sets `data-theme` on `<html>`, and `src/features/shell/appearance/themes.scss` overrides the app's own variables (colours, fonts, shadows, the sidebar and page surfaces) for it. Floating themes draw the page on a sheet behind the content. The choice is kept on the device, and `index.html` applies it before the first paint.
 - **Access control in the database.** Page visibility is enforced with Row Level Security (`can_access_page`); comment visibility follows page visibility, and the collaboration server asks the same rules before opening a document.
 
 The folder layout and where new code goes are in [`docs/STRUCTURE.md`](docs/STRUCTURE.md).
 
 ## Where things stand
 
-The editor is in good shape. The next steps are the databases (closing gaps in properties and views), templates, publishing pages to the web, and the community gallery.
+The editor is in good shape, and the database tables now behave like a spreadsheet. The next steps are closing the remaining gaps in database properties and views, templates, publishing pages to the web, and the community gallery.
 
 ## Translating Folio
 
