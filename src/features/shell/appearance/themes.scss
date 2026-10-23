@@ -71,6 +71,47 @@
   // The top bar sits on the sheet.
   --tt-toolbar-bg-color: transparent;
 
+  // Everything is fitted inside the sheet: the top bar is inset, the editor
+  // stops above the sheet's bottom edge, and covers start at the sheet's
+  // left edge instead of running under the sidebar.
+  .tiptap-toolbar {
+    padding: 20px 40px !important;
+  }
+
+  .simple-editor-wrapper {
+    height: 96vh;
+  }
+
+  .cover-header-wrapper {
+    position: relative;
+  }
+
+  .cover-image-root {
+    width: 100% !important;
+
+    img {
+      position: absolute !important;
+      right: 0px;
+      left: 168px !important;
+    }
+
+    img[data-collapsed="true"] {
+      left: 24px !important;
+    }
+  }
+
+  .gradient-cover {
+    position: absolute !important;
+    width: 100% !important;
+    height: inherit;
+    right: 0px;
+    left: 168px !important;
+  }
+
+  .gradient-cover[data-collapsed="true"] {
+    left: 24px !important;
+  }
+
   .theme-sheet {
     display: block;
     position: fixed;
@@ -90,49 +131,367 @@
   }
 }
 
-// ─── Aurora: colour mesh, frosted page, violet accent ──────────────────────
+// ─── Aurora: colour clouds, floating glass panels, violet → indigo ─────────
+// The window is five soft colour clouds and a light streak; the sidebar and
+// the page are two floating frosted panels; cards are a brighter glass on
+// top. Primary actions use the violet → indigo gradient.
 :root[data-theme="aurora"] {
-  --theme-accent: #6d4fe0;
-  --theme-window: radial-gradient(60% 70% at 0% 0%, #d9ccff 0%, transparent 60%),
-    radial-gradient(50% 60% at 100% 10%, #c4f3e6 0%, transparent 60%),
-    radial-gradient(60% 70% at 50% 110%, #ffd6c2 0%, transparent 60%), #f3efff;
-  --tt-bg-color: #fcfbff;
-  --tiptap-card-bg-color: #ffffff;
-  --tiptap-card-border-color: rgba(42, 37, 64, 0.08);
-  --tt-card-bg-color: #ffffff;
-  --tt-border-color: rgba(42, 37, 64, 0.12);
-  --tt-border-color-tint: rgba(42, 37, 64, 0.06);
+  @include theme-font(("Plus Jakarta Sans", system-ui, sans-serif));
 
-  --sidebar-bg-color: #f1edff;
-  --sidebar-surface: radial-gradient(90% 55% at 0% 0%, #d6caff 0%, transparent 60%),
-    radial-gradient(80% 45% at 100% 35%, #bdf3e6 0%, transparent 60%),
-    radial-gradient(90% 55% at 20% 100%, #ffd4bd 0%, transparent 60%), #f1edff;
-  --sidebar-fog-color: rgba(241, 237, 255, 0.85);
-  --sidebar-accent: #6d4fe0;
+  --aurora-ink: #1f1b3a;
+  --aurora-ink-soft: #5f5a7a;
+  --aurora-violet: #6d4fe0;
+  --aurora-violet-deep: #5b3fd0;
+  --aurora-gradient: linear-gradient(135deg, #8b6cf6 0%, #6d4fe0 50%, #4f46e5 100%);
+  --aurora-glass: rgba(255, 255, 255, 0.55);
+  --aurora-glass-strong: rgba(255, 255, 255, 0.78);
+  --aurora-glass-edge: inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+  --aurora-lift: 0 14px 40px rgba(76, 57, 160, 0.12);
+  --aurora-blur: blur(28px) saturate(1.4);
+
+  --theme-accent: var(--aurora-violet);
+  --theme-window: radial-gradient(38% 50% at 6% 4%, rgba(196, 181, 253, 0.95) 0%, transparent 70%),
+    radial-gradient(34% 46% at 94% 2%, rgba(153, 246, 228, 0.85) 0%, transparent 70%),
+    radial-gradient(44% 56% at 78% 100%, rgba(253, 186, 206, 0.9) 0%, transparent 70%),
+    radial-gradient(40% 50% at 22% 100%, rgba(191, 219, 254, 0.9) 0%, transparent 70%),
+    radial-gradient(26% 34% at 52% 40%, rgba(253, 230, 138, 0.45) 0%, transparent 70%),
+    linear-gradient(115deg, transparent 32%, rgba(255, 255, 255, 0.45) 46%, transparent 60%),
+    #f3f0ff;
+  --tt-bg-color: #faf8ff;
+  --tiptap-card-bg-color: var(--aurora-glass-strong);
+  --tiptap-card-border-color: rgba(255, 255, 255, 0.8);
+  --tt-card-bg-color: var(--aurora-glass-strong);
+  --tt-border-color: rgba(76, 57, 160, 0.12);
+  --tt-border-color-tint: rgba(76, 57, 160, 0.06);
+  --tt-shadow-elevated-xs: 0 1px 2px rgba(76, 57, 160, 0.1);
+  --tt-shadow-elevated-sm: 0 4px 14px rgba(76, 57, 160, 0.1);
+  --tt-shadow-elevated-md: var(--aurora-glass-edge), 0 14px 40px rgba(76, 57, 160, 0.16);
+  --tt-shadow-elevated-lg: var(--aurora-glass-edge), 0 24px 70px rgba(76, 57, 160, 0.2);
+
+  // Sidebar: see-through; the glass panel is drawn by .sidebar::before.
+  --sidebar-bg-color: #f3f0ff;
+  --sidebar-surface: transparent;
+  --sidebar-fog-color: rgba(243, 240, 255, 0);
+  --sidebar-accent: var(--aurora-violet);
   --sidebar-border-color: transparent;
   --sidebar-edge-shadow: none;
-  --sidebar-text-color: #2a2540;
-  --sb-row-color: #3b3555;
-  --sb-active-color: #1f1a36;
-  --sb-icon-color: #6d6788;
-  --sb-label-color: #6d6788;
-  --sb-hover-bg: rgba(255, 255, 255, 0.5);
-  --sb-active-bg: rgba(255, 255, 255, 0.88);
-  --sb-count-bg: rgba(255, 255, 255, 0.6);
-  --sb-count-color: #5a5575;
-  --sb-divider: rgba(42, 37, 64, 0.08);
-  --sb-dock-bg: rgba(255, 255, 255, 0.7);
-  --theme-dock-active-bg: rgba(109, 79, 224, 0.12);
-  --theme-dock-active-color: #4c32b8;
+  --sidebar-text-color: var(--aurora-ink);
+  --sb-font: "Plus Jakarta Sans", system-ui, sans-serif;
+  --sb-row-color: #2c2748;
+  --sb-active-color: var(--aurora-ink);
+  --sb-icon-color: #4a4468;
+  --sb-label-color: #6b6590;
+  --sb-row-radius: 11px;
+  --sb-hover-bg: rgba(255, 255, 255, 0.55);
+  --sb-active-bg: rgba(255, 255, 255, 0.9);
+  --sb-count-bg: rgba(109, 79, 224, 0.1);
+  --sb-count-color: var(--aurora-violet-deep);
+  --sb-divider: rgba(76, 57, 160, 0.1);
+  --sb-dock-bg: rgba(255, 255, 255, 0.6);
+  --sb-dock-shadow: inset 0 1px 0 #ffffff, inset 0 0 0 1px rgba(255, 255, 255, 0.7), 0 8px 24px rgba(76, 57, 160, 0.1);
+  --theme-dock-active-bg: #ffffff;
+  --theme-dock-active-color: var(--aurora-violet-deep);
   --sb-dock-active-bg: var(--theme-dock-active-bg);
   --sb-dock-active-color: var(--theme-dock-active-color);
+  --sb-scrlbr-width: thin;
+  --sb-scrlbr-color: rgba(76, 57, 160, 0.2) transparent;
 
+  // The page: a frosted panel floating on the clouds.
   .theme-sheet {
-    background: rgba(255, 255, 255, 0.74);
-    backdrop-filter: blur(24px) saturate(1.2);
-    box-shadow:
-      0 0 0 1px rgba(255, 255, 255, 0.9),
-      0 20px 50px rgba(80, 60, 160, 0.14);
+    top: 12px;
+    right: 14px;
+    bottom: 14px;
+    border-radius: 24px;
+    background: var(--aurora-glass);
+    backdrop-filter: blur(30px) saturate(1.4);
+    box-shadow: var(--aurora-glass-edge), 0 24px 70px rgba(76, 57, 160, 0.16);
+  }
+
+  // Menus, popovers, cards: brighter glass above the page.
+  .tiptap-card {
+    border: 0;
+    backdrop-filter: var(--aurora-blur);
+  }
+
+  // ── Sidebar: a floating glass panel ──
+  .sidebar:not(.sidebar-mobile) {
+    padding: 14px 10px 14px 18px;
+
+    &::before {
+      inset: 12px 6px 12px 12px;
+      filter: none;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.42);
+      backdrop-filter: var(--aurora-blur);
+      box-shadow: var(--aurora-glass-edge), 0 18px 50px rgba(76, 57, 160, 0.14);
+    }
+  }
+
+  // On a phone the sidebar is a drawer over the page: solid, not see-through.
+  .sidebar.sidebar-mobile,
+  .sidebar.sidebar--floating {
+    background: var(--theme-window) !important;
+  }
+
+  .sidebar-section__label {
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #6b6590;
+  }
+
+  // Page icons sit on a soft glass tile; they keep their own colour.
+  .sidebar .page-item > .page-icon,
+  .sidebar .page-item > .page-icon-wrap > .page-icon {
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 7px;
+    background: rgba(255, 255, 255, 0.6);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+  }
+
+  .sidebar .page-item {
+    border-radius: 11px;
+  }
+
+  .sidebar .page-item.active {
+    background: rgba(255, 255, 255, 0.9);
+    font-weight: 700;
+    box-shadow: inset 0 1px 0 #ffffff, 0 0 0 1px rgba(255, 255, 255, 0.8), 0 6px 18px rgba(109, 79, 224, 0.16);
+  }
+
+  .sidebar .sb-search {
+    border: 0;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.62);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.9), 0 2px 8px rgba(76, 57, 160, 0.06);
+  }
+
+  .sidebar .sb-search__palette {
+    background: rgba(109, 79, 224, 0.1);
+    font-weight: 600;
+    color: var(--aurora-violet-deep);
+  }
+
+  .sb-dock {
+    border-radius: 16px;
+  }
+
+  .sb-dock__tab.is-active {
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.9), 0 4px 12px rgba(109, 79, 224, 0.18);
+  }
+
+  // ── Buttons ──
+  .tiptap-button {
+    --tt-button-hover-bg-color: rgba(255, 255, 255, 0.6);
+  }
+
+  .tiptap-button[data-style="primary"] {
+    background: var(--aurora-gradient) !important;
+    font-weight: 700;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 8px 20px rgba(109, 79, 224, 0.32);
+    transition: transform 0.15s ease, filter 0.15s ease;
+
+    &:hover {
+      filter: brightness(1.06);
+      transform: translateY(-1px);
+    }
+  }
+
+  // ── Home ──
+  .ts-hero.aurora {
+    position: relative;
+    border: 0;
+    border-radius: 22px;
+    background: var(--aurora-glass-strong);
+    box-shadow: var(--aurora-glass-edge), var(--aurora-lift);
+    overflow: hidden;
+
+    // A soft mint glow behind the page icon.
+    &::before {
+      content: "";
+      position: absolute;
+      left: -60px;
+      top: -80px;
+      width: 320px;
+      height: 260px;
+      border-radius: 50%;
+      background: radial-gradient(closest-side, rgba(94, 234, 212, 0.35), transparent);
+      pointer-events: none;
+    }
+
+    .ts-hero__icon {
+      border-radius: 16px;
+      background: linear-gradient(140deg, #ccfbf1 0%, #99f6e4 100%);
+      box-shadow: inset 0 1px 0 #ffffff, 0 8px 20px rgba(20, 184, 166, 0.25);
+    }
+
+    .ts-hero__btn {
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.6);
+      box-shadow: inset 0 0 0 1px rgba(109, 79, 224, 0.18);
+      color: #4c3d9e;
+      font-weight: 600;
+    }
+
+    .ts-hero__btn--primary {
+      background: var(--aurora-gradient);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 8px 20px rgba(109, 79, 224, 0.32);
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    .ts-hero__pins-label {
+      font-size: 11.5px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--aurora-violet);
+
+      &::before {
+        content: "✦ ";
+      }
+    }
+
+    .ts-hero__pin {
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.7);
+      box-shadow: inset 0 1px 0 #ffffff, 0 0 0 1px rgba(255, 255, 255, 0.7), 0 4px 14px rgba(76, 57, 160, 0.07);
+      transition: background 0.15s ease, transform 0.15s ease;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.95);
+        transform: translateX(2px);
+      }
+    }
+  }
+
+  // The greeting in violet → teal; the emoji keeps its own colours.
+  .greeting {
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    background: linear-gradient(100deg, #6d4fe0 0%, #a855f7 45%, #14b8a6 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .greeting__emoji {
+    -webkit-text-fill-color: initial;
+    color: initial;
+    filter: drop-shadow(0 4px 10px rgba(245, 158, 11, 0.45));
+  }
+
+  .home-foryou {
+    border: 0;
+    border-radius: 22px;
+    background: var(--aurora-glass-strong);
+    box-shadow: var(--aurora-glass-edge), var(--aurora-lift);
+  }
+
+  .home-foryou__unread {
+    border-radius: 999px;
+    background: linear-gradient(135deg, #a78bfa, #6d4fe0);
+    box-shadow: 0 3px 10px rgba(109, 79, 224, 0.3);
+    color: #ffffff;
+  }
+
+  .home-foryou__link {
+    color: var(--aurora-violet-deep);
+    font-weight: 700;
+  }
+
+  .home-learn {
+    border-radius: 22px;
+    background: var(--aurora-glass-strong);
+    box-shadow: var(--aurora-glass-edge), var(--aurora-lift);
+  }
+
+  // Recent / Favorites / Created by me: a glass segmented control.
+  .home-dense__tabs.tab-list {
+    display: inline-flex;
+    align-self: flex-start;
+    gap: 2px;
+    padding: 4px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.45);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+
+    .tab-item {
+      padding: 7px 16px;
+      border-radius: 10px;
+      font-weight: 600;
+
+      &::after {
+        display: none;
+      }
+
+      &.is-active {
+        background: #ffffff;
+        color: var(--aurora-violet-deep);
+        font-weight: 700;
+        box-shadow: 0 2px 8px rgba(76, 57, 160, 0.12);
+      }
+    }
+  }
+
+  // ── Page content ──
+  .tiptap.ProseMirror {
+    --tt-checklist-border-color: rgba(109, 79, 224, 0.35);
+    --tt-checklist-border-active-color: transparent;
+    --tt-checklist-check-icon-color: #ffffff;
+    --tt-checklist-text-active: #7c7699;
+
+    h1,
+    h2,
+    h3,
+    h4 {
+      font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    ul[data-type="taskList"] li label span {
+      width: 19px;
+      height: 19px;
+      border-radius: 7px;
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    ul[data-type="taskList"] li label input[type="checkbox"]:checked + span {
+      background: linear-gradient(140deg, #8b6cf6, #4f46e5);
+      box-shadow: 0 3px 8px rgba(109, 79, 224, 0.3);
+    }
+
+    :not(pre) > code {
+      border-radius: 7px;
+      background: rgba(109, 79, 224, 0.1);
+      color: var(--aurora-violet-deep);
+    }
+
+    blockquote {
+      border-left: 3px solid var(--aurora-violet);
+    }
+
+    .callout-root {
+      border-color: transparent;
+      border-radius: 16px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+    }
+  }
+
+  .reaction-chip {
+    border: 0;
+    border-radius: 999px;
+    background: rgba(109, 79, 224, 0.08);
+    box-shadow: inset 0 0 0 1px rgba(109, 79, 224, 0.22);
+
+    &.is-reacted {
+      background: rgba(109, 79, 224, 0.14);
+      box-shadow: inset 0 0 0 1px rgba(109, 79, 224, 0.4);
+    }
   }
 }
 
@@ -152,14 +511,14 @@ html:root[data-theme="aurora"] {
 }
 
 :root[data-theme="aurora"] body {
-  --tt-text-primary: #241f38;
-  --tt-theme-text: #241f38;
-  --tt-text-color: #4d4766;
-  --tt-text-secondary: #6d6788;
+  --tt-text-primary: #1f1b3a;
+  --tt-theme-text: #1f1b3a;
+  --tt-text-color: #4a4468;
+  --tt-text-secondary: #5f5a7a;
 }
 
 :root[data-theme="aurora"] .tiptap.ProseMirror {
-  --tt-paragraph-text-color: #241f38;
+  --tt-paragraph-text-color: #1f1b3a;
 }
 
 // ─── Midnight: night sky, lime accent (dark) ───────────────────────────────
@@ -364,37 +723,6 @@ html:root[data-theme="notebook"] {
   --sb-dock-active-color: var(--theme-dock-active-color);
   --sb-scrlbr-width: thin;
   --sb-scrlbr-color: rgba(29, 26, 43, 0.2) transparent;
-
-  .simple-editor-wrapper {
-    height: 96vh;
-  }
-
-  // Covers start inside the sheet, not under the sidebar.
-  .cover-header-wrapper {
-    position: relative;
-  }
-  .cover-image-root {
-    width: 100% !important;
-
-    img {
-      position: absolute !important;
-      right: 0px;
-      left: 168px !important;
-    }
-    img[data-collapsed="true"] {
-      left: 24px !important;
-    }
-  }
-  .gradient-cover {
-    position: absolute !important;
-    width: 100% !important;
-    height: inherit;
-    right: 0px;
-    left: 168px !important;
-  }
-  .gradient-cover[data-collapsed="true"] {
-    left: 24px !important;
-  }
 
   // The page: an outlined paper card on the dots.
   .theme-sheet {

@@ -10,12 +10,6 @@
   --tt-toolbar-border-color: var(--tt-gray-dark-100);
 }
 
-:root[data-theme="retro"]{
-  .tiptap-toolbar{
-    padding: 20px 40px !important;
-  }
-}
-
 .tiptap-toolbar {
   display: flex;
   align-items: center;
