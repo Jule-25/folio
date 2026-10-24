@@ -58,6 +58,54 @@ const NODE_LABELS: Record<string, string> = {
   container: "Container",
 };
 
+// The handle's library builds the drag image by copying the dragged block
+// with every computed style inlined, element by element. For a big block
+// (a database: hundreds of cells) that takes long enough for the browser to
+// give up on the drag. Such a block gets a small stand-in to copy instead: a
+// chip with its name. It runs just before the library's dragstart code, and
+// everything is put back right after.
+const HEAVY_BLOCK = 300; // elements
+
+function lightenDragImage(editor: Editor, pos: number) {
+  const view = editor.view;
+  const dom = view.nodeDOM(pos);
+  if (
+    !(dom instanceof HTMLElement) ||
+    dom.getElementsByTagName("*").length < HEAVY_BLOCK
+  )
+    return;
+
+  const node = editor.state.doc.nodeAt(pos);
+  const name =
+    (node?.attrs.title as string | undefined)?.trim() ||
+    NODE_LABELS[node?.type.name ?? ""] ||
+    "Block";
+
+  // Kept off screen; the chip itself is laid out normally so its computed
+  // styles (which the library copies) are real.
+  const holder = document.createElement("div");
+  holder.style.cssText = "position: fixed; top: -10000px; left: 0;";
+  const chip = document.createElement("div");
+  chip.textContent = name;
+  chip.style.cssText =
+    "display: inline-block; padding: 6px 12px; border-radius: 8px;" +
+    "font: 500 14px/1.4 system-ui, sans-serif; white-space: nowrap;" +
+    "color: var(--tt-text-primary); background: var(--tt-bg-color);" +
+    "box-shadow: 0 0 0 1px var(--tt-border-color), 0 4px 12px rgba(0,0,0,.12);";
+  holder.appendChild(chip);
+  document.body.appendChild(holder);
+
+  const v = view as unknown as {
+    nodeDOM: (p: number) => globalThis.Node | null;
+  };
+  const original = view.nodeDOM.bind(view);
+  v.nodeDOM = (p: number) => (p === pos ? chip : original(p));
+  setTimeout(() => {
+    delete (v as { nodeDOM?: unknown }).nodeDOM; // back to the prototype's
+    holder.remove();
+  }, 0);
+}
+
 /**
  * Where the first line of text in a block sits, vertically (its middle, in
  * viewport pixels). Text in parts that aren't editable (a callout's icon, a
@@ -524,6 +572,7 @@ export function DragHandle({ editor }: { editor: Editor | null }) {
       }}
       onElementDragStart={() => {
         isDraggingRef.current = true;
+        lightenDragImage(editor, posRef.current);
 
         // A table / list row: the drag reorders the rows (board-drag.ts
         // reads draggingId and handles the drop) instead of moving the
