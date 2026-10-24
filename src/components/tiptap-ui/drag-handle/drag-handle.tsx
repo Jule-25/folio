@@ -32,6 +32,7 @@ import {
   type BlockRange,
 } from "./multi-block-drag";
 import type { ComputePositionConfig, Middleware } from "@floating-ui/dom";
+import { startDragAutoscroll } from "./drag-autoscroll";
 
 const NODE_LABELS: Record<string, string> = {
   paragraph: "Text",
@@ -278,6 +279,7 @@ export function DragHandle({ editor }: { editor: Editor | null }) {
   const inCellRef = useRef(false);
   const nestedOptions = useMemo(() => makeNestedOptions(editor), [editor]);
   const isDraggingRef = useRef(false);
+  const stopAutoscrollRef = useRef<(() => void) | null>(null);
   const targetRef = useRef(target);
   const posRef = useRef(-1);
   // Set on pointer down when the grip is inside a selection of several
@@ -573,6 +575,8 @@ export function DragHandle({ editor }: { editor: Editor | null }) {
       onElementDragStart={() => {
         isDraggingRef.current = true;
         lightenDragImage(editor, posRef.current);
+        stopAutoscrollRef.current?.();
+        stopAutoscrollRef.current = startDragAutoscroll(editor);
 
         // A table / list row: the drag reorders the rows (board-drag.ts
         // reads draggingId and handles the drop) instead of moving the
@@ -612,6 +616,8 @@ export function DragHandle({ editor }: { editor: Editor | null }) {
         isDraggingRef.current = false;
         document.body.classList.remove("db-row-dragging");
         editor.view.dom.classList.remove("is-dragging");
+        stopAutoscrollRef.current?.();
+        stopAutoscrollRef.current = null;
 
         // Broadcast drag end so the column drop plugin can clear globalDragNodePos
         document.dispatchEvent(
