@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// column.ts
 import { Node, mergeAttributes } from "@tiptap/core";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { WrappedColumnView } from "./wrapped-column-view";
+import { columnEdgeDropPlugin } from "./column-edge-drop";
 
 let globalDragNodePos: number | null = null;
 
@@ -68,6 +68,9 @@ export const Column = Node.create({
 
   addProseMirrorPlugins() {
     return [
+      // First, so its dragover listener runs before the one below and can
+      // clear its line when the pointer reaches a column's own drop zone.
+      columnEdgeDropPlugin(this.editor),
       new Plugin({
         key: new PluginKey("columnDropPlugin"),
 

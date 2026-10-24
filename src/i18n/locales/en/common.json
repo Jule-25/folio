@@ -1013,6 +1013,7 @@
   "blockMenu": {
     "discussInChat": "Discuss in chat…",
     "unwrapColumns": "Unwrap columns",
+    "turnIntoInline": "Turn into inline",
     "blocksSelected_one": "{{count}} block",
     "blocksSelected_other": "{{count}} blocks",
     "text": "Text",

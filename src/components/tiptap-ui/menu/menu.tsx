@@ -27,6 +27,7 @@ import { useOptionalActivePage } from "src/features/pages/context/active-page-co
 import { requestDiscussBlock } from "src/features/chat/block-share-store";
 import { SuggestButton } from "../../../features/comments/suggest-button";
 import { MoveToDropdown } from "src/components/tiptap-ui/move-to-dropdown";
+import { DatabasePageToggle } from "src/components/tiptap-ui/database-page-toggle/database-page-toggle";
 import {
   countSelectedBlocks,
   getSelectedBlocks,
@@ -220,6 +221,7 @@ export function Menu({
         <DropdownMenuItem asChild>
           <TurnIntoDropdown hideWhenUnavailable={true} editor={editor} />
         </DropdownMenuItem>
+        {!several && <DatabasePageToggle editor={editor} onAction={onAction} />}
         {isColumnsBlock(editor) && (
           <DropdownMenuItem asChild>
             <Button

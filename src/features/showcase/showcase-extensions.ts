@@ -55,6 +55,9 @@ import i18n from "src/i18n/config";
 // Created once at module level: the list never changes.
 export const SHOWCASE_EXTENSIONS = [
   StarterKit.configure({
+    // The line that shows where a dragged block lands: 4px, so it's easy
+    // to see (the default is 1px; CSS can't override its inline height).
+    dropcursor: { width: 4 },
     paragraph: false,
     horizontalRule: false,
     listItem: false,
@@ -108,10 +111,29 @@ export const SHOWCASE_EXTENSIONS = [
 // placeholder. Nothing here saves anything.
 
 const EDITABLE_SLASH_IDS = new Set([
-  "style", "p", "h1", "h2", "h3", "styleDivider", "bulletList", "orderedList",
-  "taskList", "insert", "separator", "quote", "codeBlock", "table", "column2",
-  "column3", "tabs", "codeGroup", "insertDivider", "mathBlock", "mathInline",
-  "callout", "appendix",
+  "style",
+  "p",
+  "h1",
+  "h2",
+  "h3",
+  "styleDivider",
+  "bulletList",
+  "orderedList",
+  "taskList",
+  "insert",
+  "separator",
+  "quote",
+  "codeBlock",
+  "table",
+  "column2",
+  "column3",
+  "tabs",
+  "codeGroup",
+  "insertDivider",
+  "mathBlock",
+  "mathInline",
+  "callout",
+  "appendix",
 ]);
 
 /** Slash items the showcase editor can actually run (and the color ones). */
@@ -133,7 +155,8 @@ export function makeEditableShowcaseExtensions() {
       includeChildren: true,
       showOnlyCurrent: true,
       placeholder: ({ node }) => {
-        if (node.type.name === "title") return i18n.t("page.untitled", "Untitled");
+        if (node.type.name === "title")
+          return i18n.t("page.untitled", "Untitled");
         return i18n.t("landing.typeSlash", "Type / for blocks");
       },
     }),

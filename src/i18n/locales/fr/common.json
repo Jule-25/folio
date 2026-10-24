@@ -1013,6 +1013,7 @@
   "blockMenu": {
     "discussInChat": "En discuter dans le chat…",
     "unwrapColumns": "Défaire les colonnes",
+    "turnIntoInline": "Transformer en base intégrée",
     "blocksSelected_one": "{{count}} bloc",
     "blocksSelected_other": "{{count}} blocs",
     "text": "Texte",

@@ -58,3 +58,21 @@
     overflow-x: auto;
   }
 }
+// Dragging a block to the left or right edge of another (column-edge-drop.ts):
+// a vertical line beside the block marks the side it will land on, and the
+// horizontal drop line is hidden meanwhile.
+.column-edge-line {
+  position: fixed;
+  z-index: 60;
+  width: 4px;
+  border-radius: 2px;
+  background: var(--tt-brand-color-400);
+  pointer-events: none;
+}
+
+body.column-edge-hover {
+  .prosemirror-dropcursor-block,
+  .prosemirror-dropcursor-inline {
+    display: none !important;
+  }
+}

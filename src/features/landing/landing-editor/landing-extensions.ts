@@ -105,6 +105,9 @@ export function makeLandingExtensions({
   return [
     // --- Core ---
     StarterKit.configure({
+      // The line that shows where a dragged block lands: 4px, so it's easy
+      // to see (the default is 1px; CSS can't override its inline height).
+      dropcursor: { width: 4 },
       paragraph: false,
       horizontalRule: false,
       listItem: false,
@@ -128,7 +131,8 @@ export function makeLandingExtensions({
     Placeholder.configure({
       includeChildren: true,
       placeholder: ({ node }) => {
-        if (node.type.name === "title") return i18n.t("page.untitled", "Untitled");
+        if (node.type.name === "title")
+          return i18n.t("page.untitled", "Untitled");
         if (node.type.name === "appendixSummary") return "Untitled";
         if (["tableCell", "tableHeader", "table"].includes(node.type.name))
           return "";
