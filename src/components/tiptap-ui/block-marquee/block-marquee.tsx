@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import type { Editor } from "@tiptap/core";
 import { TextSelection } from "@tiptap/pm/state";
+import type { Node as PMNode, ResolvedPos } from "@tiptap/pm/model";
 // Installed with @tiptap/extension-drag-handle (its peer dependency).
 import { NodeRangeSelection } from "@tiptap/extension-node-range";
 import "./block-marquee.scss";
@@ -91,33 +92,143 @@ export function BlockMarquee({ editor }: { editor: Editor | null }) {
         ? window.scrollY
         : scroller.scrollTop;
 
-    /** The top-level block at this height (its position), or -1. */
-    const blockAt = (x: number, y: number): number => {
+    /** The document position under the pointer (kept inside the
+     *  editor's width, so the margins count), or -1. */
+    const posAt = (x: number, y: number): number => {
       const box = view.dom.getBoundingClientRect();
       const hit = view.posAtCoords({
         left: Math.min(Math.max(x, box.left + 1), box.right - 1),
         top: y,
       });
-      if (!hit) return -1;
-      const $pos = view.state.doc.resolve(hit.pos);
-      return $pos.depth < 1 ? -1 : $pos.before(1);
+      return hit ? hit.pos : -1;
     };
 
-    /** Select the top-level blocks from `a` to `b` (either order). */
-    const selectBlocksBetween = (a: number, b: number) => {
+    /** Where blocks are picked from: the column `$pos` is in, else the page. */
+    const containerDepth = ($pos: ResolvedPos, upTo = $pos.depth) => {
+      let depth = upTo;
+      while (depth > 0 && $pos.node(depth).type.name !== "column") depth--;
+      return depth;
+    };
+
+    type Blocks = { from: number; to: number; depth: number };
+
+    /** The block holding `pos`, in its column or on the page. */
+    const blockOf = (pos: number): Blocks | null => {
+      const $pos = view.state.doc.resolve(pos);
+      const depth = containerDepth($pos);
+      if ($pos.depth <= depth) return null;
+      const node = $pos.node(depth + 1);
+      if (TEXT_ONLY.has(node.type.name)) return null;
+      return { from: $pos.before(depth + 1), to: $pos.after(depth + 1), depth };
+    };
+
+    /**
+     * The blocks from the one holding `a` to the one holding `b`, side by
+     * side in the nearest place that holds both: the same column, else the
+     * page. Null when `a` and `b` are in the same block.
+     */
+    const blocksBetween = (a: number, b: number): Blocks | null => {
       const { doc } = view.state;
-      const first = Math.min(a, b);
-      const last = Math.max(a, b);
-      const lastNode = doc.nodeAt(last);
-      if (!lastNode) return;
-      const key = `${first}:${last + lastNode.nodeSize}`;
+      const $a = doc.resolve(a);
+      const $b = doc.resolve(b);
+      const depth = containerDepth($a, $a.sharedDepth(b));
+      if ($a.depth <= depth || $b.depth <= depth) return null;
+      const aStart = $a.before(depth + 1);
+      const bStart = $b.before(depth + 1);
+      if (aStart === bStart) return null;
+      const first = doc.nodeAt(Math.min(aStart, bStart));
+      const last = doc.nodeAt(Math.max(aStart, bStart));
+      if (!first || !last) return null;
+      if (TEXT_ONLY.has(first.type.name) || TEXT_ONLY.has(last.type.name))
+        return null;
+      return {
+        from: Math.min(aStart, bStart),
+        to: Math.max(aStart, bStart) + last.nodeSize,
+        depth,
+      };
+    };
+
+    const selectRange = ({ from, to, depth }: Blocks) => {
+      const key = `${from}:${to}:${depth}`;
       if (key === lastRange) return;
       lastRange = key;
+      const { doc } = view.state;
       view.dispatch(
         view.state.tr.setSelection(
-          NodeRangeSelection.create(doc, first, last + lastNode.nodeSize, 0),
+          NodeRangeSelection.create(doc, from, to, depth),
         ),
       );
+    };
+
+    /** Text turned into blocks: from the first block to the pointer's. */
+    const selectFromText = () => {
+      const over = posAt(pointerX, pointerY);
+      if (over === -1) return;
+      const range = blocksBetween(textAnchor, over) ?? blockOf(textAnchor);
+      if (range) selectRange(range);
+    };
+
+    /** A point in a column's empty space, not on one of its blocks. */
+    const isColumnSpace = (x: number, y: number) => {
+      const hit = view.posAtCoords({ left: x, top: y });
+      if (!hit || hit.inside < 0) return false;
+      const name = view.state.doc.nodeAt(hit.inside)?.type.name;
+      return name === "column" || name === "columnBlock";
+    };
+
+    const touches = (rect: DOMRect, r: DOMRect) =>
+      rect.top < r.bottom &&
+      rect.bottom > r.top &&
+      rect.left < r.right &&
+      rect.right > r.left;
+
+    /** Inside a columns block: the blocks the box touches when it's all in
+     *  one column, else the columns it touches. */
+    const blocksInColumn = (
+      rowPos: number,
+      row: PMNode,
+      rect: DOMRect,
+    ): Blocks | null => {
+      const columns: number[] = [];
+      row.forEach((_column, offset) => {
+        const pos = rowPos + 1 + offset;
+        const dom = view.nodeDOM(pos);
+        if (
+          dom instanceof HTMLElement &&
+          touches(rect, dom.getBoundingClientRect())
+        )
+          columns.push(pos);
+      });
+      if (columns.length === 0) return null;
+      // Several columns: those columns, as whole columns.
+      if (columns.length > 1) {
+        const last = columns[columns.length - 1];
+        const lastColumn = view.state.doc.nodeAt(last);
+        if (!lastColumn) return null;
+        return {
+          from: columns[0],
+          to: last + lastColumn.nodeSize,
+          depth: view.state.doc.resolve(columns[0]).depth,
+        };
+      }
+      const columnPos = columns[0];
+      const column = view.state.doc.nodeAt(columnPos);
+      if (!column) return null;
+      let from = -1;
+      let to = -1;
+      column.forEach((block, offset) => {
+        const pos = columnPos + 1 + offset;
+        const dom = view.nodeDOM(pos);
+        if (!(dom instanceof HTMLElement)) return;
+        const r = dom.getBoundingClientRect();
+        // Across the column's whole width, like the page's blocks.
+        if (rect.top < r.bottom && rect.bottom > r.top) {
+          if (from === -1) from = pos;
+          to = pos + block.nodeSize;
+        }
+      });
+      if (from === -1) return null;
+      return { from, to, depth: view.state.doc.resolve(from).depth };
     };
 
     const select = (rect: DOMRect) => {
@@ -143,7 +254,14 @@ export function BlockMarquee({ editor }: { editor: Editor | null }) {
         if (from === -1) from = offset;
         to = offset + node.nodeSize;
       });
-      const key = `${from}:${to}`;
+      // Only a columns block, and the box inside one of its columns: the
+      // blocks it touches in that column.
+      const only = from === -1 ? null : doc.nodeAt(from);
+      if (only?.type.name === "columnBlock" && to === from + only.nodeSize) {
+        const inner = blocksInColumn(from, only, rect);
+        if (inner) return selectRange(inner);
+      }
+      const key = `${from}:${to}:0`;
       if (key === lastRange) return;
       lastRange = key;
       if (from === -1) {
@@ -211,10 +329,7 @@ export function BlockMarquee({ editor }: { editor: Editor | null }) {
       if (!dy) return;
       if (scroller === document.scrollingElement) window.scrollBy(0, dy);
       else scroller.scrollTop += dy;
-      const over = blockAt(pointerX, pointerY);
-      const node = over === -1 ? null : view.state.doc.nodeAt(over);
-      if (node && !TEXT_ONLY.has(node.type.name))
-        selectBlocksBetween(textAnchor, over);
+      selectFromText();
       frame = requestAnimationFrame(scrollWhileSelecting);
     };
 
@@ -226,22 +341,16 @@ export function BlockMarquee({ editor }: { editor: Editor | null }) {
       pointerY = e.clientY;
 
       if (textAnchor !== -1) {
-        const over = blockAt(pointerX, pointerY);
         if (!textBlocks) {
           // Still inside the first block: an ordinary text selection.
-          if (over === -1 || over === textAnchor) return;
-          const node = view.state.doc.nodeAt(over);
-          if (!node || TEXT_ONLY.has(node.type.name)) return;
+          const over = posAt(pointerX, pointerY);
+          if (over === -1 || !blocksBetween(textAnchor, over)) return;
           textBlocks = true;
           lastRange = "";
           window.getSelection()?.removeAllRanges();
           document.body.classList.add("is-marquee-selecting");
         }
-        if (over !== -1) {
-          const node = view.state.doc.nodeAt(over);
-          if (node && !TEXT_ONLY.has(node.type.name))
-            selectBlocksBetween(textAnchor, over);
-        }
+        selectFromText();
         if (!frame) frame = requestAnimationFrame(scrollWhileSelecting);
         return;
       }
@@ -282,14 +391,14 @@ export function BlockMarquee({ editor }: { editor: Editor | null }) {
       if (wasTextBlocks) {
         // The editor's own mouseup may set a text selection from what's
         // left of the browser's; put the blocks back after it.
-        const [from, to] = range.split(":").map(Number);
+        const [from, to, depth] = range.split(":").map(Number);
         requestAnimationFrame(() => {
           if (editor.isDestroyed || !(to > from)) return;
           const { doc } = view.state;
           if (to > doc.content.size) return;
           view.dispatch(
             view.state.tr.setSelection(
-              NodeRangeSelection.create(doc, from, to, 0),
+              NodeRangeSelection.create(doc, from, to, depth || 0),
             ),
           );
           view.focus();
@@ -321,14 +430,19 @@ export function BlockMarquee({ editor }: { editor: Editor | null }) {
       const surface = view.dom.closest(SURFACES) ?? view.dom.parentElement;
       if (!surface?.contains(target)) return;
       if (target.closest(EXCLUDE)) return;
-      onEditorPadding = target === view.dom;
+      // The editor's own padding, or the empty space of a column (below its
+      // blocks, between columns): a press there draws a box too.
+      onEditorPadding =
+        target === view.dom || isColumnSpace(e.clientX, e.clientY);
       // Inside the text: normal editing, watched in case the selection
       // leaves the block it started in.
       if (view.dom.contains(target) && !onEditorPadding) {
         if (e.shiftKey) return;
-        const anchor = blockAt(e.clientX, e.clientY);
-        const node = anchor === -1 ? null : view.state.doc.nodeAt(anchor);
-        if (!node || TEXT_ONLY.has(node.type.name)) return;
+        const anchor = posAt(e.clientX, e.clientY);
+        if (anchor === -1) return;
+        const $anchor = view.state.doc.resolve(anchor);
+        if ($anchor.depth < 1 || TEXT_ONLY.has($anchor.node(1).type.name))
+          return;
         scroller = scrollParentOf(view.dom);
         pressing = true;
         active = false;

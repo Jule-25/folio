@@ -6,6 +6,8 @@ import {
   TextSelection,
 } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
+import type { Node as PMNode } from "@tiptap/pm/model";
+import type { Mappable } from "@tiptap/pm/transform";
 // Installed with @tiptap/extension-drag-handle (its peer dependency).
 import { NodeRangeSelection } from "@tiptap/extension-node-range";
 
@@ -16,6 +18,29 @@ import { NodeRangeSelection } from "@tiptap/extension-node-range";
 // typing replaces them, dragging any of their handles moves them all, and
 // the block menu (the grip's menu) acts on all of them. Escape puts the
 // cursor back at the end of the last block.
+
+// The library's block selection forgets its depth whenever it's mapped
+// through a change (any transaction: the drag handle locking itself, a
+// collaborator's edit…). Without the depth it guesses from the positions,
+// one level too high for blocks inside a column or a callout, so each
+// transaction moved the selection up: blocks → their column → the whole
+// columns block. Mapped selections keep their depth while it still fits.
+type DepthSelection = NodeRangeSelection & { depth?: number };
+NodeRangeSelection.prototype.map = function (
+  this: DepthSelection,
+  doc: PMNode,
+  mapping: Mappable,
+) {
+  const $anchor = doc.resolve(mapping.map(this.anchor));
+  const $head = doc.resolve(mapping.map(this.head));
+  const { depth } = this;
+  const fits =
+    typeof depth === "number" &&
+    depth <= Math.min($anchor.depth, $head.depth) &&
+    $anchor.sharedDepth($head.pos) >= depth &&
+    $anchor.pos !== $head.pos;
+  return new NodeRangeSelection($anchor, $head, fits ? depth : undefined);
+};
 
 export const blockSelectionKey = new PluginKey("blockSelection");
 

@@ -20,13 +20,18 @@ export interface BlockRange {
   depth: number;
 }
 
-/** The whole blocks a selection spans, when it spans two or more. */
+/** The whole blocks a selection spans, when it spans two or more (or one
+ *  columns block). */
 export function selectedBlockRange(editor: Editor): BlockRange | null {
   const sel = editor.state.selection;
   if (sel.empty || sel instanceof NodeSelection) return null;
 
   if (sel instanceof NodeRangeSelection) {
-    return sel.ranges.length > 1
+    // One block counts too when it's a columns block: the handle never sits
+    // on it (it sits on a block inside), so without this a click on that
+    // grip would drop the selection for the block under it.
+    const one = sel.ranges.length === 1 ? sel.$from.nodeAfter : null;
+    return sel.ranges.length > 1 || one?.type.name === "columnBlock"
       ? { from: sel.from, to: sel.to, depth: sel.$from.depth }
       : null;
   }
